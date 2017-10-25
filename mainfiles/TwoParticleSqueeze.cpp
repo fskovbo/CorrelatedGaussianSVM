@@ -45,7 +45,7 @@ int main() {
     vec res1 = ansatz.sweepStochastic(10,1e4,startingGuess);
     vec res2 = ansatz.sweepDeterministic(10,5*1e3);
     results(i,0) = trapOsc(i);
-    results(i,3) = res2(res2.n_rows-1) - 2*0.5* trapOsc(i);
+    results(i,1) = res2(res2.n_rows-1) - 2*0.5* trapOsc(i);
   }
 
   cout << "Results:" << endl << results << endl;
