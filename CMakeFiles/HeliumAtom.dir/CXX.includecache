@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/frederik/Dropbox/SVMprojekt/mainfiles/HeliumAtom.cpp
+/home/frederik/SVMprojekt/mainfiles/HeliumAtom.cpp
 iostream
 -
 armadillo
@@ -14,13 +14,13 @@ armadillo
 time.h
 -
 Utils.h
-/home/frederik/Dropbox/SVMprojekt/mainfiles/Utils.h
+/home/frederik/SVMprojekt/mainfiles/Utils.h
 System.h
-/home/frederik/Dropbox/SVMprojekt/mainfiles/System.h
+/home/frederik/SVMprojekt/mainfiles/System.h
 CoulombPotential.h
-/home/frederik/Dropbox/SVMprojekt/mainfiles/CoulombPotential.h
+/home/frederik/SVMprojekt/mainfiles/CoulombPotential.h
 Variational.h
-/home/frederik/Dropbox/SVMprojekt/mainfiles/Variational.h
+/home/frederik/SVMprojekt/mainfiles/Variational.h
 
 include/CMAES.h
 armadillo

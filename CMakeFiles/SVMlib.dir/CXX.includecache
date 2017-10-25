@@ -6,57 +6,57 @@
 
 #IncludeRegexTransform: 
 
-/home/frederik/Dropbox/SVMprojekt/src/CMAES.cpp
+/home/frederik/SVMprojekt/src/CMAES.cpp
 CMAES.h
-/home/frederik/Dropbox/SVMprojekt/src/CMAES.h
+/home/frederik/SVMprojekt/src/CMAES.h
 
-/home/frederik/Dropbox/SVMprojekt/src/CoulombPotential.cpp
+/home/frederik/SVMprojekt/src/CoulombPotential.cpp
 CoulombPotential.h
-/home/frederik/Dropbox/SVMprojekt/src/CoulombPotential.h
+/home/frederik/SVMprojekt/src/CoulombPotential.h
 
-/home/frederik/Dropbox/SVMprojekt/src/DoubleTrapPotential.cpp
+/home/frederik/SVMprojekt/src/DoubleTrapPotential.cpp
 DoubleTrapPotential.h
-/home/frederik/Dropbox/SVMprojekt/src/DoubleTrapPotential.h
+/home/frederik/SVMprojekt/src/DoubleTrapPotential.h
 
-/home/frederik/Dropbox/SVMprojekt/src/MatrixElements.cpp
+/home/frederik/SVMprojekt/src/MatrixElements.cpp
 MatrixElements.h
-/home/frederik/Dropbox/SVMprojekt/src/MatrixElements.h
+/home/frederik/SVMprojekt/src/MatrixElements.h
 
-/home/frederik/Dropbox/SVMprojekt/src/Multidim_min.cpp
+/home/frederik/SVMprojekt/src/Multidim_min.cpp
 Multidim_min.h
-/home/frederik/Dropbox/SVMprojekt/src/Multidim_min.h
+/home/frederik/SVMprojekt/src/Multidim_min.h
 
-/home/frederik/Dropbox/SVMprojekt/src/PotentialList.cpp
+/home/frederik/SVMprojekt/src/PotentialList.cpp
 PotentialList.h
-/home/frederik/Dropbox/SVMprojekt/src/PotentialList.h
+/home/frederik/SVMprojekt/src/PotentialList.h
 
-/home/frederik/Dropbox/SVMprojekt/src/PotentialStrategy.cpp
+/home/frederik/SVMprojekt/src/PotentialStrategy.cpp
 PotentialStrategy.h
-/home/frederik/Dropbox/SVMprojekt/src/PotentialStrategy.h
+/home/frederik/SVMprojekt/src/PotentialStrategy.h
 
-/home/frederik/Dropbox/SVMprojekt/src/SingleGaussPotential.cpp
+/home/frederik/SVMprojekt/src/SingleGaussPotential.cpp
 SingleGaussPotential.h
-/home/frederik/Dropbox/SVMprojekt/src/SingleGaussPotential.h
+/home/frederik/SVMprojekt/src/SingleGaussPotential.h
 
-/home/frederik/Dropbox/SVMprojekt/src/System.cpp
+/home/frederik/SVMprojekt/src/System.cpp
 System.h
-/home/frederik/Dropbox/SVMprojekt/src/System.h
+/home/frederik/SVMprojekt/src/System.h
 
-/home/frederik/Dropbox/SVMprojekt/src/TrapPotential.cpp
+/home/frederik/SVMprojekt/src/TrapPotential.cpp
 TrapPotential.h
-/home/frederik/Dropbox/SVMprojekt/src/TrapPotential.h
+/home/frederik/SVMprojekt/src/TrapPotential.h
 
-/home/frederik/Dropbox/SVMprojekt/src/Utils.cpp
+/home/frederik/SVMprojekt/src/Utils.cpp
 Utils.h
-/home/frederik/Dropbox/SVMprojekt/src/Utils.h
+/home/frederik/SVMprojekt/src/Utils.h
 
-/home/frederik/Dropbox/SVMprojekt/src/Variational.cpp
+/home/frederik/SVMprojekt/src/Variational.cpp
 Variational.h
-/home/frederik/Dropbox/SVMprojekt/src/Variational.h
+/home/frederik/SVMprojekt/src/Variational.h
 
-/home/frederik/Dropbox/SVMprojekt/src/fdcube.cpp
+/home/frederik/SVMprojekt/src/fdcube.cpp
 fdcube.h
-/home/frederik/Dropbox/SVMprojekt/src/fdcube.h
+/home/frederik/SVMprojekt/src/fdcube.h
 
 /home/frederik/gsl/include/gsl/gsl_block_char.h
 stdlib.h

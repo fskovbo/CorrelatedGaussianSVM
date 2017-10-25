@@ -6,5 +6,5 @@ CXX_FLAGS =  -std=c++11
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/frederik/gsl/include -I/home/frederik/Dropbox/SVMprojekt/include 
+CXX_INCLUDES = -I/home/frederik/gsl/include -I/home/frederik/SVMprojekt/include 
 

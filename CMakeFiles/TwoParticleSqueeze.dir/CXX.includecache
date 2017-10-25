@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/frederik/Dropbox/SVMprojekt/mainfiles/TwoParticleSqueeze.cpp
+/home/frederik/SVMprojekt/mainfiles/TwoParticleSqueeze.cpp
 iostream
 -
 armadillo
@@ -16,19 +16,19 @@ time.h
 vector
 -
 Utils.h
-/home/frederik/Dropbox/SVMprojekt/mainfiles/Utils.h
+/home/frederik/SVMprojekt/mainfiles/Utils.h
 System.h
-/home/frederik/Dropbox/SVMprojekt/mainfiles/System.h
+/home/frederik/SVMprojekt/mainfiles/System.h
 SingleGaussPotential.h
-/home/frederik/Dropbox/SVMprojekt/mainfiles/SingleGaussPotential.h
+/home/frederik/SVMprojekt/mainfiles/SingleGaussPotential.h
 MatrixElements.h
-/home/frederik/Dropbox/SVMprojekt/mainfiles/MatrixElements.h
+/home/frederik/SVMprojekt/mainfiles/MatrixElements.h
 Variational.h
-/home/frederik/Dropbox/SVMprojekt/mainfiles/Variational.h
+/home/frederik/SVMprojekt/mainfiles/Variational.h
 TrapPotential.h
-/home/frederik/Dropbox/SVMprojekt/mainfiles/TrapPotential.h
+/home/frederik/SVMprojekt/mainfiles/TrapPotential.h
 PotentialList.h
-/home/frederik/Dropbox/SVMprojekt/mainfiles/PotentialList.h
+/home/frederik/SVMprojekt/mainfiles/PotentialList.h
 
 include/CMAES.h
 armadillo

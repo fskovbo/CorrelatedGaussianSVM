@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/frederik/Dropbox/SVMprojekt/mainfiles/TwoParticleSqueeze.cpp" "/home/frederik/Dropbox/SVMprojekt/CMakeFiles/TwoParticleSqueeze.dir/mainfiles/TwoParticleSqueeze.cpp.o"
+  "/home/frederik/SVMprojekt/mainfiles/TwoParticleSqueeze.cpp" "/home/frederik/SVMprojekt/CMakeFiles/TwoParticleSqueeze.dir/mainfiles/TwoParticleSqueeze.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
@@ -16,7 +16,7 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
 
 # Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
-  "/home/frederik/Dropbox/SVMprojekt/CMakeFiles/SVMlib.dir/DependInfo.cmake"
+  "/home/frederik/SVMprojekt/CMakeFiles/SVMlib.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

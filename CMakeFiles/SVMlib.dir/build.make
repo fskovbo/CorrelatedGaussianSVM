@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/frederik/Dropbox/SVMprojekt
+CMAKE_SOURCE_DIR = /home/frederik/SVMprojekt
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/frederik/Dropbox/SVMprojekt
+CMAKE_BINARY_DIR = /home/frederik/SVMprojekt
 
 # Include any dependencies generated for this target.
 include CMakeFiles/SVMlib.dir/depend.make
@@ -59,16 +59,16 @@ include CMakeFiles/SVMlib.dir/flags.make
 
 CMakeFiles/SVMlib.dir/src/CMAES.cpp.o: CMakeFiles/SVMlib.dir/flags.make
 CMakeFiles/SVMlib.dir/src/CMAES.cpp.o: src/CMAES.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/Dropbox/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/SVMlib.dir/src/CMAES.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/CMAES.cpp.o -c /home/frederik/Dropbox/SVMprojekt/src/CMAES.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/SVMlib.dir/src/CMAES.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/CMAES.cpp.o -c /home/frederik/SVMprojekt/src/CMAES.cpp
 
 CMakeFiles/SVMlib.dir/src/CMAES.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/SVMlib.dir/src/CMAES.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/Dropbox/SVMprojekt/src/CMAES.cpp > CMakeFiles/SVMlib.dir/src/CMAES.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/SVMprojekt/src/CMAES.cpp > CMakeFiles/SVMlib.dir/src/CMAES.cpp.i
 
 CMakeFiles/SVMlib.dir/src/CMAES.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/SVMlib.dir/src/CMAES.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/Dropbox/SVMprojekt/src/CMAES.cpp -o CMakeFiles/SVMlib.dir/src/CMAES.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/SVMprojekt/src/CMAES.cpp -o CMakeFiles/SVMlib.dir/src/CMAES.cpp.s
 
 CMakeFiles/SVMlib.dir/src/CMAES.cpp.o.requires:
 
@@ -83,16 +83,16 @@ CMakeFiles/SVMlib.dir/src/CMAES.cpp.o.provides.build: CMakeFiles/SVMlib.dir/src/
 
 CMakeFiles/SVMlib.dir/src/CoulombPotential.cpp.o: CMakeFiles/SVMlib.dir/flags.make
 CMakeFiles/SVMlib.dir/src/CoulombPotential.cpp.o: src/CoulombPotential.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/Dropbox/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/SVMlib.dir/src/CoulombPotential.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/CoulombPotential.cpp.o -c /home/frederik/Dropbox/SVMprojekt/src/CoulombPotential.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/SVMlib.dir/src/CoulombPotential.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/CoulombPotential.cpp.o -c /home/frederik/SVMprojekt/src/CoulombPotential.cpp
 
 CMakeFiles/SVMlib.dir/src/CoulombPotential.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/SVMlib.dir/src/CoulombPotential.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/Dropbox/SVMprojekt/src/CoulombPotential.cpp > CMakeFiles/SVMlib.dir/src/CoulombPotential.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/SVMprojekt/src/CoulombPotential.cpp > CMakeFiles/SVMlib.dir/src/CoulombPotential.cpp.i
 
 CMakeFiles/SVMlib.dir/src/CoulombPotential.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/SVMlib.dir/src/CoulombPotential.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/Dropbox/SVMprojekt/src/CoulombPotential.cpp -o CMakeFiles/SVMlib.dir/src/CoulombPotential.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/SVMprojekt/src/CoulombPotential.cpp -o CMakeFiles/SVMlib.dir/src/CoulombPotential.cpp.s
 
 CMakeFiles/SVMlib.dir/src/CoulombPotential.cpp.o.requires:
 
@@ -107,16 +107,16 @@ CMakeFiles/SVMlib.dir/src/CoulombPotential.cpp.o.provides.build: CMakeFiles/SVMl
 
 CMakeFiles/SVMlib.dir/src/DoubleTrapPotential.cpp.o: CMakeFiles/SVMlib.dir/flags.make
 CMakeFiles/SVMlib.dir/src/DoubleTrapPotential.cpp.o: src/DoubleTrapPotential.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/Dropbox/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/SVMlib.dir/src/DoubleTrapPotential.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/DoubleTrapPotential.cpp.o -c /home/frederik/Dropbox/SVMprojekt/src/DoubleTrapPotential.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/SVMlib.dir/src/DoubleTrapPotential.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/DoubleTrapPotential.cpp.o -c /home/frederik/SVMprojekt/src/DoubleTrapPotential.cpp
 
 CMakeFiles/SVMlib.dir/src/DoubleTrapPotential.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/SVMlib.dir/src/DoubleTrapPotential.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/Dropbox/SVMprojekt/src/DoubleTrapPotential.cpp > CMakeFiles/SVMlib.dir/src/DoubleTrapPotential.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/SVMprojekt/src/DoubleTrapPotential.cpp > CMakeFiles/SVMlib.dir/src/DoubleTrapPotential.cpp.i
 
 CMakeFiles/SVMlib.dir/src/DoubleTrapPotential.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/SVMlib.dir/src/DoubleTrapPotential.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/Dropbox/SVMprojekt/src/DoubleTrapPotential.cpp -o CMakeFiles/SVMlib.dir/src/DoubleTrapPotential.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/SVMprojekt/src/DoubleTrapPotential.cpp -o CMakeFiles/SVMlib.dir/src/DoubleTrapPotential.cpp.s
 
 CMakeFiles/SVMlib.dir/src/DoubleTrapPotential.cpp.o.requires:
 
@@ -131,16 +131,16 @@ CMakeFiles/SVMlib.dir/src/DoubleTrapPotential.cpp.o.provides.build: CMakeFiles/S
 
 CMakeFiles/SVMlib.dir/src/MatrixElements.cpp.o: CMakeFiles/SVMlib.dir/flags.make
 CMakeFiles/SVMlib.dir/src/MatrixElements.cpp.o: src/MatrixElements.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/Dropbox/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/SVMlib.dir/src/MatrixElements.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/MatrixElements.cpp.o -c /home/frederik/Dropbox/SVMprojekt/src/MatrixElements.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/SVMlib.dir/src/MatrixElements.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/MatrixElements.cpp.o -c /home/frederik/SVMprojekt/src/MatrixElements.cpp
 
 CMakeFiles/SVMlib.dir/src/MatrixElements.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/SVMlib.dir/src/MatrixElements.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/Dropbox/SVMprojekt/src/MatrixElements.cpp > CMakeFiles/SVMlib.dir/src/MatrixElements.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/SVMprojekt/src/MatrixElements.cpp > CMakeFiles/SVMlib.dir/src/MatrixElements.cpp.i
 
 CMakeFiles/SVMlib.dir/src/MatrixElements.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/SVMlib.dir/src/MatrixElements.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/Dropbox/SVMprojekt/src/MatrixElements.cpp -o CMakeFiles/SVMlib.dir/src/MatrixElements.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/SVMprojekt/src/MatrixElements.cpp -o CMakeFiles/SVMlib.dir/src/MatrixElements.cpp.s
 
 CMakeFiles/SVMlib.dir/src/MatrixElements.cpp.o.requires:
 
@@ -155,16 +155,16 @@ CMakeFiles/SVMlib.dir/src/MatrixElements.cpp.o.provides.build: CMakeFiles/SVMlib
 
 CMakeFiles/SVMlib.dir/src/Multidim_min.cpp.o: CMakeFiles/SVMlib.dir/flags.make
 CMakeFiles/SVMlib.dir/src/Multidim_min.cpp.o: src/Multidim_min.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/Dropbox/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/SVMlib.dir/src/Multidim_min.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/Multidim_min.cpp.o -c /home/frederik/Dropbox/SVMprojekt/src/Multidim_min.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/SVMlib.dir/src/Multidim_min.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/Multidim_min.cpp.o -c /home/frederik/SVMprojekt/src/Multidim_min.cpp
 
 CMakeFiles/SVMlib.dir/src/Multidim_min.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/SVMlib.dir/src/Multidim_min.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/Dropbox/SVMprojekt/src/Multidim_min.cpp > CMakeFiles/SVMlib.dir/src/Multidim_min.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/SVMprojekt/src/Multidim_min.cpp > CMakeFiles/SVMlib.dir/src/Multidim_min.cpp.i
 
 CMakeFiles/SVMlib.dir/src/Multidim_min.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/SVMlib.dir/src/Multidim_min.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/Dropbox/SVMprojekt/src/Multidim_min.cpp -o CMakeFiles/SVMlib.dir/src/Multidim_min.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/SVMprojekt/src/Multidim_min.cpp -o CMakeFiles/SVMlib.dir/src/Multidim_min.cpp.s
 
 CMakeFiles/SVMlib.dir/src/Multidim_min.cpp.o.requires:
 
@@ -179,16 +179,16 @@ CMakeFiles/SVMlib.dir/src/Multidim_min.cpp.o.provides.build: CMakeFiles/SVMlib.d
 
 CMakeFiles/SVMlib.dir/src/PotentialList.cpp.o: CMakeFiles/SVMlib.dir/flags.make
 CMakeFiles/SVMlib.dir/src/PotentialList.cpp.o: src/PotentialList.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/Dropbox/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/SVMlib.dir/src/PotentialList.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/PotentialList.cpp.o -c /home/frederik/Dropbox/SVMprojekt/src/PotentialList.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/SVMlib.dir/src/PotentialList.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/PotentialList.cpp.o -c /home/frederik/SVMprojekt/src/PotentialList.cpp
 
 CMakeFiles/SVMlib.dir/src/PotentialList.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/SVMlib.dir/src/PotentialList.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/Dropbox/SVMprojekt/src/PotentialList.cpp > CMakeFiles/SVMlib.dir/src/PotentialList.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/SVMprojekt/src/PotentialList.cpp > CMakeFiles/SVMlib.dir/src/PotentialList.cpp.i
 
 CMakeFiles/SVMlib.dir/src/PotentialList.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/SVMlib.dir/src/PotentialList.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/Dropbox/SVMprojekt/src/PotentialList.cpp -o CMakeFiles/SVMlib.dir/src/PotentialList.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/SVMprojekt/src/PotentialList.cpp -o CMakeFiles/SVMlib.dir/src/PotentialList.cpp.s
 
 CMakeFiles/SVMlib.dir/src/PotentialList.cpp.o.requires:
 
@@ -203,16 +203,16 @@ CMakeFiles/SVMlib.dir/src/PotentialList.cpp.o.provides.build: CMakeFiles/SVMlib.
 
 CMakeFiles/SVMlib.dir/src/PotentialStrategy.cpp.o: CMakeFiles/SVMlib.dir/flags.make
 CMakeFiles/SVMlib.dir/src/PotentialStrategy.cpp.o: src/PotentialStrategy.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/Dropbox/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/SVMlib.dir/src/PotentialStrategy.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/PotentialStrategy.cpp.o -c /home/frederik/Dropbox/SVMprojekt/src/PotentialStrategy.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/SVMlib.dir/src/PotentialStrategy.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/PotentialStrategy.cpp.o -c /home/frederik/SVMprojekt/src/PotentialStrategy.cpp
 
 CMakeFiles/SVMlib.dir/src/PotentialStrategy.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/SVMlib.dir/src/PotentialStrategy.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/Dropbox/SVMprojekt/src/PotentialStrategy.cpp > CMakeFiles/SVMlib.dir/src/PotentialStrategy.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/SVMprojekt/src/PotentialStrategy.cpp > CMakeFiles/SVMlib.dir/src/PotentialStrategy.cpp.i
 
 CMakeFiles/SVMlib.dir/src/PotentialStrategy.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/SVMlib.dir/src/PotentialStrategy.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/Dropbox/SVMprojekt/src/PotentialStrategy.cpp -o CMakeFiles/SVMlib.dir/src/PotentialStrategy.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/SVMprojekt/src/PotentialStrategy.cpp -o CMakeFiles/SVMlib.dir/src/PotentialStrategy.cpp.s
 
 CMakeFiles/SVMlib.dir/src/PotentialStrategy.cpp.o.requires:
 
@@ -227,16 +227,16 @@ CMakeFiles/SVMlib.dir/src/PotentialStrategy.cpp.o.provides.build: CMakeFiles/SVM
 
 CMakeFiles/SVMlib.dir/src/SingleGaussPotential.cpp.o: CMakeFiles/SVMlib.dir/flags.make
 CMakeFiles/SVMlib.dir/src/SingleGaussPotential.cpp.o: src/SingleGaussPotential.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/Dropbox/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/SVMlib.dir/src/SingleGaussPotential.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/SingleGaussPotential.cpp.o -c /home/frederik/Dropbox/SVMprojekt/src/SingleGaussPotential.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/SVMlib.dir/src/SingleGaussPotential.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/SingleGaussPotential.cpp.o -c /home/frederik/SVMprojekt/src/SingleGaussPotential.cpp
 
 CMakeFiles/SVMlib.dir/src/SingleGaussPotential.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/SVMlib.dir/src/SingleGaussPotential.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/Dropbox/SVMprojekt/src/SingleGaussPotential.cpp > CMakeFiles/SVMlib.dir/src/SingleGaussPotential.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/SVMprojekt/src/SingleGaussPotential.cpp > CMakeFiles/SVMlib.dir/src/SingleGaussPotential.cpp.i
 
 CMakeFiles/SVMlib.dir/src/SingleGaussPotential.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/SVMlib.dir/src/SingleGaussPotential.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/Dropbox/SVMprojekt/src/SingleGaussPotential.cpp -o CMakeFiles/SVMlib.dir/src/SingleGaussPotential.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/SVMprojekt/src/SingleGaussPotential.cpp -o CMakeFiles/SVMlib.dir/src/SingleGaussPotential.cpp.s
 
 CMakeFiles/SVMlib.dir/src/SingleGaussPotential.cpp.o.requires:
 
@@ -251,16 +251,16 @@ CMakeFiles/SVMlib.dir/src/SingleGaussPotential.cpp.o.provides.build: CMakeFiles/
 
 CMakeFiles/SVMlib.dir/src/System.cpp.o: CMakeFiles/SVMlib.dir/flags.make
 CMakeFiles/SVMlib.dir/src/System.cpp.o: src/System.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/Dropbox/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/SVMlib.dir/src/System.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/System.cpp.o -c /home/frederik/Dropbox/SVMprojekt/src/System.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/SVMlib.dir/src/System.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/System.cpp.o -c /home/frederik/SVMprojekt/src/System.cpp
 
 CMakeFiles/SVMlib.dir/src/System.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/SVMlib.dir/src/System.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/Dropbox/SVMprojekt/src/System.cpp > CMakeFiles/SVMlib.dir/src/System.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/SVMprojekt/src/System.cpp > CMakeFiles/SVMlib.dir/src/System.cpp.i
 
 CMakeFiles/SVMlib.dir/src/System.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/SVMlib.dir/src/System.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/Dropbox/SVMprojekt/src/System.cpp -o CMakeFiles/SVMlib.dir/src/System.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/SVMprojekt/src/System.cpp -o CMakeFiles/SVMlib.dir/src/System.cpp.s
 
 CMakeFiles/SVMlib.dir/src/System.cpp.o.requires:
 
@@ -275,16 +275,16 @@ CMakeFiles/SVMlib.dir/src/System.cpp.o.provides.build: CMakeFiles/SVMlib.dir/src
 
 CMakeFiles/SVMlib.dir/src/TrapPotential.cpp.o: CMakeFiles/SVMlib.dir/flags.make
 CMakeFiles/SVMlib.dir/src/TrapPotential.cpp.o: src/TrapPotential.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/Dropbox/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/SVMlib.dir/src/TrapPotential.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/TrapPotential.cpp.o -c /home/frederik/Dropbox/SVMprojekt/src/TrapPotential.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/SVMlib.dir/src/TrapPotential.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/TrapPotential.cpp.o -c /home/frederik/SVMprojekt/src/TrapPotential.cpp
 
 CMakeFiles/SVMlib.dir/src/TrapPotential.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/SVMlib.dir/src/TrapPotential.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/Dropbox/SVMprojekt/src/TrapPotential.cpp > CMakeFiles/SVMlib.dir/src/TrapPotential.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/SVMprojekt/src/TrapPotential.cpp > CMakeFiles/SVMlib.dir/src/TrapPotential.cpp.i
 
 CMakeFiles/SVMlib.dir/src/TrapPotential.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/SVMlib.dir/src/TrapPotential.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/Dropbox/SVMprojekt/src/TrapPotential.cpp -o CMakeFiles/SVMlib.dir/src/TrapPotential.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/SVMprojekt/src/TrapPotential.cpp -o CMakeFiles/SVMlib.dir/src/TrapPotential.cpp.s
 
 CMakeFiles/SVMlib.dir/src/TrapPotential.cpp.o.requires:
 
@@ -299,16 +299,16 @@ CMakeFiles/SVMlib.dir/src/TrapPotential.cpp.o.provides.build: CMakeFiles/SVMlib.
 
 CMakeFiles/SVMlib.dir/src/Utils.cpp.o: CMakeFiles/SVMlib.dir/flags.make
 CMakeFiles/SVMlib.dir/src/Utils.cpp.o: src/Utils.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/Dropbox/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/SVMlib.dir/src/Utils.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/Utils.cpp.o -c /home/frederik/Dropbox/SVMprojekt/src/Utils.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/SVMlib.dir/src/Utils.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/Utils.cpp.o -c /home/frederik/SVMprojekt/src/Utils.cpp
 
 CMakeFiles/SVMlib.dir/src/Utils.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/SVMlib.dir/src/Utils.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/Dropbox/SVMprojekt/src/Utils.cpp > CMakeFiles/SVMlib.dir/src/Utils.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/SVMprojekt/src/Utils.cpp > CMakeFiles/SVMlib.dir/src/Utils.cpp.i
 
 CMakeFiles/SVMlib.dir/src/Utils.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/SVMlib.dir/src/Utils.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/Dropbox/SVMprojekt/src/Utils.cpp -o CMakeFiles/SVMlib.dir/src/Utils.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/SVMprojekt/src/Utils.cpp -o CMakeFiles/SVMlib.dir/src/Utils.cpp.s
 
 CMakeFiles/SVMlib.dir/src/Utils.cpp.o.requires:
 
@@ -323,16 +323,16 @@ CMakeFiles/SVMlib.dir/src/Utils.cpp.o.provides.build: CMakeFiles/SVMlib.dir/src/
 
 CMakeFiles/SVMlib.dir/src/Variational.cpp.o: CMakeFiles/SVMlib.dir/flags.make
 CMakeFiles/SVMlib.dir/src/Variational.cpp.o: src/Variational.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/Dropbox/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/SVMlib.dir/src/Variational.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/Variational.cpp.o -c /home/frederik/Dropbox/SVMprojekt/src/Variational.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/SVMlib.dir/src/Variational.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/Variational.cpp.o -c /home/frederik/SVMprojekt/src/Variational.cpp
 
 CMakeFiles/SVMlib.dir/src/Variational.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/SVMlib.dir/src/Variational.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/Dropbox/SVMprojekt/src/Variational.cpp > CMakeFiles/SVMlib.dir/src/Variational.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/SVMprojekt/src/Variational.cpp > CMakeFiles/SVMlib.dir/src/Variational.cpp.i
 
 CMakeFiles/SVMlib.dir/src/Variational.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/SVMlib.dir/src/Variational.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/Dropbox/SVMprojekt/src/Variational.cpp -o CMakeFiles/SVMlib.dir/src/Variational.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/SVMprojekt/src/Variational.cpp -o CMakeFiles/SVMlib.dir/src/Variational.cpp.s
 
 CMakeFiles/SVMlib.dir/src/Variational.cpp.o.requires:
 
@@ -347,16 +347,16 @@ CMakeFiles/SVMlib.dir/src/Variational.cpp.o.provides.build: CMakeFiles/SVMlib.di
 
 CMakeFiles/SVMlib.dir/src/fdcube.cpp.o: CMakeFiles/SVMlib.dir/flags.make
 CMakeFiles/SVMlib.dir/src/fdcube.cpp.o: src/fdcube.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/Dropbox/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/SVMlib.dir/src/fdcube.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/fdcube.cpp.o -c /home/frederik/Dropbox/SVMprojekt/src/fdcube.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/frederik/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/SVMlib.dir/src/fdcube.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/SVMlib.dir/src/fdcube.cpp.o -c /home/frederik/SVMprojekt/src/fdcube.cpp
 
 CMakeFiles/SVMlib.dir/src/fdcube.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/SVMlib.dir/src/fdcube.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/Dropbox/SVMprojekt/src/fdcube.cpp > CMakeFiles/SVMlib.dir/src/fdcube.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/frederik/SVMprojekt/src/fdcube.cpp > CMakeFiles/SVMlib.dir/src/fdcube.cpp.i
 
 CMakeFiles/SVMlib.dir/src/fdcube.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/SVMlib.dir/src/fdcube.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/Dropbox/SVMprojekt/src/fdcube.cpp -o CMakeFiles/SVMlib.dir/src/fdcube.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/frederik/SVMprojekt/src/fdcube.cpp -o CMakeFiles/SVMlib.dir/src/fdcube.cpp.s
 
 CMakeFiles/SVMlib.dir/src/fdcube.cpp.o.requires:
 
@@ -403,7 +403,7 @@ libSVMlib.a: CMakeFiles/SVMlib.dir/src/Variational.cpp.o
 libSVMlib.a: CMakeFiles/SVMlib.dir/src/fdcube.cpp.o
 libSVMlib.a: CMakeFiles/SVMlib.dir/build.make
 libSVMlib.a: CMakeFiles/SVMlib.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/frederik/Dropbox/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX static library libSVMlib.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/frederik/SVMprojekt/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX static library libSVMlib.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/SVMlib.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/SVMlib.dir/link.txt --verbose=$(VERBOSE)
 
@@ -433,6 +433,6 @@ CMakeFiles/SVMlib.dir/clean:
 .PHONY : CMakeFiles/SVMlib.dir/clean
 
 CMakeFiles/SVMlib.dir/depend:
-	cd /home/frederik/Dropbox/SVMprojekt && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/frederik/Dropbox/SVMprojekt /home/frederik/Dropbox/SVMprojekt /home/frederik/Dropbox/SVMprojekt /home/frederik/Dropbox/SVMprojekt /home/frederik/Dropbox/SVMprojekt/CMakeFiles/SVMlib.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/frederik/SVMprojekt && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/frederik/SVMprojekt /home/frederik/SVMprojekt /home/frederik/SVMprojekt /home/frederik/SVMprojekt /home/frederik/SVMprojekt/CMakeFiles/SVMlib.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/SVMlib.dir/depend
 
