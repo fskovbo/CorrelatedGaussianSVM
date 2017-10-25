@@ -1,0 +1,9 @@
+set term pdf
+set title "Plot"
+set output "OUT"
+set xlabel "x"
+set ylabel "y"
+set key outside
+set logscale x
+plot \
+ "INPUT" index 0 using 1:2 notitle with points color black 
