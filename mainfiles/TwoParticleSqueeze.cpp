@@ -38,12 +38,12 @@ int main() {
 
   mat results(trapOsc.n_rows,2);
   vec startingGuess = 2.5*ones<vec>(3);
-  ansatz.sweepStochastic(15,1e5,startingGuess);
+  ansatz.sweepStochastic(25,1e5,startingGuess);
   for (size_t i = 0; i < trapOsc.n_rows; i++) {
     Trap.updateTrap(trapOsc(i));
 
-    vec res1 = ansatz.sweepStochastic(10,1e4,startingGuess);
-    vec res2 = ansatz.sweepDeterministic(10,5*1e3);
+    vec res1 = ansatz.sweepStochastic(10,1e5,startingGuess);
+    vec res2 = ansatz.sweepDeterministic(15,5*1e4);
     results(i,0) = trapOsc(i);
     results(i,1) = res2(res2.n_rows-1) - 2*0.5* trapOsc(i);
   }
