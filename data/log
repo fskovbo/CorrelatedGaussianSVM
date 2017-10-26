@@ -1,9 +1,0 @@
-set term pdf
-set title "Plot"
-set output "plot.pdf"
-set xlabel "x"
-set ylabel "y"
-set key outside
-set logscale x
-plot \
- "data" index 0 using 1:2 notitle with points color black 

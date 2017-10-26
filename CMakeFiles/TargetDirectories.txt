@@ -1,5 +1,0 @@
-/home/frederik/SVMprojekt/CMakeFiles/edit_cache.dir
-/home/frederik/SVMprojekt/CMakeFiles/HeliumAtom.dir
-/home/frederik/SVMprojekt/CMakeFiles/TwoParticleSqueeze.dir
-/home/frederik/SVMprojekt/CMakeFiles/SVMlib.dir
-/home/frederik/SVMprojekt/CMakeFiles/rebuild_cache.dir

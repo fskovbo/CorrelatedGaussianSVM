@@ -1,1 +1,0 @@
-/usr/bin/c++    -std=c++11   CMakeFiles/HeliumAtom.dir/mainfiles/HeliumAtom.cpp.o  -o bin/HeliumAtom -rdynamic libSVMlib.a -larmadillo -L/home/frederik/gsl/lib -lgsl -lgslcblas 
