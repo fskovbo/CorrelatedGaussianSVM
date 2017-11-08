@@ -16,10 +16,12 @@ private:
   vector<vec**> vArrayList;
   double alpha;
   size_t n;
-  bool JacobiCoordinates;
+
+  vec calculateIntStr();
 
 public:
-  SingleGaussPotential(System& sys, double interactionStr, double interactionRange);
+  SingleGaussPotential(System& sys);
+  SingleGaussPotential(System& sys, double baseStr, double interactionRange);
   virtual double calculateExpectedPotential(mat& A1, mat& A2, vec& s1, vec& s2, mat& Binv, double detB);
   virtual double calculateExpectedPotential_noShift(mat& A1, mat& A2, mat& Binv, double detB);
 };

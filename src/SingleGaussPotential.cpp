@@ -1,15 +1,36 @@
 #include "SingleGaussPotential.h"
 
-SingleGaussPotential::SingleGaussPotential(System& sys, double interactionStr, double interactionRange) {
+SingleGaussPotential::SingleGaussPotential(System& sys, double baseStr, double interactionRange) {
   vArrayList = sys.vArrayList;
   n = sys.n;
-  JacobiCoordinates = sys.JacobiCoordinates;
   alpha = 1.0/pow(interactionRange,2);
 
-  //interStr = Utils::buildInterStr(sys.masses,interactionStr,interactionRange);
-  interStr = interactionStr*ones<vec>(sys.N*(sys.N-1)/2);
+  interStr = zeros<vec>(n*(n+1)/2);
+  size_t count = 0;
+  for (size_t i = 0; i < n+1; i++) {
+    for (size_t j = i+1; j < n+1; j++) {
+      double mu = sys.masses(i)*sys.masses(j)/(sys.masses(i)+sys.masses(j));
+      interStr(count) = baseStr/(mu*interactionRange*interactionRange);
+    }
+  }
 }
 
+SingleGaussPotential::SingleGaussPotential(System& sys) {
+  double baseStr = -2.684;
+  double interactionRange = 1;
+  vArrayList = sys.vArrayList;
+  n = sys.n;
+  alpha = 1.0/pow(interactionRange,2);
+
+  interStr = zeros<vec>(n*(n+1)/2);
+  size_t count = 0;
+  for (size_t i = 0; i < n+1; i++) {
+    for (size_t j = i+1; j < n+1; j++) {
+      double mu = sys.masses(i)*sys.masses(j)/(sys.masses(i)+sys.masses(j));
+      interStr(count) = baseStr/(2.0*mu*interactionRange*interactionRange);
+    }
+  }
+}
 
 double SingleGaussPotential::calculateExpectedPotential(mat& A1, mat& A2, vec& s1, vec& s2, mat& Binv, double detB){
   // mat B = A1 + A2;
@@ -72,18 +93,12 @@ double SingleGaussPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2
 
   for (size_t i = 0; i < n+1; i++) {
     for (size_t j = i+1; j < n+1; j++) {
-      if (j == i+1 && JacobiCoordinates == false) {
-        kappavec(count) = 0;
-        count++;
-      }
-      else{
-        detBp = detB;
-        detBp *= 1+ alpha*dot((vxArray[i][j]),Binv*vxArray[i][j]);
-        detBp *= 1+ alpha*dot((vyArray[i][j]),Binv*vyArray[i][j]);
-        detBp *= 1+ alpha*dot((vzArray[i][j]),Binv*vzArray[i][j]);
-        kappavec(count) = 1.0/sqrt(detBp);
-        count++;
-      }
+      detBp = detB;
+      detBp *= 1+ alpha*dot((vxArray[i][j]),Binv*vxArray[i][j]);
+      detBp *= 1+ alpha*dot((vyArray[i][j]),Binv*vyArray[i][j]);
+      detBp *= 1+ alpha*dot((vzArray[i][j]),Binv*vzArray[i][j]);
+      kappavec(count) = 1.0/sqrt(detBp);
+      count++;
     }
   }
   return pow(datum::pi,3.0*n/2.0)*dot(interStr,kappavec);

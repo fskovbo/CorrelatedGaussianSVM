@@ -1,15 +1,7 @@
 #include "System.h"
 
-System::System(vec& masses, vec& charges, bool JacobiCoordinates)
- : masses(masses), charges(charges), JacobiCoordinates(JacobiCoordinates) {
-   //
-   // append a dummy particle when using absolute coordinates, such that matrix dimensions are correct
-   //
-   if (JacobiCoordinates == false) {
-     vec dummymass = ones<vec>(1), dummycharge = zeros<vec>(1);
-     masses = join_vert(masses,dummymass);
-     charges = join_vert(charges,dummycharge);
-   }
+System::System(vec& masses, vec& charges)
+ : masses(masses), charges(charges) {
 
    N = masses.n_rows;
    n = N-1;
@@ -37,7 +29,7 @@ System::System(vec& masses, vec& charges, bool JacobiCoordinates)
            }
        }
    }
-   if (JacobiCoordinates == false) U.eye();
+
    Ui = U.i();
 
    //
@@ -109,21 +101,6 @@ System::System(vec& masses, vec& charges, bool JacobiCoordinates)
        wzArray[j][i] = wzArray[i][j];
      }
    }
-
-   //
-   // when using absolute coordinates, need w_ii as well as w_ij
-   // fix by setting w_ij --> w_ij+1 (move everything one step right)
-   //
-   if (JacobiCoordinates == false) {
-     for (size_t i = 0; i < N; i++) {
-       for (size_t j = N-1; j > 0 && j < N; j--) {
-         wxArray[i][j] = wxArray[i][j-1];
-         wyArray[i][j] = wyArray[i][j-1];
-         wzArray[i][j] = wzArray[i][j-1];
-       }
-     }
-   }
-
 
    //
    // transform w vector such that v = (U^-1)^t * w
