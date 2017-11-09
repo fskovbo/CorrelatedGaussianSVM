@@ -17,7 +17,7 @@ private:
   double alpha;
   size_t n;
 
-  vec calculateIntStr();
+  vec calculateIntStr(vec& masses, double baseStr, double intRange);
 
 public:
   SingleGaussPotential(System& sys);

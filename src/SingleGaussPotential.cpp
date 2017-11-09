@@ -4,15 +4,7 @@ SingleGaussPotential::SingleGaussPotential(System& sys, double baseStr, double i
   vArrayList = sys.vArrayList;
   n = sys.n;
   alpha = 1.0/pow(interactionRange,2);
-
-  interStr = zeros<vec>(n*(n+1)/2);
-  size_t count = 0;
-  for (size_t i = 0; i < n+1; i++) {
-    for (size_t j = i+1; j < n+1; j++) {
-      double mu = sys.masses(i)*sys.masses(j)/(sys.masses(i)+sys.masses(j));
-      interStr(count) = baseStr/(mu*interactionRange*interactionRange);
-    }
-  }
+  interStr = calculateIntStr(sys.masses,baseStr,interactionRange);
 }
 
 SingleGaussPotential::SingleGaussPotential(System& sys) {
@@ -21,15 +13,20 @@ SingleGaussPotential::SingleGaussPotential(System& sys) {
   vArrayList = sys.vArrayList;
   n = sys.n;
   alpha = 1.0/pow(interactionRange,2);
+  interStr = calculateIntStr(sys.masses,baseStr,interactionRange);
+}
 
+vec SingleGaussPotential::calculateIntStr(vec& masses, double baseStr, double intRange){
   interStr = zeros<vec>(n*(n+1)/2);
   size_t count = 0;
-  for (size_t i = 0; i < n+1; i++) {
+  for (size_t i = 0; i < n; i++) {
     for (size_t j = i+1; j < n+1; j++) {
-      double mu = sys.masses(i)*sys.masses(j)/(sys.masses(i)+sys.masses(j));
-      interStr(count) = baseStr/(2.0*mu*interactionRange*interactionRange);
+      double mu = masses(i)*masses(j)/(masses(i)+masses(j));
+      interStr(count) = baseStr/(2.0*mu*intRange*intRange);
+      count++;
     }
   }
+  return interStr;
 }
 
 double SingleGaussPotential::calculateExpectedPotential(mat& A1, mat& A2, vec& s1, vec& s2, mat& Binv, double detB){
@@ -60,7 +57,7 @@ double SingleGaussPotential::calculateExpectedPotential(mat& A1, mat& A2, vec& s
   mat Bpinv;
   size_t count = 0;
 
-  for (size_t i = 0; i < n+1; i++) {
+  for (size_t i = 0; i < n; i++) {
     for (size_t j = i+1; j < n+1; j++) {
       detBp = detB;
       Bpinv = Binv;
@@ -91,7 +88,7 @@ double SingleGaussPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2
   double detBp;
   size_t count = 0;
 
-  for (size_t i = 0; i < n+1; i++) {
+  for (size_t i = 0; i < n; i++) {
     for (size_t j = i+1; j < n+1; j++) {
       detBp = detB;
       detBp *= 1+ alpha*dot((vxArray[i][j]),Binv*vxArray[i][j]);

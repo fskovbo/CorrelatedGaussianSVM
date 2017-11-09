@@ -17,7 +17,7 @@ int main() {
 
   arma_rng::set_seed_random();
 
-  vec masses = {10 , 10};
+  vec masses = {1 , 1};
   vec charges = {0 , 0};
 
   System TwoPart = System(masses,charges);
@@ -35,7 +35,7 @@ int main() {
 
   vec startingGuess = 2.5*ones<vec>(3);
 
-  size_t Nvals = 15;
+  size_t Nvals = 10;
   vec oscs = logspace<vec>(4,-4,Nvals);
   mat data(Nvals,2);
   vec trapOsc;
