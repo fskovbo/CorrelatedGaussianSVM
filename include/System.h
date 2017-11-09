@@ -20,6 +20,9 @@ public:
 
   System(vec& masses, vec& charges);
 
+  void setupCoordinates();
+  void setupCoordinates2();
+
 };
 
 #endif

@@ -6,30 +6,7 @@ System::System(vec& masses, vec& charges)
    N = masses.n_rows;
    n = N-1;
 
-   //
-   // build transformationmatrix
-   //
-   U = zeros<mat>(3*N,3*N);
-   for (size_t i = 0; i<N; i++){
-       int ibegin = 3*i;
-       int iend = 3*i+2;
-
-       for (size_t j = 0; j<N; j++){
-           int jbegin = 3*j;
-           int jend = 3*j+2;
-
-           if (j > i+1){
-               U(span(ibegin,iend),span(jbegin,jend)) = zeros<mat>(3,3);
-           }
-           else if (j == i+1){
-               U(span(ibegin,iend),span(jbegin,jend)) = -1*eye(3,3);
-           }
-           else {
-               U(span(ibegin,iend),span(jbegin,jend)) = masses(j) /(sum(masses.rows(0,i))) *eye(3,3);
-           }
-       }
-   }
-
+   setupCoordinates2();
    Ui = U.i();
 
    //
@@ -134,4 +111,59 @@ System::System(vec& masses, vec& charges)
    // add vArrays to list
    //
    vArrayList = {vxArray, vyArray, vzArray};
+}
+
+void System::setupCoordinates(){
+  //
+  // build transformationmatrix
+  //
+  int D = 3;
+  U = zeros<mat>(D*N,D*N);
+  for (size_t i = 0; i<N; i++){
+      int ibegin = D*i;
+      int iend = D*i+(D-1);
+
+      for (size_t j = 0; j<N; j++){
+          int jbegin = D*j;
+          int jend = D*j+(D-1);
+
+          if (j > i+1){
+              U(span(ibegin,iend),span(jbegin,jend)) = zeros<mat>(D,D);
+          }
+          else if (j == i+1){
+              U(span(ibegin,iend),span(jbegin,jend)) = -1*eye(D,D);
+          }
+          else {
+              U(span(ibegin,iend),span(jbegin,jend)) = masses(j) /(sum(masses.rows(0,i))) *eye(D,D);
+          }
+      }
+  }
+}
+
+void System::setupCoordinates2(){
+  int D = 3;
+  U = zeros<mat>(D*N,D*N);
+  for (size_t i = 0; i<N; i++){
+      int ibegin = D*i;
+      int iend = D*i+(D-1);
+      double mu_i = 1;
+      if (i != n) {
+        mu_i = masses(i+1)*sum(masses.rows(0,i))/sum(masses.rows(0,i+1));
+      }
+
+      for (size_t j = 0; j<N; j++){
+          int jbegin = D*j;
+          int jend = D*j+(D-1);
+
+          if (j > i+1){
+              U(span(ibegin,iend),span(jbegin,jend)) = zeros<mat>(D,D);
+          }
+          else if (j == i+1){
+              U(span(ibegin,iend),span(jbegin,jend)) = -sqrt(mu_i)*eye(D,D);
+          }
+          else {
+              U(span(ibegin,iend),span(jbegin,jend)) = sqrt(mu_i) * masses(j) /(sum(masses.rows(0,i))) *eye(D,D);
+          }
+      }
+  }
 }

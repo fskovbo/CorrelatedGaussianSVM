@@ -21,7 +21,7 @@ vec SingleGaussPotential::calculateIntStr(vec& masses, double baseStr, double in
   size_t count = 0;
   for (size_t i = 0; i < n; i++) {
     for (size_t j = i+1; j < n+1; j++) {
-      double mu = masses(i)*masses(j)/(masses(i)+masses(j));
+      double mu = 0.5;// masses(i)*masses(j)/(masses(i)+masses(j));
       interStr(count) = baseStr/(2.0*mu*intRange*intRange);
       count++;
     }

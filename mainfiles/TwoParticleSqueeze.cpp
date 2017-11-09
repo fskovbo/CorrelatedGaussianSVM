@@ -17,7 +17,7 @@ int main() {
 
   arma_rng::set_seed_random();
 
-  vec masses = {1 , 1};
+  vec masses = {10 , 10};
   vec charges = {0 , 0};
 
   System TwoPart = System(masses,charges);
@@ -46,7 +46,7 @@ int main() {
     vec res1 = ansatz.sweepStochastic(5,1e4,startingGuess);
     vec res2 = ansatz.sweepDeterministic(5,1e4);
     data(i,0) = oscs(i);
-    data(i,1) = res2(res2.n_rows-1) - 0.5*sum(trapOsc);
+    data(i,1) = res2(res2.n_rows-1) - 0.5*0.5*sum(trapOsc);
   }
 
   clock_t end = clock();
