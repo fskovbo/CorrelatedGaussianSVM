@@ -5,13 +5,13 @@ TrapPotential::TrapPotential(System& sys)
 
 }
 
-TrapPotential::TrapPotential(System& sys, vec& trapFreq)
+TrapPotential::TrapPotential(System& sys, double trapLength)
   : n(sys.n), lambdamat(sys.lambdamat) {
 
-  updateTrap(trapFreq);
+  updateTrap(trapLength);
 }
 
-void TrapPotential::updateTrap(vec& trapFreq){
+void TrapPotential::updateTrap(double trapLength){
   // Omega = zeros<mat>(3*n,3*n);
   // mat Zmat = zeros<mat>(3,3);
   // Zmat(2,2) = 1;
@@ -32,9 +32,11 @@ void TrapPotential::updateTrap(vec& trapFreq){
   //     }
   //   }
   // }
-  mat Zmat = zeros<mat>(3,3);
-  Zmat(2,2) = 1;
-  Omega = lambdamat%Zmat * 0.5 * trapFreq(0); // trapFreq(0) = 1/b^4
+  mat Zmat = zeros<mat>(3*n,3*n);
+  for (size_t i = 0; i < n; i++) {
+    Zmat(3*(i+1)-1,3*(i+1)-1) = 1;
+  }
+  Omega = lambdamat%Zmat * 0.5 * pow(trapLength,-4); // trapFreq(0) = 1/b^4
 
   cout << Omega << endl;
 }

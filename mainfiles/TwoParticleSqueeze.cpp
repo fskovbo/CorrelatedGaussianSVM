@@ -35,9 +35,7 @@ int main() {
   double mui            = TwoPart.lambdamat(0,0);
 
   for (size_t i = 0; i < Nvals; i++) {
-    vec trapOsc   = { pow(bs(i),-4) };
-
-    Trap.updateTrap(trapOsc);
+    Trap.updateTrap(bs(i));
     ansatz.initializeBasis(4);
 
     vec res1      = ansatz.sweepStochastic(5,1e4,startGuess);
@@ -49,17 +47,6 @@ int main() {
   clock_t end = clock();
   cout << "Runtime = " <<  double(end - begin) / CLOCKS_PER_SEC << endl;
   cout << data << endl;
-
-
-
-  // vec res1 = ansatz.sweepStochastic(5,1e4,startingGuess);
-  // vec res2 = ansatz.sweepDeterministic(5,1e4);
-  // clock_t end = clock();
-  // cout << "Results after stochastic sweep" << endl << res1 - 0.5*sum(trapOsc) << endl;
-  // cout << "Results after deterministic sweep" << endl << res2 - 0.5*sum(trapOsc) << endl;
-  // cout << "Runtime = " <<  double(end - begin) / CLOCKS_PER_SEC << endl;
-
-
 
   return 0;
 }
