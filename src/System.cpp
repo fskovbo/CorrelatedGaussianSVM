@@ -6,7 +6,7 @@ System::System(vec& masses, vec& charges)
    N = masses.n_rows;
    n = N-1;
 
-   setupCoordinates2();
+   setupCoordinates();
    Ui = U.i();
 
    //

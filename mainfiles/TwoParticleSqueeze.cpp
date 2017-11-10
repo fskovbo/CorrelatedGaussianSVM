@@ -17,36 +17,35 @@ int main() {
 
   arma_rng::set_seed_random();
 
-  vec masses = {10 , 10};
+  vec masses = {1 , 1};
   vec charges = {0 , 0};
 
   System TwoPart = System(masses,charges);
 
-  vec temptrapOsc = 1e4 * ones<vec>(masses.n_rows);
-  SingleGaussPotential Gauss(TwoPart);
-  TrapPotential Trap(TwoPart,temptrapOsc);
+  auto Gauss = SingleGaussPotential(TwoPart);
+  auto Trap = TrapPotential(TwoPart),
+
   PotentialList Vstrat;
   Vstrat.addPotential(&Gauss);
   Vstrat.addPotential(&Trap);
-  MatrixElements elem(TwoPart,Vstrat);
-  Variational ansatz = Variational(TwoPart,elem);
+  auto elem = MatrixElements(TwoPart,Vstrat);
+  auto ansatz = Variational(TwoPart,elem);
 
-  ansatz.initializeBasis(4);
 
-  vec startingGuess = 2.5*ones<vec>(3);
 
   size_t Nvals = 10;
-  vec oscs = logspace<vec>(4,-4,Nvals);
+  vec bs = logspace<vec>(-2,2,Nvals);
   mat data(Nvals,2);
+  double mui = TwoPart.lambdamat(0,0);
   vec trapOsc;
   for (size_t i = 0; i < Nvals; i++) {
-    trapOsc = oscs(i) * ones<vec>(masses.n_rows);
+    trapOsc = { pow(bs(i),-4) };
     Trap.updateTrap(trapOsc);
     ansatz.initializeBasis(4);
-    vec res1 = ansatz.sweepStochastic(5,1e4,startingGuess);
+    vec res1 = ansatz.sweepStochastic(5,1e4,2.5*ones<vec>(3));
     vec res2 = ansatz.sweepDeterministic(5,1e4);
-    data(i,0) = oscs(i);
-    data(i,1) = res2(res2.n_rows-1) - 0.5*0.5*sum(trapOsc);
+    data(i,0) = bs(i);
+    data(i,1) = res2(res2.n_rows-1) - 0.5*mui/bs(i)/bs(i);
   }
 
   clock_t end = clock();
