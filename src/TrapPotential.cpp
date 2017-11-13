@@ -36,8 +36,7 @@ void TrapPotential::updateTrap(double trapLength){
   for (size_t i = 0; i < n; i++) {
     Zmat(3*(i+1)-1,3*(i+1)-1) = 1;
   }
-  Omega = lambdamat%Zmat * 0.5 * pow(trapLength,-4); // trapFreq(0) = 1/b^4
-
+  Omega = lambdamat%Zmat * 0.5 * pow(trapLength,-4);
   cout << Omega << endl;
 }
 

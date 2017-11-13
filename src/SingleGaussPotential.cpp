@@ -1,20 +1,18 @@
 #include "SingleGaussPotential.h"
 
-SingleGaussPotential::SingleGaussPotential(System& sys, double baseStr, double interactionRange) {
-  vArrayList = sys.vArrayList;
-  n = sys.n;
+SingleGaussPotential::SingleGaussPotential(System& sys, double baseStr, double interactionRange)
+  : vArrayList(sys.vArrayList), n(sys.n), lambdamat(sys.lambdamat) {
   alpha = 1.0/pow(interactionRange,2);
   interStr = calculateIntStr(sys.masses,baseStr,interactionRange);
 }
 
-SingleGaussPotential::SingleGaussPotential(System& sys) {
-  double baseStr = -2.684;
-  double interactionRange = 1;
-  vArrayList = sys.vArrayList;
-  n = sys.n;
-  alpha = 1.0/pow(interactionRange,2);
-  interStr = calculateIntStr(sys.masses,baseStr,interactionRange);
-}
+// SingleGaussPotential::SingleGaussPotential(System& sys)
+//   :   : vArrayList(sys.vArrayList), n(sys.n), lambdamat(sys.lambdamat) {
+//   double baseStr = -2.684;
+//   double interactionRange = 1;
+//   alpha = 1.0/pow(interactionRange,2);
+//   interStr = calculateIntStr(sys.masses,baseStr,interactionRange);
+// }
 
 vec SingleGaussPotential::calculateIntStr(vec& masses, double baseStr, double intRange){
   interStr = zeros<vec>(n*(n+1)/2);
