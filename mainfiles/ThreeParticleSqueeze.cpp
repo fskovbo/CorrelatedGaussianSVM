@@ -21,14 +21,14 @@ int main() {
 
   auto Gauss            = SingleGaussPotential(TwoPart);
   auto Trap             = TrapPotential(TwoPart);
-  PotentialList Vstrat  = {&Trap};
+  PotentialList Vstrat  = {&Gauss, &Trap};
 
   auto elem             = MatrixElements(TwoPart,Vstrat);
   auto ansatz           = Variational(TwoPart,elem);
 
 
-  size_t Nvals          = 6;
-  vec bs                = logspace<vec>(-3,3,Nvals);
+  size_t Nvals          = 1;
+  vec bs                = logspace<vec>(-1,1,Nvals);
   mat data              = zeros<mat>(Nvals,4);
 
   for (size_t i = 0; i < Nvals; i++) {

@@ -4,15 +4,8 @@ SingleGaussPotential::SingleGaussPotential(System& sys, double baseStr, double i
   : vArrayList(sys.vArrayList), n(sys.n), lambdamat(sys.lambdamat) {
   alpha = 1.0/pow(interactionRange,2);
   interStr = calculateIntStr(sys.masses,baseStr,interactionRange);
+  // buildInteractions(sys.Ui);
 }
-
-// SingleGaussPotential::SingleGaussPotential(System& sys)
-//   :   : vArrayList(sys.vArrayList), n(sys.n), lambdamat(sys.lambdamat) {
-//   double baseStr = -2.684;
-//   double interactionRange = 1;
-//   alpha = 1.0/pow(interactionRange,2);
-//   interStr = calculateIntStr(sys.masses,baseStr,interactionRange);
-// }
 
 vec SingleGaussPotential::calculateIntStr(vec& masses, double baseStr, double intRange){
   interStr = zeros<vec>(n*(n+1)/2);
@@ -25,6 +18,29 @@ vec SingleGaussPotential::calculateIntStr(vec& masses, double baseStr, double in
     }
   }
   return interStr;
+}
+
+void SingleGaussPotential::buildInteractions(mat& invTrans){
+  interactions.reserve(n*(n+1)/2);
+
+  for (size_t i = 0; i < n; i++) {
+    size_t ibegin = 3*i;
+    size_t iend = 3*i+2;
+    for (size_t j = i+1; j < n+1; j++) {
+      size_t jbegin = 3*j;
+      size_t jend = 3*j+2;
+
+      mat temp = zeros<mat>(3*(n+1),3*(n+1));
+      temp(span(ibegin,iend),span(ibegin,iend)) = eye(3,3);
+      temp(span(jbegin,jend),span(jbegin,jend)) = eye(3,3);
+      temp(span(ibegin,iend),span(jbegin,jend)) = -eye(3,3);
+      temp(span(jbegin,jend),span(ibegin,iend)) = -eye(3,3);
+      temp *= alpha;
+      temp = invTrans.t()*temp*invTrans;
+      mat temp_red = temp(span(0,3*n-1),span(0,3*n-1));
+      interactions.push_back(temp_red);
+    }
+  }
 }
 
 double SingleGaussPotential::calculateExpectedPotential(mat& A1, mat& A2, vec& s1, vec& s2, mat& Binv, double detB){
@@ -83,6 +99,7 @@ double SingleGaussPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2
   vec** vxArray = vArrayList.at(0);
   vec** vyArray = vArrayList.at(1);
   vec** vzArray = vArrayList.at(2);
+
   double detBp;
   size_t count = 0;
 
@@ -97,4 +114,18 @@ double SingleGaussPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2
     }
   }
   return pow(datum::pi,3.0*n/2.0)*dot(interStr,kappavec);
+
+  // ------------------------- //
+
+  // mat B = A1 + A2;
+  // mat kappa(3*n,3*n);
+  // size_t count = 0;
+  // double result2 = 0;
+  //
+  // for (auto& M : interactions){
+  //   kappa = B + M;
+  //   result2 += interStr(count)/(sqrt(det(kappa)));
+  //   count++;
+  // }
+  // return result2 * pow(datum::pi,3.0*n/2.0);
 }
