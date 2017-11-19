@@ -38,7 +38,7 @@ int main() {
     ansatz.initializeBasis(4);
 
     vec res1      = ansatz.sweepStochastic(5,1e4,startGuess);
-    vec res2      = ansatz.sweepDeterministic(5,1e4);
+    vec res2      = ansatz.sweepDeterministic(5);
     double Vexpt  = 0.5*trace(TwoPart.lambdamat)/3.0/bs(i)/bs(i);
     data(i,0)     = bs(i);
     data(i,1)     = res2(res2.n_rows-1) - Vexpt;

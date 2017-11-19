@@ -27,22 +27,20 @@ int main() {
   auto ansatz           = Variational(TwoPart,elem);
 
 
-  size_t Nvals          = 1;
-  vec bs                = logspace<vec>(-1,1,Nvals);
-  mat data              = zeros<mat>(Nvals,4);
+  size_t Nvals          = 25;
+  vec bs                = logspace<vec>(-2,2,Nvals);
+  mat data              = zeros<mat>(Nvals,2);
 
   for (size_t i = 0; i < Nvals; i++) {
     Trap.updateTrap(bs(i));
     ansatz.initializeBasis(10);
 
     vec aGuess    = {2.5 , 2.5 , bs(i)};
-    vec res1      = ansatz.sweepStochastic(5,1e4,aGuess);
-    vec res2      = ansatz.sweepDeterministic(5,1e4);
+    vec res1      = ansatz.sweepStochastic(5,1e2,aGuess);
+    vec res2      = ansatz.sweepDeterministic(10);
     double Vexpt  = 0.5*trace(TwoPart.lambdamat)/3.0/bs(i)/bs(i);
     data(i,0)     = bs(i);
-    data(i,1)     = res2(res2.n_rows-1);
-    data(i,2)     = Vexpt;
-    data(i,3)     = res2(res2.n_rows-1) - Vexpt;
+    data(i,1)     = res2(res2.n_rows-1) - Vexpt;
   }
 
   clock_t end = clock();

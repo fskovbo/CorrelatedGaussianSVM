@@ -37,7 +37,6 @@ void TrapPotential::updateTrap(double trapLength){
     Zmat(3*(i+1)-1,3*(i+1)-1) = 1;
   }
   Omega = lambdamat%Zmat * 0.5 * pow(trapLength,-4);
-  cout << Omega << endl;
 }
 
 double TrapPotential::calculateExpectedPotential(mat& A1, mat& A2, vec& s1, vec& s2, mat& Binv, double detB){

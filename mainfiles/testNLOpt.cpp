@@ -2,6 +2,24 @@
 #include "math.h"
 #include "nlopt.hpp"
 
+
+typedef struct {
+    double a, b;
+} my_constraint_data;
+
+// struct my_constraint_data
+// {
+//   void operator()(const double &a, const double &b) const
+//   {
+//     a =
+//   }
+// };
+//
+// static double wrap(const std::vector<double> &x, std::vector<double> &grad, void *data) {
+//     return (*reinterpret_cast<MyFunction*>(data))(x, grad);
+// }
+
+
 //
 //  Function to be optimized
 //
@@ -17,10 +35,6 @@ double myvfunc(const std::vector<double> &x, std::vector<double> &grad, void *my
 //
 //  Constraints function
 //
-typedef struct {
-    double a, b;
-} my_constraint_data;
-
 double myvconstraint(const std::vector<double> &x, std::vector<double> &grad, void *data)
 {
     my_constraint_data *d = reinterpret_cast<my_constraint_data*>(data);
@@ -32,9 +46,7 @@ double myvconstraint(const std::vector<double> &x, std::vector<double> &grad, vo
     return ((a*x[0] + b) * (a*x[0] + b) * (a*x[0] + b) - x[1]);
 }
 
-// static double wrap(const std::vector`<double>` &x, std::vector`<double>` &grad, void *data) {
-//     return (*reinterpret_cast`<MyFunction*>`(data))(x, grad);
-// }
+
 
 int main() {
 
