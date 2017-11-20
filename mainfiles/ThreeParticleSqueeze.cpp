@@ -17,7 +17,7 @@ int main() {
 
   vec masses            = {1 , 1 , 1};
   vec charges           = {0 , 0 , 0};
-  auto TwoPart          = System(masses,charges);
+  auto TwoPart          = System(masses,charges,3);
 
   auto Gauss            = SingleGaussPotential(TwoPart);
   auto Trap             = TrapPotential(TwoPart);
@@ -27,7 +27,7 @@ int main() {
   auto ansatz           = Variational(TwoPart,elem);
 
 
-  size_t Nvals          = 25;
+  size_t Nvals          = 10;
   vec bs                = logspace<vec>(-2,2,Nvals);
   mat data              = zeros<mat>(Nvals,2);
 
@@ -37,7 +37,7 @@ int main() {
 
     vec aGuess    = {2.5 , 2.5 , bs(i)};
     vec res1      = ansatz.sweepStochastic(5,1e2,aGuess);
-    vec res2      = ansatz.sweepDeterministic(10);
+    vec res2      = ansatz.sweepDeterministic(5);
     double Vexpt  = 0.5*trace(TwoPart.lambdamat)/3.0/bs(i)/bs(i);
     data(i,0)     = bs(i);
     data(i,1)     = res2(res2.n_rows-1) - Vexpt;

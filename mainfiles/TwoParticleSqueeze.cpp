@@ -18,7 +18,7 @@ int main() {
 
   vec masses            = {1 , 1};
   vec charges           = {0 , 0};
-  auto TwoPart          = System(masses,charges);
+  auto TwoPart          = System(masses,charges,3);
 
   auto Gauss            = SingleGaussPotential(TwoPart);
   auto Trap             = TrapPotential(TwoPart);

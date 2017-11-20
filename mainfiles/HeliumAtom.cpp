@@ -17,7 +17,7 @@ int main() {
   masses << 7296 << 1 << 1;
   charges << 2 << -1 << -1;
 
-  System He = System(masses,charges);
+  System He = System(masses,charges,3);
   CoulombPotential Vstrat(He,10,12);
   MatrixElements elem(He,Vstrat);
   Variational ansatz1 = Variational(He,elem);
