@@ -21,7 +21,7 @@ using namespace std;
 
 class Variational {
 private:
-  size_t K, n;
+  size_t K, n, De;
   mat H, B, shift;
   MatrixElements matElem;
   cube basis;
@@ -40,7 +40,6 @@ public:
   vec sweepDeterministic(size_t sweeps);
 
   vec sweepDeterministicCMAES(size_t sweeps, size_t maxeval);
-  double addBasisFunctionCMAES(mat A_guess, vec S_guess, size_t state, size_t maxeval);
 
   void printBasis();
   void printShift();
