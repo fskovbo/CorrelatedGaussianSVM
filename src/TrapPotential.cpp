@@ -1,12 +1,12 @@
 #include "TrapPotential.h"
 
 TrapPotential::TrapPotential(System& sys)
-  : n(sys.n), lambdamat(sys.lambdamat) {
+  : n(sys.n), De(sys.De), lambdamat(sys.lambdamat) {
 
 }
 
 TrapPotential::TrapPotential(System& sys, double trapLength)
-  : n(sys.n), lambdamat(sys.lambdamat) {
+  : n(sys.n), De(sys.De), lambdamat(sys.lambdamat) {
 
   updateTrap(trapLength);
 }
@@ -32,11 +32,11 @@ void TrapPotential::updateTrap(double trapLength){
   //     }
   //   }
   // }
-  mat Zmat = zeros<mat>(3*n,3*n);
+  mat Xmat = zeros<mat>(De*n,De*n);
   for (size_t i = 0; i < n; i++) {
-    Zmat(3*(i+1)-1,3*(i+1)-1) = 1;
+    Xmat(De*i,De*i) = 1;
   }
-  Omega = lambdamat%Zmat * 0.5 * pow(trapLength,-4);
+  Omega = lambdamat%Xmat * 0.5 * pow(trapLength,-4);
 }
 
 double TrapPotential::calculateExpectedPotential(mat& A1, mat& A2, vec& s1, vec& s2, mat& Binv, double detB){
@@ -45,6 +45,6 @@ double TrapPotential::calculateExpectedPotential(mat& A1, mat& A2, vec& s1, vec&
 
 double TrapPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2, mat& Binv, double detB){
   // calculate <g|x^t*v*v^t*x|g> , where v*v^t = Zmat
-  return pow(datum::pi,3.0*n/2.0)/sqrt(detB) * 0.5*trace(Omega*Binv);
+  return pow(datum::pi,3.0*n/2.0)*pow(detB,-3.0/De/2.0) * 0.5*trace(Omega*Binv);
 
 }

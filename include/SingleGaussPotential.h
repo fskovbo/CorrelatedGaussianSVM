@@ -15,7 +15,7 @@ private:
   vec interStr;
   vector<vec**> vArrayList;
   double alpha;
-  size_t n;
+  size_t n, De;
   mat lambdamat;
 
   vector<mat> interactions;

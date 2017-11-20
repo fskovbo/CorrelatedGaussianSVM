@@ -12,7 +12,7 @@ using namespace std;
 
 class TrapPotential : public PotentialStrategy{
 private:
-  size_t n;
+  size_t n, De;
   mat Omega, lambdamat;
 
 public:

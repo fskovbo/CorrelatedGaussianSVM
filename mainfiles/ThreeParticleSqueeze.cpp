@@ -36,7 +36,7 @@ int main() {
     Trap.updateTrap(bs(i));
     ansatz.initializeBasis(10);
 
-    vec aGuess    = {2.5 , 2.5 , bs(i)};
+    vec aGuess    = {bs(i) , 2.5 , 2.5};
     vec res1      = ansatz.sweepStochastic(5,1e2,aGuess);
     vec res2      = ansatz.sweepDeterministic(5);
     double Vexpt  = 0.5*trace(TwoPart.lambdamat)/3.0/bs(i)/bs(i);
