@@ -1,43 +1,12 @@
 #include "System.h"
 
-System::System(vec& masses, vec& charges, bool JacobiCoordinates)
- : masses(masses), charges(charges), JacobiCoordinates(JacobiCoordinates) {
-   //
-   // append a dummy particle when using absolute coordinates, such that matrix dimensions are correct
-   //
-   if (JacobiCoordinates == false) {
-     vec dummymass = ones<vec>(1), dummycharge = zeros<vec>(1);
-     masses = join_vert(masses,dummymass);
-     charges = join_vert(charges,dummycharge);
-   }
+System::System(vec& masses, vec& charges)
+ : masses(masses), charges(charges) {
 
    N = masses.n_rows;
    n = N-1;
 
-   //
-   // build transformationmatrix
-   //
-   U = zeros<mat>(3*N,3*N);
-   for (size_t i = 0; i<N; i++){
-       int ibegin = 3*i;
-       int iend = 3*i+2;
-
-       for (size_t j = 0; j<N; j++){
-           int jbegin = 3*j;
-           int jend = 3*j+2;
-
-           if (j > i+1){
-               U(span(ibegin,iend),span(jbegin,jend)) = zeros<mat>(3,3);
-           }
-           else if (j == i+1){
-               U(span(ibegin,iend),span(jbegin,jend)) = -1*eye(3,3);
-           }
-           else {
-               U(span(ibegin,iend),span(jbegin,jend)) = masses(j) /(sum(masses.rows(0,i))) *eye(3,3);
-           }
-       }
-   }
-   if (JacobiCoordinates == false) U.eye();
+   setupCoordinates();
    Ui = U.i();
 
    //
@@ -111,21 +80,6 @@ System::System(vec& masses, vec& charges, bool JacobiCoordinates)
    }
 
    //
-   // when using absolute coordinates, need w_ii as well as w_ij
-   // fix by setting w_ij --> w_ij+1 (move everything one step right)
-   //
-   if (JacobiCoordinates == false) {
-     for (size_t i = 0; i < N; i++) {
-       for (size_t j = N-1; j > 0 && j < N; j--) {
-         wxArray[i][j] = wxArray[i][j-1];
-         wyArray[i][j] = wyArray[i][j-1];
-         wzArray[i][j] = wzArray[i][j-1];
-       }
-     }
-   }
-
-
-   //
    // transform w vector such that v = (U^-1)^t * w
    //
    vec v;
@@ -157,4 +111,59 @@ System::System(vec& masses, vec& charges, bool JacobiCoordinates)
    // add vArrays to list
    //
    vArrayList = {vxArray, vyArray, vzArray};
+}
+
+void System::setupCoordinates(){
+  //
+  // build transformationmatrix
+  //
+  int D = 3;
+  U = zeros<mat>(D*N,D*N);
+  for (size_t i = 0; i<N; i++){
+      int ibegin = D*i;
+      int iend = D*i+(D-1);
+
+      for (size_t j = 0; j<N; j++){
+          int jbegin = D*j;
+          int jend = D*j+(D-1);
+
+          if (j > i+1){
+              U(span(ibegin,iend),span(jbegin,jend)) = zeros<mat>(D,D);
+          }
+          else if (j == i+1){
+              U(span(ibegin,iend),span(jbegin,jend)) = -1*eye(D,D);
+          }
+          else {
+              U(span(ibegin,iend),span(jbegin,jend)) = masses(j) /(sum(masses.rows(0,i))) *eye(D,D);
+          }
+      }
+  }
+}
+
+void System::setupCoordinates2(){
+  int D = 3;
+  U = zeros<mat>(D*N,D*N);
+  for (size_t i = 0; i<N; i++){
+      int ibegin = D*i;
+      int iend = D*i+(D-1);
+      double mu_i = 1;
+      if (i != n) {
+        mu_i = masses(i+1)*sum(masses.rows(0,i))/sum(masses.rows(0,i+1));
+      }
+
+      for (size_t j = 0; j<N; j++){
+          int jbegin = D*j;
+          int jend = D*j+(D-1);
+
+          if (j > i+1){
+              U(span(ibegin,iend),span(jbegin,jend)) = zeros<mat>(D,D);
+          }
+          else if (j == i+1){
+              U(span(ibegin,iend),span(jbegin,jend)) = -sqrt(mu_i)*eye(D,D);
+          }
+          else {
+              U(span(ibegin,iend),span(jbegin,jend)) = sqrt(mu_i) * masses(j) /(sum(masses.rows(0,i))) *eye(D,D);
+          }
+      }
+  }
 }

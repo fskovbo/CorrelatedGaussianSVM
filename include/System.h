@@ -17,9 +17,11 @@ public:
   mat U, Ui, lambdamat;
   vec masses, charges;
   vector<vec**> vArrayList;
-  bool JacobiCoordinates;
 
-  System(vec& masses, vec& charges, bool JacobiCoordinates);
+  System(vec& masses, vec& charges);
+
+  void setupCoordinates();
+  void setupCoordinates2();
 
 };
 

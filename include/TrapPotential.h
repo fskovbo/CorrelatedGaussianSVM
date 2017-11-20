@@ -13,12 +13,12 @@ using namespace std;
 class TrapPotential : public PotentialStrategy{
 private:
   size_t n;
-  mat Zmat;
-  vec masses;
+  mat Omega, lambdamat;
 
 public:
-  TrapPotential(System& sys, double trapFreq);
-  void updateTrap(double trapFreq);
+  TrapPotential(System& sys);
+  TrapPotential(System& sys, double trapLength);
+  void updateTrap(double trapLength);
   virtual double calculateExpectedPotential(mat& A1, mat& A2, vec& s1, vec& s2, mat& Binv, double detB);
   virtual double calculateExpectedPotential_noShift(mat& A1, mat& A2, mat& Binv, double detB);
 };

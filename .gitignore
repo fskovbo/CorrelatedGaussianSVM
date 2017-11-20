@@ -9,3 +9,4 @@ CMakeCache.txt
 CMakeLists.txt
 libSVMlib.a
 Makefile
+profiling

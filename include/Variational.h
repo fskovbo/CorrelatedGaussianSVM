@@ -8,6 +8,7 @@
 #include <math.h>
 #include <time.h>
 #include <vector>
+#include "nlopt.hpp"
 
 #include "System.h"
 #include "MatrixElements.h"
@@ -27,16 +28,18 @@ private:
   mat basisCoefficients;
   vector<vec**> vArrayList;
 
+  static double myvfunc(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
+  double groundStateEnergy();
+  mat generateRandomGaussian(vec& Ameanval, vec& coeffs);
+
 public:
   Variational(System& sys, MatrixElements& matElem);
 
-  double groundStateEnergy();
-  mat generateRandomGaussian(vec& Ameanval, vec& coeffs);
   double initializeBasis(size_t basisSize);
   vec sweepStochastic(size_t sweeps, size_t trials, vec& Ameanval);
-  vec sweepDeterministic(size_t sweeps, size_t maxeval);
+  vec sweepDeterministic(size_t sweeps);
 
-
+  vec sweepDeterministicCMAES(size_t sweeps, size_t maxeval);
   double addBasisFunctionCMAES(mat A_guess, vec S_guess, size_t state, size_t maxeval);
 
   void printBasis();

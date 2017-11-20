@@ -4,6 +4,12 @@ PotentialList::PotentialList(){
 
 }
 
+PotentialList::PotentialList(const std::initializer_list<PotentialStrategy*>& initlist) {
+  for (auto i : initlist) {
+    list.push_back(i);
+  }
+}
+
 void PotentialList::addPotential(PotentialStrategy* pot){
   list.push_back(pot);
 }
