@@ -12,6 +12,7 @@
 
 
 int main() {
+
   clock_t begin = clock();
   arma_rng::set_seed_random();
 

@@ -19,12 +19,12 @@ private:
   void setupvArray2();
 
 public:
-  size_t N, n, D;
+  size_t N, n, De;
   mat U, Ui, lambdamat;
   vec masses, charges;
   vector<vec**> vArrayList;
 
-  System(vec& masses, vec& charges, size_t D);
+  System(vec& masses, vec& charges, size_t De);
 
 };
 

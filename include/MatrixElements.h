@@ -11,7 +11,7 @@ using namespace std;
 
 class MatrixElements {
 private:
-  size_t n;
+  size_t n, De;
   mat lambda;
   PotentialStrategy& Vstrat;
 public:
