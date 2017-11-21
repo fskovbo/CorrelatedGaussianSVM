@@ -12,8 +12,11 @@ using namespace std;
 
 class CoulombPotential : public PotentialStrategy{
 private:
+  size_t n, De;
   vec Qinter, bvec, cvec;
   fdcube interactions;
+
+  fdcube buildInteractions(vec& alpha, mat& Ui);
 
 public:
   CoulombPotential(System& sys, size_t expansionterms, double range);

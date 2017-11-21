@@ -18,8 +18,7 @@ int main() {
 
   vec masses            = {1 , 1 , 1};
   vec charges           = {0 , 0 , 0};
-  size_t Deff           = 2;
-  auto TwoPart          = System(masses,charges,Deff);
+  auto TwoPart          = System(masses,charges);
 
   auto Gauss            = SingleGaussPotential(TwoPart);
   auto Trap             = TrapPotential(TwoPart);
@@ -40,10 +39,9 @@ int main() {
     vec aGuess    = {bs(i) , 2.5 , 2.5};
     vec res1      = ansatz.sweepStochastic(5,1e2,aGuess);
     vec res2      = ansatz.sweepDeterministic(5);
-    double Vexpt  = 1.5*trace(TwoPart.lambdamat)/Deff/Deff/bs(i)/bs(i);
 
     data(i,0)     = bs(i);
-    data(i,1)     = res2(res2.n_rows-1) - Vexpt;
+    data(i,1)     = res2(res2.n_rows-1) - Trap.gsExpectedVal();
   }
 
   clock_t end = clock();
