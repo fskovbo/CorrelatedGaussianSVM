@@ -123,7 +123,8 @@ vec Variational::sweepStochastic(size_t sweeps, size_t trials, vec& Ameanval){
 }
 
 typedef struct {
-    size_t index, n, K, De;
+    size_t index, n, K, De, Nunique;
+    vec& uniquePar;
     vector<vec**>& vArrayList;
     mat H, B;
     cube& basis;
@@ -134,7 +135,8 @@ typedef struct {
 double Variational::myvfunc(const std::vector<double> &x, std::vector<double> &grad, void *data)
 {
   my_function_data *d = reinterpret_cast<my_function_data*>(data);
-  size_t index = d->index, n = d->n, K = d->K, De = d->De;
+  size_t index = d->index, n = d->n, K = d->K, De = d->De, Nunique = d->Nunique;
+  vec& uniquePar = d->uniquePar;
   vector<vec**>& vArrayList = d->vArrayList;
   mat H = d->H, B = d->B;
   cube& basis = d->basis;
@@ -149,7 +151,7 @@ double Variational::myvfunc(const std::vector<double> &x, std::vector<double> &g
     for (size_t j = i+1; j < n+1; j++) {
       for (size_t k = 0; k < De; k++) {
         vArray = vArrayList.at(k);
-        Atrial += x[De*count+k] * (vArray[i][j] * (vArray[i][j]).t());
+        Atrial += x[Nunique*count+uniquePar(k)] * (vArray[i][j] * (vArray[i][j]).t());
       }
       count++;
     }
@@ -182,8 +184,8 @@ double Variational::myvfunc(const std::vector<double> &x, std::vector<double> &g
   }
 }
 
-vec Variational::sweepDeterministic(size_t sweeps){
-  size_t Npar = De*n*(n+1)/2;
+vec Variational::sweepDeterministic(size_t sweeps, size_t Nunique, vec uniquePar){
+  size_t Npar = Nunique*n*(n+1)/2;
   vec results(sweeps), xstart(Npar);
   vec** vArray;
 
@@ -206,10 +208,12 @@ vec Variational::sweepDeterministic(size_t sweeps){
       // optimize basis function index using its current values as starting guess
       //
       xstart = basisCoefficients.col(index);
-      for (size_t i = 0; i < Npar; i++) {
-        xs[i] = xstart(i);
+      for (size_t i = 0; i < n*(n+1)/2; i++) {
+        for (size_t k = 0; k < De; k++) {
+          xs[Nunique*i+uniquePar(k)] = xstart(De*i+k);
+        }
       }
-      my_function_data data = { index,n,K,De,vArrayList,H,B,basis,matElem };
+      my_function_data data = { index,n,K,De,Nunique,uniquePar,vArrayList,H,B,basis,matElem };
       opt.set_min_objective(myvfunc, &data);
 
       bool status = false;
@@ -224,8 +228,10 @@ vec Variational::sweepDeterministic(size_t sweeps){
         }
       }
 
-      for (size_t i = 0; i < Npar; i++) {
-        xstart(i) = xs[i];
+      for (size_t i = 0; i < n*(n+1)/2; i++) {
+        for (size_t k = 0; k < De; k++) {
+          xstart(De*i+k) = xs[Nunique*i+uniquePar(k)];
+        }
       }
 
       // ----------------------------------------- //
@@ -236,7 +242,7 @@ vec Variational::sweepDeterministic(size_t sweeps){
         for (size_t j = i+1; j < n+1; j++) {
           for (size_t k = 0; k < De; k++) {
             vArray = vArrayList.at(k);
-            Anew += xs[De*count+k] * (vArray[i][j] * (vArray[i][j]).t());
+            Anew += xs[Nunique*count+uniquePar(k)] * (vArray[i][j] * (vArray[i][j]).t());
           }
           count++;
         }

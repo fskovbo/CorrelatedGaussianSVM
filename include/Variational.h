@@ -37,7 +37,7 @@ public:
 
   double initializeBasis(size_t basisSize);
   vec sweepStochastic(size_t sweeps, size_t trials, vec& Ameanval);
-  vec sweepDeterministic(size_t sweeps);
+  vec sweepDeterministic(size_t sweeps, size_t Nunique = 3, vec uniquePar = {0,1,2});
 
   vec sweepDeterministicCMAES(size_t sweeps, size_t maxeval);
 
