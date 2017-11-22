@@ -17,6 +17,8 @@ public:
   void addPotential(PotentialStrategy* pot);
   virtual double calculateExpectedPotential(mat& A1, mat& A2, vec& s1, vec& s2, mat& Binv, double detB);
   virtual double calculateExpectedPotential_noShift(mat& A1, mat& A2, mat& Binv, double detB);
+  virtual double calculateExpectedPotential_noShift(mat& A1, mat& A2, mat& Binv, double detB, vec& Vgrad, cube& Binvgrad, vec& detBgrad);
+
 };
 
 #endif

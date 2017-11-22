@@ -1,7 +1,7 @@
 #include "MatrixElements.h"
 
 MatrixElements::MatrixElements(System& sys, PotentialStrategy& Vstrat)
-: Vstrat(Vstrat), n(sys.n), De(sys.De), lambda(sys.lambdamat){
+: Vstrat(Vstrat), n(sys.n), De(sys.De), lambda(sys.lambdamat), vArrayList(sys.vArrayList) {
 
 }
 
@@ -33,4 +33,46 @@ void MatrixElements::calculateH_noShift(mat& A1, mat& A2, double& Hij, double& B
 
   Hij = T+V;
   Bij = overlap;
+}
+
+void MatrixElements::calculateH_noShift(mat& A1, mat& A2, double& Hij, double& Bij, vec& Hgrad, vec& Mgrad){
+  //
+  //  Gradient of A2
+  //
+  mat B = A1 + A2;
+  mat Bi = inv_sympd(B);
+  double detB = det(B);
+  mat prod12 = A1*0.5*lambda*A2;
+
+  double overlap = pow(datum::pi,3.0*n/2.0)*pow(detB,-3.0/De/2.0);
+
+  //
+  //  gradient
+  //
+  vec** vArray;
+  cube Bigrad(De*n,De*n,De*n*(n+1)/2);
+  vec detBgrad(De*n*(n+1)/2);
+  vec Tgrad2(De*n*(n+1)/2);
+  size_t count = 0;
+  for (size_t i = 0; i < n; i++) {
+    for (size_t j = 0; j < n+1; j++) {
+      for (size_t k = 0; k < De; k++) {
+        vArray = vArrayList.at(k);
+        Bigrad.slice(count+k) = -Bi*vArray[i][j]*(vArray[i][j]).t()*Bi;
+        detBgrad(count+k) = detB * dot(vArray[i][j],Bi*vArray[i][j]);
+        Tgrad2(count+k) = trace(-prod12*Bigrad.slice(count+k));
+      }
+      count++;
+    }
+  }
+  Mgrad = -1.5/detB *overlap*detBgrad;
+  vec Tgrad = 6.0/De*trace(prod12*Bi)*Mgrad + 6.0/De*Tgrad2*overlap;
+  vec Vgrad(De*n*(n+1)/2);
+
+  double T = overlap*(6.0/De*trace(prod12*Bi) );
+  double V = Vstrat.calculateExpectedPotential_noShift(A1, A2, Bi, detB, Vgrad, Bigrad, detBgrad);
+
+  Hij   = T+V;
+  Bij   = overlap;
+  Hgrad = Tgrad+Vgrad;
 }

@@ -35,3 +35,16 @@ double PotentialList::calculateExpectedPotential_noShift(mat& A1, mat& A2, mat& 
 
   return Vtotal;
 }
+
+double PotentialList::calculateExpectedPotential_noShift(mat& A1, mat& A2, mat& Binv, double detB, vec& Vgrad, cube& Binvgrad, vec& detBgrad){
+  double Vtotal = 0;
+  vec gradtemp(Vgrad);
+  std::vector<PotentialStrategy*>::iterator it = list.begin();
+
+  while (it != list.end()) {
+    Vtotal += (*it++)->calculateExpectedPotential_noShift(A1,A2,Binv,detB,gradtemp,Binvgrad,detBgrad);
+    Vgrad += gradtemp;
+  }
+
+  return Vtotal;
+}

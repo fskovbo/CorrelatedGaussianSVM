@@ -83,3 +83,7 @@ double CoulombPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2, ma
 
   return pow(datum::pi,3.0*n/2.0)*dot(Qinter,kappamat*cvec);
 }
+
+double CoulombPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2, mat& Binv, double detB, vec& Vgrad, cube& Binvgrad, vec& detBgrad){
+  return 9999999;
+}

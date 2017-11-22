@@ -4,7 +4,6 @@ SingleGaussPotential::SingleGaussPotential(System& sys, double baseStr, double i
   : vArrayList(sys.vArrayList), n(sys.n), De(sys.De), lambdamat(sys.lambdamat) {
   alpha = 1.0/pow(interactionRange,2);
   interStr = calculateIntStr(sys.masses,baseStr,interactionRange);
-  // buildInteractions(sys.Ui);
 }
 
 vec SingleGaussPotential::calculateIntStr(vec& masses, double baseStr, double intRange){
@@ -18,29 +17,6 @@ vec SingleGaussPotential::calculateIntStr(vec& masses, double baseStr, double in
     }
   }
   return interStr;
-}
-
-void SingleGaussPotential::buildInteractions(mat& invTrans){
-  interactions.reserve(n*(n+1)/2);
-
-  for (size_t i = 0; i < n; i++) {
-    size_t ibegin = De*i;
-    size_t iend = De*i+(De-1);
-    for (size_t j = i+1; j < n+1; j++) {
-      size_t jbegin = De*j;
-      size_t jend = De*j+(De-1);
-
-      mat temp = zeros<mat>(De*(n+1),De*(n+1));
-      temp(span(ibegin,iend),span(ibegin,iend)) = eye(De,De);
-      temp(span(jbegin,jend),span(jbegin,jend)) = eye(De,De);
-      temp(span(ibegin,iend),span(jbegin,jend)) = -eye(De,De);
-      temp(span(jbegin,jend),span(ibegin,iend)) = -eye(De,De);
-      temp *= alpha;
-      temp = invTrans.t()*temp*invTrans;
-      mat temp_red = temp(span(0,De*n-1),span(0,De*n-1));
-      interactions.push_back(temp_red);
-    }
-  }
 }
 
 double SingleGaussPotential::calculateExpectedPotential(mat& A1, mat& A2, vec& s1, vec& s2, mat& Binv, double detB){
@@ -86,5 +62,27 @@ double SingleGaussPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2
       count++;
     }
   }
+  return pow(datum::pi,3.0*n/2.0)*dot(interStr,kappavec);
+}
+
+double SingleGaussPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2, mat& Binv, double detB, vec& Vgrad, cube& Binvgrad, vec& detBgrad){
+  vec kappavec(n*(n+1)/2);
+  vec** vArray;
+  double detBp, Gtemp;
+  size_t count = 0;
+
+  for (size_t i = 0; i < n; i++) {
+    for (size_t j = i+1; j < n+1; j++) {
+      detBp = detB;
+      for (size_t k = 0; k < De; k++) {
+        vArray = vArrayList.at(k);
+        detBp *= 1+ alpha*dot((vArray[i][j]),Binv*vArray[i][j]);
+      }
+      kappavec(count) = pow(detBp,-3.0/De/2.0);
+      Gtemp += kappavec(count)/detBp;
+      count++;
+    }
+  }
+  Vgrad = -1.5*detBgrad*Gtemp*pow(datum::pi,3.0*n/2.0);
   return pow(datum::pi,3.0*n/2.0)*dot(interStr,kappavec);
 }
