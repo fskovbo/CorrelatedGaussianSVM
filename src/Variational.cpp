@@ -386,7 +386,6 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
       }
     }
   }
-  cout << "hej" << endl;
 
   //
   //  NLOpt setup
@@ -396,7 +395,7 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
   for (size_t i = 0; i < Npar; i++) {
     lb[i] = 1e-6;
   }
-  nlopt::opt opt(nlopt::LD_MMA, Npar);
+  nlopt::opt opt(nlopt::LD_LBFGS, Npar);
   opt.set_lower_bounds(lb);
   opt.set_xtol_abs(1e-10); // tolerance on parametres
   double minf;
@@ -413,7 +412,7 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
         }
       }
       my_function_data data = { index,n,K,De,Nunique,uniquePar,vArrayList,H,B,HG,BG,basis,matElem };
-      opt.set_min_objective(myvfunc, &data);
+      opt.set_min_objective(myvfunc_grad, &data);
 
       bool status = false;
       size_t attempts = 0;

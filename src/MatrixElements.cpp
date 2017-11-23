@@ -55,12 +55,12 @@ void MatrixElements::calculateH_noShift(mat& A1, mat& A2, double& Hij, double& B
   vec Tgrad2(De*n*(n+1)/2);
   size_t count = 0;
   for (size_t i = 0; i < n; i++) {
-    for (size_t j = 0; j < n+1; j++) {
+    for (size_t j = i+1; j < n+1; j++) {
       for (size_t k = 0; k < De; k++) {
         vArray = vArrayList.at(k);
-        Bigrad.slice(count+k) = -Bi*vArray[i][j]*(vArray[i][j]).t()*Bi;
-        detBgrad(count+k) = detB * dot(vArray[i][j],Bi*vArray[i][j]);
-        Tgrad2(count+k) = trace(-prod12*Bigrad.slice(count+k));
+        Bigrad.slice(De*count+k) = -Bi*vArray[i][j]*(vArray[i][j]).t()*Bi;
+        detBgrad(De*count+k) = detB * dot(vArray[i][j],Bi*vArray[i][j]);
+        Tgrad2(De*count+k) = De*trace(prod12*Bigrad.slice(De*count+k));
       }
       count++;
     }
@@ -75,4 +75,16 @@ void MatrixElements::calculateH_noShift(mat& A1, mat& A2, double& Hij, double& B
   Hij   = T+V;
   Bij   = overlap;
   Hgrad = Tgrad+Vgrad;
+
+
+
+  cout << Bigrad << endl;
+  cout << detBgrad << endl;
+  cout << Tgrad2 << endl;
+  cout << Mgrad << endl;
+  cout << Tgrad << endl;
+  cout << Vgrad << endl;
+  while (1) {
+    /* code */
+  }
 }
