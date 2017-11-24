@@ -38,9 +38,7 @@ int main() {
 
     vec aGuess    = {bs(i) , 2.5 , 2.5};
     vec res1      = ansatz.sweepStochastic(5,1e2,aGuess);
-    // vec res2      = ansatz.sweepDeterministic(5,2,{0,1,1});
-    // vec res2      = ansatz.sweepDeterministic(5,1,{0});
-    vec res2      = ansatz.sweepDeterministic_grad(5);
+    vec res2      = ansatz.sweepDeterministic(5,2,{0,1,1});
 
     data(i,0)     = bs(i);
     data(i,1)     = res2(res2.n_rows-1) - Trap.gsExpectedVal();

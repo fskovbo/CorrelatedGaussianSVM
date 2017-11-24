@@ -77,14 +77,14 @@ void MatrixElements::calculateH_noShift(mat& A1, mat& A2, double& Hij, double& B
   Hgrad = Tgrad+Vgrad;
 
 
-
-  cout << Bigrad << endl;
-  cout << detBgrad << endl;
-  cout << Tgrad2 << endl;
-  cout << Mgrad << endl;
-  cout << Tgrad << endl;
-  cout << Vgrad << endl;
-  while (1) {
-    /* code */
-  }
+  //
+  // cout << Bigrad << endl;
+  // cout << detBgrad << endl;
+  // cout << Tgrad2 << endl;
+  // cout << Mgrad << endl;
+  // cout << Tgrad << endl;
+  // cout << Vgrad << endl;
+  // while (1) {
+  //   /* code */
+  // }
 }

@@ -127,7 +127,7 @@ typedef struct {
     vec& uniquePar;
     vector<vec**>& vArrayList;
     mat H, B;
-    vector<mat>& HG, BG;
+    vector<mat> HG, BG;
     cube& basis;
     MatrixElements& matElem;
 } my_function_data;
@@ -192,7 +192,7 @@ double Variational::myvfunc_grad(const std::vector<double> &x, std::vector<doubl
   vec& uniquePar = d->uniquePar;
   vector<vec**>& vArrayList = d->vArrayList;
   mat H = d->H, B = d->B;
-  vector<mat>& HG = d->HG, BG = d->BG;
+  vector<mat> HG = d->HG, BG = d->BG;
   cube& basis = d->basis;
   MatrixElements& matElem = d->matElem;
 
@@ -217,14 +217,15 @@ double Variational::myvfunc_grad(const std::vector<double> &x, std::vector<doubl
       matElem.calculateH_noShift(Atrial,Atrial,Hij,Bij,Hgradij,Bgradij);
       count = 0;
       for (auto iH = begin(HG), iB = begin(BG), e = end(HG); iH != e; ++iH, ++iB){
-        (*iH)(index,index) = Hgradij(count);
-        (*iB)(index,index) = Bgradij(count);
+        (*iH)(index,index) = 2*Hgradij(count);
+        (*iB)(index,index) = 2*Bgradij(count);
         count++;
       }
       H(index,index) = Hij;
       B(index,index) = Bij;
     } else {
       Acurrent = basis.slice(j);
+      cout << "WALLAH" << endl;
 
       matElem.calculateH_noShift(Acurrent,Atrial,Hij,Bij,Hgradij,Bgradij);
       count = 0;
@@ -376,6 +377,10 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
       vec Hgradij, Bgradij;
 
       matElem.calculateH_noShift(Ai,Aj,Hij,Bij,Hgradij,Bgradij);
+      if (j == i) {
+        Hgradij *= 2;
+        Bgradij *= 2;
+      }
       size_t count = 0;
       for (auto iH = begin(HG), iB = begin(BG), e = end(HG); iH != e; ++iH, ++iB){
         (*iH)(i,j) = Hgradij(count);
@@ -395,13 +400,14 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
   for (size_t i = 0; i < Npar; i++) {
     lb[i] = 1e-6;
   }
-  nlopt::opt opt(nlopt::LD_LBFGS, Npar);
+  nlopt::opt opt(nlopt::LD_SLSQP, Npar);
   opt.set_lower_bounds(lb);
   opt.set_xtol_abs(1e-10); // tolerance on parametres
   double minf;
 
   for (size_t l = 0; l < sweeps; l++) {
     for (size_t index = 0; index < K; index++) {
+      cout << "index " << index << endl;
       //
       // optimize basis function index using its current values as starting guess
       //
@@ -414,6 +420,14 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
       my_function_data data = { index,n,K,De,Nunique,uniquePar,vArrayList,H,B,HG,BG,basis,matElem };
       opt.set_min_objective(myvfunc_grad, &data);
 
+      for (auto& lol : HG){
+        cout << lol << endl;
+      }
+      for (auto& lol : xs){
+        cout << lol << endl;
+      }
+      cout << basis << endl;
+
       bool status = false;
       size_t attempts = 0;
       while (!status && attempts < 5) {
@@ -425,6 +439,14 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
           attempts++;
         }
       }
+
+      for (auto& lol : HG){
+        cout << lol << endl;
+      }
+      for (auto& lol : xs){
+        cout << lol << endl;
+      }
+      auto TEMP = HG;
 
       for (size_t i = 0; i < n*(n+1)/2; i++) {
         for (size_t k = 0; k < De; k++) {
@@ -446,20 +468,44 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
         }
       }
 
+      cout << Anew << endl;
+
+      vec Hgradij, Bgradij;
       for (size_t j = 0; j < K; j++) {
         if (j == index) {
-          matElem.calculateH_noShift(Anew,Anew,Hij,Bij);
+          matElem.calculateH_noShift(Anew,Anew,Hij,Bij,Hgradij,Bgradij);
+          count = 0;
+          for (auto iH = begin(HG), iB = begin(BG), e = end(HG); iH != e; ++iH, ++iB){
+            (*iH)(index,index) = 2*Hgradij(count);
+            (*iB)(index,index) = 2*Bgradij(count);
+            count++;
+          }
           H(index,index) = Hij;
           B(index,index) = Bij;
         } else {
           Acurrent = basis.slice(j);
+          cout << "WALLAH" << endl;
 
-          matElem.calculateH_noShift(Acurrent,Anew,Hij,Bij);
+          matElem.calculateH_noShift(Acurrent,Anew,Hij,Bij,Hgradij,Bgradij);
+          count = 0;
+          for (auto iH = begin(HG), iB = begin(BG), e = end(HG); iH != e; ++iH, ++iB){
+            (*iH)(index,j) = Hgradij(count);
+            (*iH)(j,index) = Hgradij(count);
+            (*iB)(index,j) = Bgradij(count);
+            (*iB)(j,index) = Bgradij(count);
+            count++;
+          }
           H(j,index) = Hij;
           H(index,j) = Hij;
           B(j,index) = Bij;
           B(index,j) = Bij;
         }
+      }
+      size_t tempcount = 0;
+      for (auto& lol : HG){
+        cout << lol << endl;
+        cout << lol-TEMP[tempcount] << endl;
+        tempcount++;
       }
       // ----------------------------------------- //
       //
@@ -554,4 +600,105 @@ void Variational::printBasis(){
 
 void Variational::printShift(){
   cout << "Current shift:" << endl << shift << endl;
+}
+
+
+
+
+
+double Variational::myvfunc_grad_test(const std::vector<double> &x, std::vector<double> &grad, void *data)
+{
+  my_function_data *d = reinterpret_cast<my_function_data*>(data);
+  size_t index = d->index, n = d->n, K = d->K, De = d->De, Nunique = d->Nunique;
+  vec& uniquePar = d->uniquePar;
+  vector<vec**>& vArrayList = d->vArrayList;
+  mat H = d->H, B = d->B;
+  vector<mat> HG = d->HG, BG = d->BG;
+  cube& basis = d->basis;
+  MatrixElements& matElem = d->matElem;
+
+  double Hii, Bii;
+  vec Hgradii, Bgradii;
+  mat A = zeros<mat>(De*n,De*n);
+  size_t count = 0;
+  vec** vArray;
+
+  for (size_t i = 0; i < n+1; i++) {
+    for (size_t j = i+1; j < n+1; j++) {
+      for (size_t k = 0; k < De; k++) {
+        vArray = vArrayList.at(k);
+        A += x[count+k] * (vArray[i][j] * (vArray[i][j]).t());
+      }
+      count++;
+    }
+  }
+
+  matElem.calculateH_noShift(A,A,Hii,Bii,Hgradii,Bgradii);
+  for (size_t i = 0; i < Hgradii.n_rows; i++) {
+    (HG[i])(0,0) = 2*Hgradii(i);
+    (BG[i])(0,0) = 2*Bgradii(i);
+  }
+  H(0,0) = Hii;
+  B(0,0) = Bii;
+
+  mat L(K,K);
+  vec eigval;
+  mat eigvec;
+  bool status = chol(L,B,"lower");
+  if (status) {
+    eig_sym(eigval,eigvec, L.i()*H*(L.t()).i() );
+  }
+  else{
+    eigval = 9999*1e10*ones<vec>(K);
+  }
+
+  if (!grad.empty()){
+    for (size_t i = 0; i < HG.size(); i++) {
+      grad[i] = dot(eigvec.col(0), ((HG[i])-eigval(0)*(BG[i])) * eigvec.col(0));
+    }
+  }
+
+  return eigval(0);
+}
+
+vec Variational::sweepDeterministic_grad_test(){
+  size_t Npar = n*(n+1)/2;
+  vec xstart(Npar);
+
+  //
+  //  Set initial matrix gradients
+  //
+  std::vector<mat> HG(Npar);
+  std::vector<mat> BG(Npar);
+  for (size_t i = 0; i < Npar; i++) {
+    HG.at(i) = (mat(K,K));
+    BG.at(i) = (mat(K,K));
+  }
+
+  //
+  //  NLOpt setup
+  //
+  std::vector<double> lb(Npar);
+  std::vector<double> xs(Npar);
+  for (size_t i = 0; i < Npar; i++) {
+    lb[i] = 1e-6;
+  }
+  nlopt::opt opt(nlopt::LD_SLSQP, Npar);
+  opt.set_lower_bounds(lb);
+  opt.set_ftol_rel(1e-6); // tolerance on parametres
+  double minf;
+
+  xstart = basisCoefficients.col(0);
+  for (size_t i = 0; i < Npar; i++) {
+    xs[i] = xstart(i);
+  }
+
+  size_t Nunique = 1000 , index = 1000; vec uniquePar = {6, 6, 6, 6};
+  my_function_data data = { index,n,K,De,Nunique,uniquePar,vArrayList,H,B,HG,BG,basis,matElem };
+  opt.set_min_objective(myvfunc_grad_test, &data);
+  nlopt::result optresult = opt.optimize(xs, minf);
+
+  vec result = {minf};
+
+  return result;
 }

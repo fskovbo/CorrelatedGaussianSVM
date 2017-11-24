@@ -45,6 +45,10 @@ public:
 
   void printBasis();
   void printShift();
+
+
+  static double myvfunc_grad_test(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
+  vec sweepDeterministic_grad_test();
 };
 
 #endif

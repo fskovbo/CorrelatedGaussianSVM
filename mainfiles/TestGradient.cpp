@@ -16,7 +16,7 @@ int main() {
   clock_t begin = clock();
   arma_rng::set_seed_random();
 
-  size_t De             = 1;
+  size_t De             = 3;
   vec masses            = {1 , 1};
   vec charges           = {0 , 0};
   auto Test             = System(masses,charges,De);
