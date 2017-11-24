@@ -410,7 +410,7 @@ vec Variational::sweepDeterministicShift(size_t state, size_t sweeps, size_t Nun
   size_t NparA = Nunique*n*(n+1)/2;
   size_t NparS = 3*n;
   size_t Npar  = NparA + NparS;
-  vec results(sweeps), xstart(Npar);
+  vec results(sweeps), xstart(NparA);
   vec** vArray;
 
   //
@@ -439,14 +439,14 @@ vec Variational::sweepDeterministicShift(size_t state, size_t sweeps, size_t Nun
       // optimize basis function index using its current values as starting guess
       //
 
-      xstart = join_vert(basisCoefficients.col(index), shift.col(index));
+      xstart = basisCoefficients.col(index);
       for (size_t i = 0; i < n*(n+1)/2; i++) {
         for (size_t k = 0; k < De; k++) {
           xs[Nunique*i+uniquePar(k)] = xstart(De*i+k);
         }
       }
-      for (size_t i = NparA; i < Npar; i++) {
-        xs[i] = xstart(i);
+      for (size_t i = 0; i < NparS; i++) {
+        xs[i+NparA] = shift(i,index);
       }
 
       my_function_data_shift data = { index,n,K,De,Nunique,state,uniquePar,vArrayList,H,B,basis,shift,matElem };
