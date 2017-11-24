@@ -37,8 +37,8 @@ public:
   Variational(System& sys, MatrixElements& matElem);
 
   double initializeBasis(size_t basisSize);
-  vec sweepStochastic(size_t state, size_t sweeps, size_t trials, vec& Ameanval);
-  vec sweepStochasticShift(size_t state, size_t sweeps, size_t trials, vec& Ameanval);
+  vec sweepStochastic(size_t state, size_t sweeps, size_t trials, vec Ameanval);
+  vec sweepStochasticShift(size_t state, size_t sweeps, size_t trials, vec Ameanval, vec maxShift);
   vec sweepDeterministic(size_t state, size_t sweeps, size_t Nunique = 3, vec uniquePar = {0,1,2});
   vec sweepDeterministicShift(size_t state, size_t sweeps, size_t Nunique = 3, vec uniquePar = {0,1,2});
 

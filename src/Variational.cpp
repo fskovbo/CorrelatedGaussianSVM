@@ -71,7 +71,7 @@ double Variational::initializeBasis(size_t basisSize){
   return eigenEnergy(0);
 }
 
-vec Variational::sweepStochastic(size_t state, size_t sweeps, size_t trials, vec& Ameanval){
+vec Variational::sweepStochastic(size_t state, size_t sweeps, size_t trials, vec Ameanval){
   mat Atrial, Acurrent;
   double Hij, Bij, Etrial;
   double Ebest = eigenEnergy(state);
@@ -123,7 +123,7 @@ vec Variational::sweepStochastic(size_t state, size_t sweeps, size_t trials, vec
   return results;
 }
 
-vec Variational::sweepStochasticShift(size_t state, size_t sweeps, size_t trials, vec& Ameanval){
+vec Variational::sweepStochasticShift(size_t state, size_t sweeps, size_t trials, vec Ameanval, vec maxShift){
   mat Atrial, Acurrent;
   vec strial, scurrent;
   double Hij, Bij, Etrial;
@@ -137,6 +137,8 @@ vec Variational::sweepStochasticShift(size_t state, size_t sweeps, size_t trials
       for (size_t k = 0; k < trials; k++) {
         Atrial = generateRandomGaussian(Ameanval,trialCoeffs);
         strial = randn<vec>(3*n);
+        vec stemp =  repmat(maxShift,n,1);
+        strial = diagmat(stemp)*strial;
 
         for (size_t i = 0; i < K; i++) {
 
@@ -422,8 +424,8 @@ vec Variational::sweepDeterministicShift(size_t state, size_t sweeps, size_t Nun
     ub[i] = HUGE_VAL;
   }
   for (size_t i = NparA; i < Npar; i++) {
-    lb[i] = -1e-0;
-    ub[i] = 1e-0;
+    lb[i] = -1e0;
+    ub[i] = 1e0;
   }
   nlopt::opt opt(nlopt::LN_NELDERMEAD, Npar);
   opt.set_lower_bounds(lb);
