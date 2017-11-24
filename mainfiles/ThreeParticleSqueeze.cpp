@@ -22,7 +22,7 @@ int main() {
 
   auto Gauss            = SingleGaussPotential(TwoPart);
   auto Trap             = TrapPotential(TwoPart);
-  PotentialList Vstrat  = {&Trap};
+  PotentialList Vstrat  = {&Gauss, &Trap};
 
   auto elem             = MatrixElements(TwoPart,Vstrat);
   auto ansatz           = Variational(TwoPart,elem);
@@ -34,7 +34,7 @@ int main() {
 
   for (size_t i = 0; i < Nvals; i++) {
     Trap.updateTrap(bs(i));
-    ansatz.initializeBasis(1);
+    ansatz.initializeBasis(10);
 
     vec aGuess    = {bs(i) , 2.5 , 2.5};
     vec res1      = ansatz.sweepStochastic(5,1e2,aGuess);
