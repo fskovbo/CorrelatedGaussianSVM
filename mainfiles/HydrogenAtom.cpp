@@ -12,20 +12,19 @@ int main() {
   clock_t begin = clock();
   arma_rng::set_seed_random();
 
-  vec masses(3);
-  vec charges(3);
-  masses << 7296 << 1 << 1;
-  charges << 2 << -1 << -1;
+  vec masses    = { 1836 , 1 };
+  vec charges   = { 1 , -1};
 
-  System He = System(masses,charges,1);
-  CoulombPotential Vstrat(He,10,12);
-  MatrixElements elem(He,Vstrat);
-  Variational ansatz1 = Variational(He,elem);
+  auto H        = System(masses,charges,1);
+  auto Vstrat   = CoulombPotential(H,10,12);
+  auto elem     = MatrixElements(H,Vstrat);
+  auto ansatz   = Variational(H,elem);
+  size_t state  = 3;
 
-  ansatz1.initializeBasis(20);
-  vec startingGuess = 1.5*ones<vec>(3);
-  vec res1 = ansatz1.sweepStochastic(0,5,1e2,startingGuess);
-  vec res2 = ansatz1.sweepDeterministic(0,5,1,{0});
+  ansatz.initializeBasis(8);
+  vec guess = 4.0/datum::pi * ones<vec>(3);
+  vec res1 = ansatz.sweepStochasticShift(state,5,1e2,guess);
+  vec res2 = ansatz.sweepDeterministicShift(state,5,1,{0});
 
   cout << "Result after stochastic sweep:" << endl << res1 << endl;
   cout << "Result after deterministic sweep:" << endl << res2 << endl;

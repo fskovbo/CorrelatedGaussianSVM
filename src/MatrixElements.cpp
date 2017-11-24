@@ -10,7 +10,7 @@ void MatrixElements::calculateH(mat& A1, mat& A2, vec& s1, vec& s2, double& Hij,
   mat Bi = inv_sympd(B);
   double detB = det(B);
   vec v = 2.0*A1*s1 + 2.0*A2*s2;
-  vec u = 1/2.0 * Bi*v;
+  vec u = 0.5 * Bi*v;
   mat prod12 = A1*0.5*lambda*A2;
 
   double overlap = (pow(datum::pi,3.0*n/2.0)*pow(detB,-3.0/De/2.0)) * exp(-dot(s1,A1*s1) - dot(s2,A2*s2) + 1/4.0 *dot(v,Bi*v));

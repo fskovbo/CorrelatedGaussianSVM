@@ -6,12 +6,12 @@ Variational::Variational(System& sys, MatrixElements& matElem)
 }
 
 
-double Variational::groundStateEnergy(){
+double Variational::eigenEnergy(size_t state){
   mat L(K,K);
   bool status = chol(L,B,"lower");
   if (status) {
     vec eigs = eig_sym( L.i()*H*(L.t()).i() );
-    return eigs(0);
+    return eigs(state);
   }
   else{
     return 9999*1e10;
@@ -44,6 +44,7 @@ double Variational::initializeBasis(size_t basisSize){
   B.resize(K,K);
   basis.set_size(De*n,De*n,K);
   basisCoefficients.set_size(De*n*(n+1)/2,K);
+  shift = zeros<mat>(3*n,K);
 
   vec coeffs(De*n*(n+1)/2);
   vec startingGuess = 10*ones<vec>(De);
@@ -67,13 +68,13 @@ double Variational::initializeBasis(size_t basisSize){
       B(j,i) = Bij;
     }
   }
-  return groundStateEnergy();
+  return eigenEnergy(0);
 }
 
-vec Variational::sweepStochastic(size_t sweeps, size_t trials, vec& Ameanval){
+vec Variational::sweepStochastic(size_t state, size_t sweeps, size_t trials, vec& Ameanval){
   mat Atrial, Acurrent;
   double Hij, Bij, Etrial;
-  double Ebest = groundStateEnergy();
+  double Ebest = eigenEnergy(state);
   mat Hbest = H, Bbest = B;
   vec trialCoeffs(De*n*(n+1)/2);
   vec results = Ebest*ones<vec>(sweeps+1);
@@ -101,7 +102,7 @@ vec Variational::sweepStochastic(size_t sweeps, size_t trials, vec& Ameanval){
 
         }
 
-        Etrial = groundStateEnergy();
+        Etrial = eigenEnergy(state);
         if (Etrial < Ebest) { //if trial is better: update basis
           Ebest = Etrial;
           Hbest = H;
@@ -122,8 +123,65 @@ vec Variational::sweepStochastic(size_t sweeps, size_t trials, vec& Ameanval){
   return results;
 }
 
+vec Variational::sweepStochasticShift(size_t state, size_t sweeps, size_t trials, vec& Ameanval){
+  mat Atrial, Acurrent;
+  vec strial, scurrent;
+  double Hij, Bij, Etrial;
+  double Ebest = eigenEnergy(state);
+  mat Hbest = H, Bbest = B;
+  vec trialCoeffs(De*n*(n+1)/2);
+  vec results = Ebest*ones<vec>(sweeps+1);
+
+  for (size_t l = 0; l < sweeps; l++) {
+    for (size_t j = 0; j < K; j++) {
+      for (size_t k = 0; k < trials; k++) {
+        Atrial = generateRandomGaussian(Ameanval,trialCoeffs);
+        strial = randn<vec>(3*n);
+
+        for (size_t i = 0; i < K; i++) {
+
+          if (j == i) {
+            matElem.calculateH(Atrial,Atrial,strial,strial,Hij,Bij);
+            H(i,i) = Hij;
+            B(i,i) = Bij;
+          }
+          else{
+            Acurrent = basis.slice(i);
+            scurrent = shift.col(i);
+
+            matElem.calculateH(Acurrent,Atrial,scurrent,strial,Hij,Bij);
+            H(i,j) = Hij;
+            H(j,i) = Hij;
+            B(i,j) = Bij;
+            B(j,i) = Bij;
+          }
+
+        }
+
+        Etrial = eigenEnergy(state);
+        if (Etrial < Ebest) { //if trial is better: update basis
+          Ebest = Etrial;
+          Hbest = H;
+          Bbest = B;
+          basis.slice(j) = Atrial;
+          basisCoefficients.col(j) = trialCoeffs;
+          shift.col(j) = strial;
+        }
+        else{ //otherwise revert to old H,B
+          H = Hbest;
+          B = Bbest;
+        }
+
+      }
+    }
+    cout << "Energy after stochastic sweep " << l+1 << ": " << Ebest << "\n";
+    results(l+1) = Ebest;
+  }
+  return results;
+}
+
 typedef struct {
-    size_t index, n, K, De, Nunique;
+    size_t index, n, K, De, Nunique, state;
     vec& uniquePar;
     vector<vec**>& vArrayList;
     mat H, B;
@@ -132,11 +190,20 @@ typedef struct {
     MatrixElements& matElem;
 } my_function_data;
 
+typedef struct {
+    size_t index, n, K, De, Nunique, state;
+    vec& uniquePar;
+    vector<vec**>& vArrayList;
+    mat H, B;
+    cube& basis;
+    mat& shift;
+    MatrixElements& matElem;
+} my_function_data_shift;
 
 double Variational::myvfunc(const std::vector<double> &x, std::vector<double> &grad, void *data)
 {
   my_function_data *d = reinterpret_cast<my_function_data*>(data);
-  size_t index = d->index, n = d->n, K = d->K, De = d->De, Nunique = d->Nunique;
+  size_t index = d->index, n = d->n, K = d->K, De = d->De, Nunique = d->Nunique, state = d->state;
   vec& uniquePar = d->uniquePar;
   vector<vec**>& vArrayList = d->vArrayList;
   mat H = d->H, B = d->B;
@@ -178,15 +245,73 @@ double Variational::myvfunc(const std::vector<double> &x, std::vector<double> &g
   bool status = chol(L,B,"lower");
   if (status) {
     vec eigs = eig_sym( L.i()*H*(L.t()).i() );
-    return eigs(0);
+    return eigs(state);
   }
   else{
     return 9999*1e10;
   }
 }
 
+double Variational::myvfunc_shift(const std::vector<double> &x, std::vector<double> &grad, void *data)
+{
+  my_function_data_shift *d = reinterpret_cast<my_function_data_shift*>(data);
+  size_t index = d->index, n = d->n, K = d->K, De = d->De, Nunique = d->Nunique, state = d->state;
+  vec& uniquePar = d->uniquePar;
+  vector<vec**>& vArrayList = d->vArrayList;
+  mat H = d->H, B = d->B;
+  cube& basis = d->basis;
+  mat& shift = d->shift;
+  MatrixElements& matElem = d->matElem;
 
-vec Variational::sweepDeterministic(size_t sweeps, size_t Nunique, vec uniquePar){
+  double Hij, Bij;
+  mat Acurrent(De*n,De*n), Atrial = zeros<mat>(De*n,De*n);
+  vec scurrent(3*n), strial(3*n);
+  size_t count = 0;
+  vec** vArray;
+
+  for (size_t i = 0; i < n+1; i++) {
+    for (size_t j = i+1; j < n+1; j++) {
+      for (size_t k = 0; k < De; k++) {
+        vArray = vArrayList.at(k);
+        Atrial += x[Nunique*count+uniquePar(k)] * (vArray[i][j] * (vArray[i][j]).t());
+      }
+      count++;
+    }
+  }
+
+  for (size_t i = 0; i < 3*n; i++) {
+    strial(i) = x[i+count*Nunique];
+  }
+
+  for (size_t j = 0; j < K; j++) {
+    if (j == index) {
+      matElem.calculateH(Atrial,Atrial,strial,strial,Hij,Bij);
+      H(index,index) = Hij;
+      B(index,index) = Bij;
+    } else {
+      Acurrent = basis.slice(j);
+      scurrent = shift.col(j);
+
+      matElem.calculateH(Acurrent,Atrial,scurrent,strial,Hij,Bij);
+      H(j,index) = Hij;
+      H(index,j) = Hij;
+      B(j,index) = Bij;
+      B(index,j) = Bij;
+    }
+  }
+
+  mat L(K,K);
+  bool status = chol(L,B,"lower");
+  if (status) {
+    vec eigs = eig_sym( L.i()*H*(L.t()).i() );
+    return eigs(state);
+  }
+  else{
+    return 9999*1e10;
+  }
+}
+
+vec Variational::sweepDeterministic(size_t state, size_t sweeps, size_t Nunique, vec uniquePar){
   size_t Npar = Nunique*n*(n+1)/2;
   vec results(sweeps), xstart(Npar);
   vec** vArray;
@@ -216,7 +341,7 @@ vec Variational::sweepDeterministic(size_t sweeps, size_t Nunique, vec uniquePar
           xs[Nunique*i+uniquePar(k)] = xstart(De*i+k);
         }
       }
-      my_function_data data = { index,n,K,De,Nunique,uniquePar,vArrayList,H,B,dummy,dummy,basis,matElem };
+      my_function_data data = { index,n,K,De,Nunique,state,uniquePar,vArrayList,H,B,dummy,dummy,basis,matElem };
       opt.set_min_objective(myvfunc, &data);
 
       bool status = false;
@@ -279,7 +404,120 @@ vec Variational::sweepDeterministic(size_t sweeps, size_t Nunique, vec uniquePar
   return results;
 }
 
-vec Variational::sweepDeterministicCMAES(size_t sweeps, size_t maxeval){
+vec Variational::sweepDeterministicShift(size_t state, size_t sweeps, size_t Nunique, vec uniquePar){
+  size_t NparA = Nunique*n*(n+1)/2;
+  size_t NparS = 3*n;
+  size_t Npar  = NparA + NparS;
+  vec results(sweeps), xstart(Npar);
+  vec** vArray;
+
+  //
+  //  NLOpt setup
+  //
+  std::vector<double> lb(Npar);
+  std::vector<double> ub(Npar);
+  std::vector<double> xs(Npar);
+  for (size_t i = 0; i < NparA; i++) {
+    lb[i] = 1e-6;
+    ub[i] = HUGE_VAL;
+  }
+  for (size_t i = NparA; i < Npar; i++) {
+    lb[i] = -1e-0;
+    ub[i] = 1e-0;
+  }
+  nlopt::opt opt(nlopt::LN_NELDERMEAD, Npar);
+  opt.set_lower_bounds(lb);
+  opt.set_upper_bounds(ub);
+  opt.set_xtol_abs(1e-10); // tolerance on parametres
+  double minf;
+
+  for (size_t l = 0; l < sweeps; l++) {
+    for (size_t index = 0; index < K; index++) {
+      //
+      // optimize basis function index using its current values as starting guess
+      //
+
+      xstart = join_vert(basisCoefficients.col(index), shift.col(index));
+      for (size_t i = 0; i < n*(n+1)/2; i++) {
+        for (size_t k = 0; k < De; k++) {
+          xs[Nunique*i+uniquePar(k)] = xstart(De*i+k);
+        }
+      }
+      for (size_t i = NparA; i < Npar; i++) {
+        xs[i] = xstart(i);
+      }
+
+      my_function_data_shift data = { index,n,K,De,Nunique,state,uniquePar,vArrayList,H,B,basis,shift,matElem };
+      opt.set_min_objective(myvfunc_shift, &data);
+
+      bool status = false;
+      size_t attempts = 0;
+      while (!status && attempts < 5) {
+        try{
+          nlopt::result optresult = opt.optimize(xs, minf);
+          status = true;
+        }
+        catch (const std::exception& e) {
+          attempts++;
+        }
+      }
+
+      // ----------------------------------------- //
+      double Hij, Bij;
+      mat Acurrent(De*n,De*n), Anew = zeros<mat>(De*n,De*n);
+      vec scurrent(3*n), snew(3*n);
+      size_t count = 0;
+      for (size_t i = 0; i < n+1; i++) {
+        for (size_t j = i+1; j < n+1; j++) {
+          for (size_t k = 0; k < De; k++) {
+            vArray = vArrayList.at(k);
+            Anew += xs[Nunique*count+uniquePar(k)] * (vArray[i][j] * (vArray[i][j]).t());
+          }
+          count++;
+        }
+      }
+      for (size_t i = 0; i < NparS; i++) {
+        snew(i) = xs[NparA+i];
+      }
+
+      for (size_t j = 0; j < K; j++) {
+        if (j == index) {
+          matElem.calculateH(Anew,Anew,snew,snew,Hij,Bij);
+          H(index,index) = Hij;
+          B(index,index) = Bij;
+        } else {
+          Acurrent = basis.slice(j);
+          scurrent = shift.col(j);
+
+          matElem.calculateH(Acurrent,Anew,scurrent,snew,Hij,Bij);
+          H(j,index) = Hij;
+          H(index,j) = Hij;
+          B(j,index) = Bij;
+          B(index,j) = Bij;
+        }
+      }
+      // ----------------------------------------- //
+      //
+      // add optimized basis function to basis
+      //
+      vec Acoeffs(De*n*(n+1)/2);
+      for (size_t i = 0; i < n*(n+1)/2; i++) {
+        for (size_t k = 0; k < De; k++) {
+          Acoeffs(De*i+k) = xs[Nunique*i+uniquePar(k)];
+        }
+      }
+
+      basis.slice(index) = Anew;
+      basisCoefficients.col(index) = Acoeffs;
+      shift.col(index) = snew;
+    }
+    cout << "Energy after deterministic sweep " << l+1 << ": " << minf << "\n";
+    results(l) = minf;
+  }
+  return results;
+}
+
+vec Variational::sweepDeterministicCMAES(size_t state, size_t sweeps, size_t maxeval){
   vec results(sweeps), xstart(De*n*(n+1)/2);
   mat Anew(3*n,3*n);
   size_t index, vcount;
@@ -318,7 +556,7 @@ vec Variational::sweepDeterministicCMAES(size_t sweeps, size_t maxeval){
       }
     }
 
-    return groundStateEnergy();
+    return eigenEnergy(state);
   };
 
   for (size_t l = 0; l < sweeps; l++) {
@@ -537,8 +775,8 @@ vec Variational::sweepDeterministic_grad_test(){
     xs[i] = xstart(i);
   }
 
-  size_t Nunique = 1000 , index = 1000; vec uniquePar = {6, 6, 6, 6};
-  my_function_data data = { index,n,K,De,Nunique,uniquePar,vArrayList,H,B,HG,BG,basis,matElem };
+  size_t Nunique = 1000 , index = 1000, state = 0; vec uniquePar = {6, 6, 6, 6};
+  my_function_data data = { index,n,K,De,Nunique,state,uniquePar,vArrayList,H,B,HG,BG,basis,matElem };
   opt.set_min_objective(myvfunc_grad_test, &data);
   nlopt::result optresult = opt.optimize(xs, minf);
 
@@ -609,7 +847,8 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
           xs[Nunique*i+uniquePar(k)] = xstart(De*i+k);
         }
       }
-      my_function_data data = { index,n,K,De,Nunique,uniquePar,vArrayList,H,B,HG,BG,basis,matElem };
+      size_t state = 0;
+      my_function_data data = { index,n,K,De,Nunique,state,uniquePar,vArrayList,H,B,HG,BG,basis,matElem };
       opt.set_min_objective(myvfunc_grad, &data);
 
       for (auto& lol : HG){
