@@ -37,11 +37,11 @@ int main() {
     ansatz.initializeBasis(10);
 
     vec aGuess    = {bs(i) , 2.5 , 2.5};
-    vec maxShift  = {bs(i) , 1 , 1};
-    vec res1      = ansatz.sweepStochastic(state,5,1e2,aGuess);
-    vec res2      = ansatz.sweepDeterministic(state,5,2,{0,1,1});
-// vec res1      = ansatz.sweepStochasticShift(state,5,1e2,aGuess,maxShift);
-    // vec res2      = ansatz.sweepDeterministicShift(state,5,2,{0,1,1});
+    vec maxShift  = {0.1*bs(i) , 1 , 1};
+    // vec res1      = ansatz.sweepStochastic(state,5,1e2,aGuess);
+    // vec res2      = ansatz.sweepDeterministic(state,5,2,{0,1,1});
+    vec res1      = ansatz.sweepStochasticShift(state,5,1e2,aGuess,maxShift);
+    vec res2      = ansatz.sweepDeterministicShift(state,5,maxShift,2,{0,1,1});
 
     data(i,0)     = bs(i);
     data(i,1)     = res2(res2.n_rows-1) - Trap.gsExpectedVal();

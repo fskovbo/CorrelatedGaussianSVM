@@ -406,7 +406,7 @@ vec Variational::sweepDeterministic(size_t state, size_t sweeps, size_t Nunique,
   return results;
 }
 
-vec Variational::sweepDeterministicShift(size_t state, size_t sweeps, size_t Nunique, vec uniquePar){
+vec Variational::sweepDeterministicShift(size_t state, size_t sweeps, vec maxShift, size_t Nunique, vec uniquePar){
   size_t NparA = Nunique*n*(n+1)/2;
   size_t NparS = 3*n;
   size_t Npar  = NparA + NparS;
@@ -423,9 +423,11 @@ vec Variational::sweepDeterministicShift(size_t state, size_t sweeps, size_t Nun
     lb[i] = 1e-6;
     ub[i] = HUGE_VAL;
   }
-  for (size_t i = NparA; i < Npar; i++) {
-    lb[i] = -1e0;
-    ub[i] = 1e0;
+  for (size_t i = 0; i < n; i++) {
+    for (size_t k = 0; k < 3; k++) {
+      lb[NparA + 3*i+k] = -min(2.0*maxShift(k),1.0);
+      ub[NparA + 3*i+k] = min(2.0*maxShift(k),1.0);
+    }
   }
   nlopt::opt opt(nlopt::LN_NELDERMEAD, Npar);
   opt.set_lower_bounds(lb);

@@ -19,13 +19,13 @@ int main() {
   auto Vstrat   = CoulombPotential(H,10,12);
   auto elem     = MatrixElements(H,Vstrat);
   auto ansatz   = Variational(H,elem);
-  size_t state  = 0;
+  size_t state  = 5;
 
-  ansatz.initializeBasis(8);
+  ansatz.initializeBasis(10);
   vec guess = 4.0/datum::pi * ones<vec>(3);
   vec maxshift = 0.1*ones<vec>(3);
   vec res1 = ansatz.sweepStochasticShift(state,5,1e2,guess,maxshift);
-  vec res2 = ansatz.sweepDeterministicShift(state,5,1,{0,0,0});
+  vec res2 = ansatz.sweepDeterministicShift(state,10,maxshift,1,{0,0,0});
 
   cout << "Result after stochastic sweep:" << endl << res1 << endl;
   cout << "Result after deterministic sweep:" << endl << res2 << endl;

@@ -40,7 +40,7 @@ public:
   vec sweepStochastic(size_t state, size_t sweeps, size_t trials, vec Ameanval);
   vec sweepStochasticShift(size_t state, size_t sweeps, size_t trials, vec Ameanval, vec maxShift);
   vec sweepDeterministic(size_t state, size_t sweeps, size_t Nunique = 3, vec uniquePar = {0,1,2});
-  vec sweepDeterministicShift(size_t state, size_t sweeps, size_t Nunique = 3, vec uniquePar = {0,1,2});
+  vec sweepDeterministicShift(size_t state, size_t sweeps, vec maxShift = {1,1,1}, size_t Nunique = 3, vec uniquePar = {0,1,2});
 
   vec sweepDeterministicCMAES(size_t state, size_t sweeps, size_t maxeval);
 

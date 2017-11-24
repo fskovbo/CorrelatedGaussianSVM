@@ -39,7 +39,10 @@ double TrapPotential::gsExpectedVal(){
 }
 
 double TrapPotential::calculateExpectedPotential(mat& A1, mat& A2, vec& s1, vec& s2, mat& Binv, double detB){
-  return 999999999;
+  vec v = 2.0*A1*s1 + 2.0*A2*s2;
+  vec u = 0.5*Binv*v;
+  double overlap = (pow(datum::pi,3.0*n/2.0)*pow(detB,-3.0/De/2.0)) * exp(-dot(s1,A1*s1) - dot(s2,A2*s2) + 0.25*dot(v,Binv*v));
+  return overlap*(1.5/De*trace(Omega*Binv) + dot(u,Omega*u));
 }
 
 double TrapPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2, mat& Binv, double detB){
