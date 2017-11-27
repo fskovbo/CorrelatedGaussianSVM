@@ -9,6 +9,7 @@
 #include <time.h>
 #include <vector>
 #include "nlopt.hpp"
+#include "FigureOfMerits.hpp"
 
 #include "System.h"
 #include "MatrixElements.h"
@@ -28,8 +29,6 @@ private:
   mat basisCoefficients;
   vector<vec**> vArrayList;
 
-  static double myvfunc(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
-  static double myvfunc_shift(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
   double eigenEnergy(size_t state);
   mat generateRandomGaussian(vec& Ameanval, vec& coeffs);
 
@@ -41,8 +40,9 @@ public:
   vec sweepStochasticShift(size_t state, size_t sweeps, size_t trials, vec Ameanval, vec maxShift);
   vec sweepDeterministic(size_t state, size_t sweeps, size_t Nunique = 3, vec uniquePar = {0,1,2});
   vec sweepDeterministicShift(size_t state, size_t sweeps, vec maxShift = {1,1,1}, size_t Nunique = 3, vec uniquePar = {0,1,2});
-
   vec sweepDeterministicCMAES(size_t state, size_t sweeps, size_t maxeval);
+
+  vec addBasisFunction(size_t state, size_t tries, vec startGuess, vec maxShift = {1,1,1}, size_t Nunique = 3, vec uniquePar = {0,1,2});
 
   void printBasis();
   void printShift();
