@@ -725,7 +725,7 @@ double Variational::myvfunc_grad_test(const std::vector<double> &x, std::vector<
 
   if (!grad.empty()){
     for (size_t i = 0; i < HG.size(); i++) {
-      grad[i] = dot(eigvec.col(0), ((HG[i])-eigval(0)*(BG[i])) * eigvec.col(0));
+      grad[i] = dot(eigvec.col(0), ((HG[i])-eigval(0)*(BG[i])) * eigvec.col(0))/dot(eigvec.col(0), B*eigvec.col(0));
     }
   }
   // for (size_t i = 0; i < HG.size(); i++) {

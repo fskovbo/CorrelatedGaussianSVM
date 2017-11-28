@@ -11,6 +11,17 @@
 #include "PotentialList.h"
 
 
+double NumGradient(MatrixElements& elem, mat& A, double eps){
+  mat temp = {eps};
+  mat Ap = A+temp;
+  mat Am = A-temp;
+  double Hp, Hm, Bp, Bm;
+  elem.calculateH_noShift(Ap,Ap,Hp,Bp);
+  elem.calculateH_noShift(Am,Am,Hm,Bm);
+
+  return (Hp/Bp - Hm/Bm)/(2*eps);
+}
+
 int main() {
 
   clock_t begin = clock();
@@ -23,8 +34,7 @@ int main() {
 
   auto Trap             = TrapPotential(Test);
   auto Gauss            = SingleGaussPotential(Test);
-  PotentialList Vstrat  = {&Gauss,&Trap};
-
+  PotentialList Vstrat  = {&Gauss, &Trap};
   auto elem             = MatrixElements(Test,Vstrat);
 
 
@@ -32,18 +42,23 @@ int main() {
 
 
   double Hij,Bij;
-  vec dumme;
+  vec Hg, Bg;
 
-  size_t Npts = 1e6;
-  mat data(Npts,2);
+  size_t Npts = 1e2;
+  mat data(Npts,5);
   vec Avals = linspace(4950,5050,Npts);
   for (size_t i = 0; i < Npts; i++) {
     mat A = Avals(i)*eye<mat>(De,De);
-    elem.calculateH_noShift(A,A,Hij,Bij,dumme,dumme);
+    elem.calculateH_noShift(A,A,Hij,Bij,Hg,Bg);
     data(i,0) = Avals(i);
     data(i,1) = Hij/Bij - Trap.gsExpectedVal();
+    data(i,2) = (2*Hg(0)-Hij/Bij *2* Bg(0))/Bij;
+    data(i,3) = NumGradient(elem,A,1e-4);
+    data(i,4) = data(i,2)-data(i,3);
   }
-  data.save("parameterspace.txt", arma_ascii);
+  // data.save("parameterspace.txt", arma_ascii);
+
+  cout << data << endl;
 
   clock_t end = clock();
   cout << "Runtime = " <<  double(end - begin) / CLOCKS_PER_SEC << endl;

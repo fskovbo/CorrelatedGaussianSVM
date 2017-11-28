@@ -57,16 +57,16 @@ void MatrixElements::calculateH_noShift(mat& A1, mat& A2, double& Hij, double& B
   for (size_t i = 0; i < n; i++) {
     for (size_t j = i+1; j < n+1; j++) {
       for (size_t k = 0; k < De; k++) {
-        vArray = vArrayList.at(k);
-        Bigrad.slice(De*count+k) = -Bi*vArray[i][j]*(vArray[i][j]).t()*Bi;
-        detBgrad(De*count+k) = detB * dot(vArray[i][j],Bi*vArray[i][j]);
-        Tgrad2(De*count+k) = De*trace(prod12*Bigrad.slice(De*count+k));
+        vArray                    = vArrayList.at(k);
+        Bigrad.slice(De*count+k)  = -Bi*vArray[i][j]*(vArray[i][j]).t()*Bi;
+        detBgrad(De*count+k)      = detB * dot(vArray[i][j],Bi*vArray[i][j]);
+        Tgrad2(De*count+k)        = De*trace(prod12*Bigrad.slice(De*count+k));
       }
       count++;
     }
   }
   Mgrad = -1.5/detB *overlap*detBgrad;
-  vec Tgrad = 6.0/De*trace(prod12*Bi)*Mgrad + 6.0/De*Tgrad2*overlap;
+  vec Tgrad = 6.0/De*trace(prod12*Bi)*Mgrad - 6.0/De*Tgrad2*overlap; // HVORFOR MINUS???
   vec Vgrad(De*n*(n+1)/2);
 
   double T = overlap*(6.0/De*trace(prod12*Bi) );
@@ -77,13 +77,13 @@ void MatrixElements::calculateH_noShift(mat& A1, mat& A2, double& Hij, double& B
   Hgrad = Tgrad+Vgrad;
 
 
-  //
+
   // cout << Bigrad << endl;
   // cout << detBgrad << endl;
   // cout << Tgrad2 << endl;
-  // cout << Mgrad << endl;
-  // cout << Tgrad << endl;
-  // cout << Vgrad << endl;
+  // cout << "Bgrad: " << Mgrad << endl;
+  // cout << "Tgrad: " << Tgrad << endl;
+  // cout << "Vgrad: " << Vgrad << endl;
   // while (1) {
   //   /* code */
   // }

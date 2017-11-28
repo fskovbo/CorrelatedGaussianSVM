@@ -83,6 +83,7 @@ double SingleGaussPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2
       count++;
     }
   }
+  
   Vgrad = -1.5*detBgrad*Gtemp*pow(datum::pi,3.0*n/2.0);
   return pow(datum::pi,3.0*n/2.0)*dot(interStr,kappavec);
 }
