@@ -30,10 +30,10 @@ private:
   vector<vec**> vArrayList;
 
   double eigenEnergy(size_t state);
-  mat generateRandomGaussian(vec& Ameanval, vec& coeffs);
 
 public:
   Variational(System& sys, MatrixElements& matElem);
+  mat generateRandomGaussian(vec& Ameanval, vec& coeffs);
 
   double initializeBasis(size_t basisSize);
   vec sweepStochastic(size_t state, size_t sweeps, size_t trials, vec Ameanval);

@@ -670,10 +670,14 @@ double Variational::myvfunc_grad(const std::vector<double> &x, std::vector<doubl
   }
 
   count = 0;
-  for (auto iH = begin(HG), iB = begin(BG), e = end(HG); iH != e; ++iH, ++iB){
-    grad.at(count) = dot(eigvec.col(0), ((*iH)-eigval(0)*(*iB)) * eigvec.col(0));
-    count++;
+  if (!grad.empty()){
+    for (auto iH = begin(HG), iB = begin(BG), e = end(HG); iH != e; ++iH, ++iB){
+      grad.at(count) = dot(eigvec.col(0), ((*iH)-eigval(0)*(*iB)) * eigvec.col(0))/dot(eigvec.col(0), B*eigvec.col(0));
+      count++;
+    }
   }
+
+  cout << eigval(0) << endl;
   return eigval(0);
 }
 
@@ -728,16 +732,13 @@ double Variational::myvfunc_grad_test(const std::vector<double> &x, std::vector<
       grad[i] = dot(eigvec.col(0), ((HG[i])-eigval(0)*(BG[i])) * eigvec.col(0))/dot(eigvec.col(0), B*eigvec.col(0));
     }
   }
-  // for (size_t i = 0; i < HG.size(); i++) {
-  //   cout << HG[i] << endl;
-  //   grad[i] = dot(eigvec.col(0), ((HG[i])-eigval(0)*(BG[i])) * eigvec.col(0));
-  // }
+
   cout << eigval(0) << endl;
   return eigval(0);
 }
 
 vec Variational::sweepDeterministic_grad_test(){
-  size_t Npar = n*(n+1)/2;
+  size_t Npar = De*n*(n+1)/2;
   vec xstart(Npar);
 
   //
@@ -758,7 +759,7 @@ vec Variational::sweepDeterministic_grad_test(){
   for (size_t i = 0; i < Npar; i++) {
     lb[i] = 1e-6;
   }
-  nlopt::opt opt(nlopt::LD_SLSQP, Npar);
+  nlopt::opt opt(nlopt::LD_MMA, Npar);
   opt.set_lower_bounds(lb);
   opt.set_ftol_abs(1e-8); // tolerance on parametres
   double minf;
@@ -772,8 +773,6 @@ vec Variational::sweepDeterministic_grad_test(){
   my_function_data data = { index,n,K,De,Nunique,state,uniquePar,vArrayList,H,B,HG,BG,basis,matElem };
   opt.set_min_objective(myvfunc_grad_test, &data);
   nlopt::result optresult = opt.optimize(xs, minf);
-
-  basis.slice(0) = {xs[0]};
 
   vec result = {minf};
 
@@ -825,7 +824,7 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
   for (size_t i = 0; i < Npar; i++) {
     lb[i] = 1e-6;
   }
-  nlopt::opt opt(nlopt::LD_SLSQP, Npar);
+  nlopt::opt opt(nlopt::LD_MMA, Npar);
   opt.set_lower_bounds(lb);
   opt.set_xtol_abs(1e-10); // tolerance on parametres
   double minf;
@@ -846,14 +845,6 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
       my_function_data data = { index,n,K,De,Nunique,state,uniquePar,vArrayList,H,B,HG,BG,basis,matElem };
       opt.set_min_objective(myvfunc_grad, &data);
 
-      for (auto& lol : HG){
-        cout << lol << endl;
-      }
-      for (auto& lol : xs){
-        cout << lol << endl;
-      }
-      cout << basis << endl;
-
       bool status = false;
       size_t attempts = 0;
       while (!status && attempts < 5) {
@@ -865,14 +856,6 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
           attempts++;
         }
       }
-
-      for (auto& lol : HG){
-        cout << lol << endl;
-      }
-      for (auto& lol : xs){
-        cout << lol << endl;
-      }
-      auto TEMP = HG;
 
       for (size_t i = 0; i < n*(n+1)/2; i++) {
         for (size_t k = 0; k < De; k++) {
@@ -894,7 +877,6 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
         }
       }
 
-      cout << Anew << endl;
 
       vec Hgradij, Bgradij;
       for (size_t j = 0; j < K; j++) {
@@ -910,7 +892,6 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
           B(index,index) = Bij;
         } else {
           Acurrent = basis.slice(j);
-          cout << "WALLAH" << endl;
 
           matElem.calculateH_noShift(Acurrent,Anew,Hij,Bij,Hgradij,Bgradij);
           count = 0;
@@ -926,12 +907,6 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
           B(j,index) = Bij;
           B(index,j) = Bij;
         }
-      }
-      size_t tempcount = 0;
-      for (auto& lol : HG){
-        cout << lol << endl;
-        cout << lol-TEMP[tempcount] << endl;
-        tempcount++;
       }
       // ----------------------------------------- //
       //
