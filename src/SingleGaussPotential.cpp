@@ -19,6 +19,27 @@ vec SingleGaussPotential::calculateIntStr(vec& masses, double baseStr, double in
   return interStr;
 }
 
+void SingleGaussPotential::buildInteractions(mat& Ui){
+  for (size_t i = 0; i<n; i++){
+    size_t ibegin = De*i;
+    size_t iend = De*i+(De-1);
+
+    for (size_t j = i+1; j<n+1; j++){
+      size_t jbegin = De*j;
+      size_t jend = De*j+(De-1);
+
+      mat inter = zeros<mat>(De*(n+1),De*(n+1));
+      inter(span(ibegin,iend),span(ibegin,iend)) = eye(De,De);
+      inter(span(jbegin,jend),span(jbegin,jend)) = eye(De,De);
+      inter(span(ibegin,iend),span(jbegin,jend)) = -eye(De,De);
+      inter(span(jbegin,jend),span(ibegin,iend)) = -eye(De,De);
+      inter *= alpha;
+      inter = Ui.t()*inter*Ui;
+      interactions.emplace_back(inter(span(0,De*n-1),span(0,De*n-1)));
+    }
+  }
+}
+
 double SingleGaussPotential::calculateExpectedPotential(mat& A1, mat& A2, vec& s1, vec& s2, mat& Binv, double detB){
   vec v = 2.0*A1*s1 + 2.0*A2*s2;
 
@@ -68,22 +89,26 @@ double SingleGaussPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2
 double SingleGaussPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2, mat& Binv, double detB, vec& Vgrad, cube& Binvgrad, vec& detBgrad){
   vec kappavec(n*(n+1)/2);
   vec** vArray;
-  double detBp, Gtemp;
+  double detBp, Gtemp, vBv;
+  mat Bpinv;
   size_t count = 0;
 
   for (size_t i = 0; i < n; i++) {
     for (size_t j = i+1; j < n+1; j++) {
       detBp = detB;
+      Bpinv = Binv;
       for (size_t k = 0; k < De; k++) {
         vArray = vArrayList.at(k);
-        detBp *= 1+ alpha*dot((vArray[i][j]),Binv*vArray[i][j]);
+        vBv = 1+ alpha*dot((vArray[i][j]),Bpinv*vArray[i][j]);
+        detBp *= vBv;
+        Bpinv -= (Bpinv*vArray[i][j]*(vArray[i][j]).t()*Bpinv)/vBv;
       }
       kappavec(count) = pow(detBp,-3.0/De/2.0);
-      Gtemp += kappavec(count)/detBp;
+      Gtemp += interStr(count)*kappavec(count)/detBp;
       count++;
     }
   }
-  
+
   Vgrad = -1.5*detBgrad*Gtemp*pow(datum::pi,3.0*n/2.0);
   return pow(datum::pi,3.0*n/2.0)*dot(interStr,kappavec);
 }

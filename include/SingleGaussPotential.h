@@ -21,6 +21,7 @@ private:
   vector<mat> interactions;
 
   vec calculateIntStr(vec& masses, double baseStr, double intRange);
+  void buildInteractions(mat& Ui);
 
 public:
   SingleGaussPotential(System& sys, double baseStr = -2.684, double interactionRange = 1.0);
