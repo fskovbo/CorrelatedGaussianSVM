@@ -57,6 +57,6 @@ double TrapPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2, mat& 
   for (size_t i = 0; i < De*n*(n+1)/2; i++) {
     Vgrad2(i) = trace(Omega*Binvgrad.slice(i));
   }
-  Vgrad = 1.5/De*trace(Omega*Binv)*Xmatgrad*Mgrad + 1.5*Vgrad2*overlap;
+  Vgrad = 1.5/De*trace(Omega*Binv)*Xmatgrad*Mgrad + 1.5/De*Vgrad2*overlap;
   return overlap * 1.5/De*trace(Omega*Binv);
 }

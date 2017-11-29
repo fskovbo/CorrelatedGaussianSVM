@@ -60,7 +60,7 @@ void MatrixElements::calculateH_noShift(mat& A1, mat& A2, double& Hij, double& B
         vArray                    = vArrayList.at(k);
         Bigrad.slice(De*count+k)  = -Bi*vArray[i][j]*(vArray[i][j]).t()*Bi;
         detBgrad(De*count+k)      = detB * dot(vArray[i][j],Bi*vArray[i][j]);
-        Tgrad2(De*count+k)        = De*trace(prod12*Bigrad.slice(De*count+k));
+        Tgrad2(De*count+k)        = trace(prod12*Bigrad.slice(De*count+k));
       }
       count++;
     }

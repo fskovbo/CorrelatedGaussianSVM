@@ -12,7 +12,8 @@
 
 
 double NumGradient(MatrixElements& elem, mat& A, double eps){
-  mat temp = {eps};
+  mat temp = zeros<mat>(A.n_rows,A.n_cols);
+  temp(0,0) = eps;
   mat Ap = A+temp;
   mat Am = A-temp;
   double Hp, Hm, Bp, Bm;
@@ -27,14 +28,14 @@ int main() {
   clock_t begin = clock();
   arma_rng::set_seed_random();
 
-  size_t De             = 1;
+  size_t De             = 3;
   vec masses            = {1 , 1};
   vec charges           = {0 , 0};
   auto Test             = System(masses,charges,De);
 
   auto Trap             = TrapPotential(Test);
   auto Gauss            = SingleGaussPotential(Test);
-  PotentialList Vstrat  = {&Gauss, &Trap};
+  PotentialList Vstrat  = { &Trap};
   auto elem             = MatrixElements(Test,Vstrat);
 
 
