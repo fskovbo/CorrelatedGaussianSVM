@@ -35,7 +35,7 @@ int main() {
 
   auto Trap             = TrapPotential(Test);
   auto Gauss            = SingleGaussPotential(Test);
-  PotentialList Vstrat  = { &Trap};
+  PotentialList Vstrat  = {&Gauss};
   auto elem             = MatrixElements(Test,Vstrat);
 
 
