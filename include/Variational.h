@@ -46,6 +46,7 @@ public:
 
   void printBasis();
   void printShift();
+  void printBasisCoeffs();
 
 
 

@@ -136,7 +136,7 @@ vec Variational::sweepStochasticShift(size_t state, size_t sweeps, size_t trials
     for (size_t j = 0; j < K; j++) {
       for (size_t k = 0; k < trials; k++) {
         Atrial = generateRandomGaussian(Ameanval,trialCoeffs);
-        strial = randn<vec>(3*n);
+        strial = randu<vec>(3*n);
         vec stemp =  repmat(maxShift,n,1);
         strial = diagmat(stemp)*strial;
 
@@ -294,11 +294,11 @@ vec Variational::sweepDeterministicShift(size_t state, size_t sweeps, vec maxShi
   }
   for (size_t i = 0; i < n; i++) {
     for (size_t k = 0; k < 3; k++) {
-      lb[NparA + 3*i+k] = -3.0*maxShift(k);
-      ub[NparA + 3*i+k] = 3.0*maxShift(k);
+      lb[NparA + 3*i+k] = -maxShift(k);
+      ub[NparA + 3*i+k] = maxShift(k);
     }
   }
-  nlopt::opt opt(nlopt::LN_NELDERMEAD, Npar);
+  nlopt::opt opt(nlopt::LN_SBPLX, Npar);
   opt.set_lower_bounds(lb);
   opt.set_upper_bounds(ub);
   opt.set_xtol_abs(1e-10); // tolerance on parametres
@@ -588,7 +588,9 @@ void Variational::printShift(){
   cout << "Current shift:" << endl << shift << endl;
 }
 
-
+void Variational::printBasisCoeffs(){
+  cout << "Current basis coefficients:" << endl << basisCoefficients << endl;
+}
 
 
 // -------------------------------------------------------------------------------------------------- //
@@ -640,7 +642,6 @@ double Variational::myvfunc_grad(const std::vector<double> &x, std::vector<doubl
       B(index,index) = Bij;
     } else {
       Acurrent = basis.slice(j);
-      cout << "WALLAH" << endl;
 
       matElem.calculateH_noShift(Acurrent,Atrial,Hij,Bij,Hgradij,Bgradij);
       count = 0;
