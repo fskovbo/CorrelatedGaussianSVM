@@ -92,31 +92,53 @@ double SingleGaussPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2
   vec kappavec(n*(n+1)/2);
   vec** vArray;
   double detBp, Gtemp, vBv;
-  mat Bpinv;
   size_t count = 0;
 
   for (size_t i = 0; i < n; i++) {
     for (size_t j = i+1; j < n+1; j++) {
       detBp = detB;
-      Bpinv = Binv;
       for (size_t k = 0; k < De; k++) {
         vArray = vArrayList.at(k);
-        vBv = 1+ alpha*dot((vArray[i][j]),Bpinv*vArray[i][j]);
+        vBv = 1+ alpha*dot((vArray[i][j]),Binv*vArray[i][j]);
         detBp *= vBv;
-        // Bpinv -= (Bpinv*vArray[i][j]*(vArray[i][j]).t()*Bpinv)/vBv;
       }
       kappavec(count) = pow(detBp,-3.0/De/2.0);
-      Gtemp += interStr(count)*kappavec(count)/detBp;
       count++;
     }
   }
 
-  Vgrad = -1.5*detBgrad*Gtemp*pow(datum::pi,3.0*n/2.0);
+  //
+  //  Calculate gradient for De = 1
+  //
+  vec** wArray = vArrayList.at(0);
+  Vgrad = zeros<vec>(n*(n+1)/2);
+  vec intergrad(n*(n+1)/2);
+  size_t intcount = 0, paramcount = 0;
+  for (size_t iparam = 0; iparam < n; iparam++) {
+    for (size_t jparam = iparam+1; jparam < n+1; jparam++) {
+      intcount = 0;
+
+      for (size_t iint = 0; iint < n; iint++) {
+        for (size_t jint = iint+1; jint < n+1; jint++) {
+          vec w = wArray[iint][jint];
+          // double ddetBdx = (1 + alpha*dot(w,Binv*w*v.t()*Binv*v) - alpha*dot(w,Binv*v*v.t()*Binv*w))/(1 + alpha*dot(w,Binv*w));
+          detBp = detB*(1+alpha*dot(w,Binv*w));
+          double ddetBpdx = (1+alpha*dot(w,Binv*w))*detBgrad(paramcount)+alpha*dot(w,Binvgrad.slice(paramcount)*w)*detB;
+          intergrad(intcount) = -1.5/detBp*kappavec(intcount)*ddetBpdx;
+          // intergrad(intcount) = -1.5*ddetBdx*kappavec(intcount);
+          intcount++;
+        }
+      }
+      Vgrad(paramcount) = pow(datum::pi,3.0*n/2.0)*dot(interStr,intergrad);
+      paramcount++;
+    }
+  }
+
   return pow(datum::pi,3.0*n/2.0)*dot(interStr,kappavec);
 }
 
 // double SingleGaussPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2, mat& Binv, double detB, vec& Vgrad, cube& Binvgrad, vec& detBgrad){
-//   size_t intcount = 0, paramcount = 0;
+//   size_t intcount = 0;
 //   mat Bp, Bpinv;
 //   double detBp;
 //   vec kappavec(interactions.size());
@@ -130,8 +152,7 @@ double SingleGaussPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2
 //       kappavec(intcount) = pow(detBp,-3.0/De/2.0);
 //       for (size_t k = 0; k < De; k++) {
 //         vArray = vArrayList.at(k);
-//         Vgrad(paramcount) = dot((vArray[i][j]),Bpinv*vArray[i][j]) * kappavec(intcount)*interStr(intcount);
-//         paramcount++;
+//         Vgrad(De*intcount+k) = dot((vArray[i][j]),Bpinv*vArray[i][j]) * kappavec(intcount)*interStr(intcount);
 //       }
 //       intcount++;
 //     }
