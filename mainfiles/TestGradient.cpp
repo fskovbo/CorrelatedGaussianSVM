@@ -23,7 +23,7 @@ double NumGradient(MatrixElements& elem, mat& A, double eps){
   return (Hp/Bp - Hm/Bm)/(2*eps);
 }
 
-double NumGradient(System& sys, MatrixElements& elem, mat& A, double eps){
+double NumGradient(System& sys, MatrixElements& elem, PotentialList& Vstrat, mat& A, double eps){
   vec** vA = sys.vArrayList.at(0);
   vec v = vA[0][1];
 
@@ -35,6 +35,15 @@ double NumGradient(System& sys, MatrixElements& elem, mat& A, double eps){
   elem.calculateH_noShift(Am,Am,Hm,Bm);
 
   return (Hp/Bp - Hm/Bm)/(2*eps);
+
+  // double detAp = det(Ap+Ap);
+  // mat invAp = (Ap+Ap).i();
+  // double Vp = Vstrat.calculateExpectedPotential_noShift(Ap,Ap,invAp,detAp);
+  // double detAm = det(Am+Am);
+  // mat invAm = (Am+Am).i();
+  // double Vm = Vstrat.calculateExpectedPotential_noShift(Am,Am,invAm,detAm);
+  //
+  // return (Vp-Vm)/(2*eps);
 }
 
 int main() {
@@ -42,8 +51,8 @@ int main() {
   clock_t begin = clock();
   arma_rng::set_seed_random();
 
-  size_t De             = 1;
-  vec masses            = {1 , 1 ,1 };
+  size_t De             = 3;
+  vec masses            = {1 , 1 , 1 };
   vec charges           = {0 , 0 , 0};
   auto Test             = System(masses,charges,De);
 
@@ -68,8 +77,9 @@ int main() {
   for (size_t i = 0; i < Npts; i++) {
     mat A = zeros<mat>(Test.n*De,Test.n*De);
     vec Alist = {Avals(i) , Avals(i) ,Avals(i) };
+
     size_t count = 0;
-    for (size_t j = 0; j < Test.n; j++) {
+    for (size_t j = 0; j < Test.n+1; j++) {
       for (size_t k = j+1; k < Test.n+1; k++) {
         for (size_t l = 0; l < De; l++) {
           vArray = Test.vArrayList.at(l);
@@ -78,11 +88,20 @@ int main() {
         count++;
       }
     }
+
     elem.calculateH_noShift(A,A,Hij,Bij,Hg,Bg);
+    // mat B = A+A;
+    // double detB = det(B);
+    // mat Binv = B.i();
+    // vec Vgrad(De*Test.n*(Test.n+1)/2), detBgrad;
+    // cube Binvgrad;
+
     data(i,0) = Avals(i);
     data(i,1) = Hij/Bij;// - Trap.gsExpectedVal();
     data(i,2) = (2*Hg(0)-Hij/Bij *2* Bg(0))/Bij;
-    data(i,3) = NumGradient(Test,elem,A,1e-4);
+    // data(i,1) = Vstrat.calculateExpectedPotential_noShift(A,A,Binv,detB,Vgrad,Binvgrad,detBgrad);
+    // data(i,2) = Vgrad(0);
+    data(i,3) = NumGradient(Test,elem,Vstrat,A,1e-7);
     data(i,4) = data(i,2)-data(i,3);
   }
   // data.save("parameterspace.txt", arma_ascii);
