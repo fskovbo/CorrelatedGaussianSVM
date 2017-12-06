@@ -53,6 +53,7 @@ void MatrixElements::calculateH_noShift(mat& A1, mat& A2, double& Hij, double& B
   cube Bigrad(De*n,De*n,De*n*(n+1)/2);
   vec detBgrad(De*n*(n+1)/2);
   vec Tgrad2(De*n*(n+1)/2);
+  vec Tgrad3(De*n*(n+1)/2);
   size_t count = 0;
   for (size_t i = 0; i < n; i++) {
     for (size_t j = i+1; j < n+1; j++) {
@@ -60,13 +61,15 @@ void MatrixElements::calculateH_noShift(mat& A1, mat& A2, double& Hij, double& B
         vArray                    = vArrayList.at(k);
         Bigrad.slice(De*count+k)  = -Bi*vArray[i][j]*(vArray[i][j]).t()*Bi;
         detBgrad(De*count+k)      = detB * dot(vArray[i][j],Bi*vArray[i][j]);
-        Tgrad2(De*count+k)        = trace(A1*0.5*lambda*A1*Bigrad.slice(De*count+k));
+        Tgrad2(De*count+k)        = trace(A1*0.5*lambda*A2*Bigrad.slice(De*count+k)); // dB-1/da
+        Tgrad3(De*count+k)        = trace(A1*0.5*lambda*vArray[i][j]*(vArray[i][j]).t()*Bi); // dA/da
       }
       count++;
     }
   }
   Mgrad = -1.5/De/detB *overlap*detBgrad;
-  vec Tgrad = 6.0/De*trace(prod12*Bi)*Mgrad - 6.0/De*Tgrad2*overlap;
+  // vec Tgrad = 6.0/De*trace(prod12*Bi)*Mgrad - 6.0/De*Tgrad2*overlap;
+  vec Tgrad = 6.0/De*trace(A1*0.5*lambda*A2*Bi)*Mgrad + 6.0/De*Tgrad2*overlap + 6.0/De*Tgrad3*overlap;
   vec Vgrad(De*n*(n+1)/2);
 
   double T = overlap*(6.0/De*trace(prod12*Bi) );
@@ -75,4 +78,5 @@ void MatrixElements::calculateH_noShift(mat& A1, mat& A2, double& Hij, double& B
   Hij   = T+V;
   Bij   = overlap;
   Hgrad = Tgrad+Vgrad;
+
 }

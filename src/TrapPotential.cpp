@@ -53,10 +53,9 @@ double TrapPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2, mat& 
   double overlap = pow(datum::pi,3.0*n/2.0)*pow(detB,-3.0/De/2.0);
   vec Mgrad = -1.5/De/detB *overlap*detBgrad;
   vec Vgrad2(Vgrad);
-
   for (size_t i = 0; i < De*n*(n+1)/2; i++) {
     Vgrad2(i) = trace(Omega*Binvgrad.slice(i));
   }
-  Vgrad = 1.5/De*trace(Omega*Binv)*Xmatgrad*Mgrad + 1.5/De*Vgrad2*overlap;
+  Vgrad = 1.5/De*trace(Omega*Binv)*Mgrad + 1.5/De*Vgrad2*overlap;
   return overlap * 1.5/De*trace(Omega*Binv);
 }
