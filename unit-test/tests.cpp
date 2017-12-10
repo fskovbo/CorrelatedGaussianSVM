@@ -378,17 +378,14 @@ TEST_P(gradientTestFixture, MatchOneNumericalAnalyticalGradientK10){
   }
 
   mat L(K,K);
-  cx_vec analytical(Npar);
-  cx_vec eigval;
-  cx_mat eigvec;
-  // bool status = chol(L,B,"lower");
-  // eig_sym(eigval,eigvec, L.i()*H*(L.t()).i() );
-  eig_pair(eigval,eigvec,H,B);
+  vec analytical(Npar);
+  vec eigval;
+  mat eigvec;
+  bool status = chol(L,B,"lower");
+  eig_sym(eigval,eigvec, L.i()*H*(L.t()).i() );
 
-  uvec indices = sort_index(eigval);
-
-  cx_vec c = eigvec.col(indices(0));
-  cx_double E = eigval(indices(0));
+  vec c = (L.t()).i() * eigvec.col(0);
+  double E = eigval(0);
 
   for (size_t i = 0; i < Npar; i++) {
     analytical(i) = 2.0*c(index)*dot(c,(HG[i]-E*BG[i]));
@@ -398,7 +395,7 @@ TEST_P(gradientTestFixture, MatchOneNumericalAnalyticalGradientK10){
 
   ASSERT_EQ(analytical.n_rows, numeric.n_rows);
   for (size_t i = 0; i < analytical.n_rows; i++) {
-    EXPECT_NEAR(real(analytical(i)),numeric(i),5*1e-5);
+    EXPECT_NEAR(analytical(i),numeric(i),5*1e-5);
   }
 }
 
