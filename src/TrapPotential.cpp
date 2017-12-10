@@ -7,10 +7,6 @@ TrapPotential::TrapPotential(System& sys)
   for (size_t i = 0; i < n; i++) {
     Xmat(De*i,De*i) = 1;
   }
-  Xmatgrad = zeros<mat>(De*n*(n+1)/2,De*n*(n+1)/2);
-  for (size_t i = 0; i < n*(n+1)/2; i++) {
-    Xmatgrad(De*i,De*i) = 1;
-  }
 }
 
 TrapPotential::TrapPotential(System& sys, double trapLength)
@@ -19,10 +15,6 @@ TrapPotential::TrapPotential(System& sys, double trapLength)
   Xmat = zeros<mat>(De*n,De*n);
   for (size_t i = 0; i < n; i++) {
     Xmat(De*i,De*i) = 1;
-  }
-  Xmatgrad = zeros<mat>(De*n*(n+1)/2,De*n*(n+1)/2);
-  for (size_t i = 0; i < n*(n+1)/2; i++) {
-    Xmatgrad(De*i,De*i) = 1;
   }
 
   updateTrap(trapLength);

@@ -79,6 +79,8 @@ vec NumGradient(System& sys, MatrixElements& elem, mat& Afixed, mat& Avar){
 }
 
 vec NumGradient(System& sys, MatrixElements& elem, cube& basis, size_t index){
+  std::vector<mat> dH;
+  std::vector<mat> dM;
   size_t count = 0;
   size_t K = basis.n_slices;
   vec** vA;
@@ -129,6 +131,8 @@ vec NumGradient(System& sys, MatrixElements& elem, cube& basis, size_t index){
           Bp(x,index) = Bxyp; Bm(x,index) = Bxym;
           Bp(index,x) = Bxyp; Bm(index,x) = Bxym;
         }
+        dH.emplace_back((Hp-Hm)/(2*eps));
+        dM.emplace_back((Bp-Bm)/(2*eps));
 
         mat Lp(K,K), Lm(K,K);
         vec eigvalp, eigvalm;
@@ -138,7 +142,7 @@ vec NumGradient(System& sys, MatrixElements& elem, cube& basis, size_t index){
         eig_sym(eigvalp,eigvecp, Lp.i()*Hp*(Lp.t()).i() );
         eig_sym(eigvalm,eigvecm, Lm.i()*Hm*(Lm.t()).i() );
 
-        g(count) = (eigvalp(0) - eigvalm(0))/(2*eps);
+        g(count) = ( eigvalp(0) - eigvalm(0) )/(2*eps);
 
         count++;
       }
@@ -374,24 +378,27 @@ TEST_P(gradientTestFixture, MatchOneNumericalAnalyticalGradientK10){
   }
 
   mat L(K,K);
-  vec eigval, analytical(Npar);
-  mat eigvec;
-  bool status = chol(L,B,"lower");
-  eig_sym(eigval,eigvec, L.i()*H*(L.t()).i() );
-  vec c = eigvec.col(0);
-  double E = eigval(0);
+  cx_vec analytical(Npar);
+  cx_vec eigval;
+  cx_mat eigvec;
+  // bool status = chol(L,B,"lower");
+  // eig_sym(eigval,eigvec, L.i()*H*(L.t()).i() );
+  eig_pair(eigval,eigvec,H,B);
+
+  uvec indices = sort_index(eigval);
+
+  cx_vec c = eigvec.col(indices(0));
+  cx_double E = eigval(indices(0));
+
   for (size_t i = 0; i < Npar; i++) {
     analytical(i) = 2.0*c(index)*dot(c,(HG[i]-E*BG[i]));
   }
-  analytical /= dot(eigvec.col(0), B*eigvec.col(0));
+  analytical /= dot(c , B*c);
   vec numeric = NumGradient(*sys, *matElem, basis, index);
-
-  cout << analytical << endl;
-  cout << numeric << endl;
 
   ASSERT_EQ(analytical.n_rows, numeric.n_rows);
   for (size_t i = 0; i < analytical.n_rows; i++) {
-    EXPECT_NEAR(analytical(i),numeric(i),5*1e-5);
+    EXPECT_NEAR(real(analytical(i)),numeric(i),5*1e-5);
   }
 }
 
