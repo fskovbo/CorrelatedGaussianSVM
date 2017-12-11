@@ -87,3 +87,10 @@ double CoulombPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2, ma
 double CoulombPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2, mat& Binv, double detB, vec& Vgrad, cube& Binvgrad, vec& detBgrad){
   return 9999999;
 }
+
+double CoulombPotential::calculateExpectedPotential(mat& A1, mat& A2, vec& s1, vec& s2,
+                                                    mat& Binv, double detB, vec& Vgrad_A, vec& Vgrad_s,
+                                                    cube& Binvgrad, vec& detBgrad)
+{
+  return 999999;
+}
