@@ -68,8 +68,7 @@ void MatrixElements::calculateH_noShift(mat& A1, mat& A2, double& Hij, double& B
     }
   }
   Mgrad = -1.5/De/detB *overlap*detBgrad;
-  // vec Tgrad = 6.0/De*trace(prod12*Bi)*Mgrad - 6.0/De*Tgrad2*overlap;
-  vec Tgrad = 6.0/De*trace(A1*0.5*lambda*A2*Bi)*Mgrad + 6.0/De*Tgrad2*overlap + 6.0/De*Tgrad3*overlap;
+  vec Tgrad = 6.0/De*trace(A1*0.5*lambda*A2*Bi)*Mgrad + 6.0/De*(Tgrad2+Tgrad3)*overlap;
   vec Vgrad(De*n*(n+1)/2);
 
   double T = overlap*(6.0/De*trace(prod12*Bi) );

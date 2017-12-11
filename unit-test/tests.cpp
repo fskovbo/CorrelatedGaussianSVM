@@ -20,6 +20,7 @@ std::vector<mat> Alist;
 std::vector<vec> mlist;
 std::vector<size_t> Dlist;
 std::vector<int> potlist;
+std::vector<size_t> Klist;
 
 
 vec NumGradient(System& sys, MatrixElements& elem, mat& A){
@@ -85,7 +86,7 @@ vec NumGradient(System& sys, MatrixElements& elem, cube& basis, size_t index){
   size_t K = basis.n_slices;
   vec** vA;
   vec v, g(sys.De*sys.n*(sys.n+1)/2);
-  double eps = 1e-5;
+  double eps = 1e-2;
   mat Hp(K,K), Hm(K,K), Bp(K,K), Bm(K,K), H(K,K), B(K,K);
   double Hxyp, Bxyp, Hxym, Bxym, Hxy, Bxy;
 
@@ -202,7 +203,7 @@ void buildA(System* sys1, System* sys3, mat& A1, mat& A3){
   }
 }
 
-class gradientTestFixture : public ::testing::TestWithParam<std::tuple<size_t, vec, int, mat>> {
+class gradientTestFixture : public ::testing::TestWithParam<std::tuple<size_t, vec, int, size_t, mat>> {
 public:
 
   System* sys;
@@ -333,69 +334,74 @@ TEST_P(gradientTestFixture, MatchNumericalAnalyticalGradientDiffGauss){
   }
 }
 
-TEST_P(gradientTestFixture, MatchOneNumericalAnalyticalGradientK10){
-  //  Compare numeric and analytical gradient for basisfnct nr index using a basis of ten Gaussians.
-  size_t Npar = sys->De*sys->n*(sys->n+1)/2;
-  size_t index = 0, K = 2;
-  double Hij, Bij;
-  vec Hg, Bg;
-  mat Ai, Aj;
-  mat H(K,K), B(K,K);
-  std::vector<vec> HG(Npar);
-  std::vector<vec> BG(Npar);
-  for (size_t i = 0; i < Npar; i++) {
-    HG.at(i) = zeros<vec>(K);
-    BG.at(i) = zeros<vec>(K);
+TEST_P(gradientTestFixture, MatchOneNumericalAnalyticalGradientKFullBasis){
+  //  Compare numeric and analytical gradient for basisfnct nr index using a basis of K Gaussians.
+  size_t K = std::get<3>(GetParam());
+  if ( sys->n == 1 && K > 4) {
+    K = 3;
   }
-
-  cube basis(sys->De*sys->n,sys->De*sys->n,K);
-  for (size_t i = 0; i < K; i++) {
-    basis.slice(i) = buildA(sys);
-  }
-
-
-  for (size_t i = 0; i < K; i++) {
-    Ai = basis.slice(i);
-    for (size_t j = i; j < K; j++) {
-      Aj = basis.slice(j);
-      matElem->calculateH_noShift(Ai, Aj, Hij, Bij);
-      H(i,j) = Hij;
-      H(j,i) = Hij;
-      B(i,j) = Bij;
-      B(j,i) = Bij;
+  for (size_t index = 0; index < K; index++) {
+    size_t Npar = sys->De*sys->n*(sys->n+1)/2;
+    double Hij, Bij;
+    vec Hg, Bg;
+    mat Ai, Aj;
+    mat H(K,K), B(K,K);
+    std::vector<vec> HG(Npar);
+    std::vector<vec> BG(Npar);
+    for (size_t i = 0; i < Npar; i++) {
+      HG.at(i) = zeros<vec>(K);
+      BG.at(i) = zeros<vec>(K);
     }
-  }
 
-  for (size_t i = 0; i < K; i++) {
-    Ai = basis.slice(i);
-    Aj = basis.slice(index);
-    matElem->calculateH_noShift(Ai, Aj, Hij, Bij, Hg, Bg);
-
-    for (size_t j = 0; j < Npar; j++) {
-      (HG[j])(i) = Hg(j);
-      (BG[j])(i) = Bg(j);
+    cube basis(sys->De*sys->n,sys->De*sys->n,K);
+    for (size_t i = 0; i < K; i++) {
+      basis.slice(i) = buildA(sys);
     }
-  }
 
-  mat L(K,K);
-  vec analytical(Npar);
-  vec eigval;
-  mat eigvec;
-  bool status = chol(L,B,"lower");
-  eig_sym(eigval,eigvec, L.i()*H*(L.t()).i() );
 
-  vec c = (L.t()).i() * eigvec.col(0);
-  double E = eigval(0);
+    for (size_t i = 0; i < K; i++) {
+      Ai = basis.slice(i);
+      for (size_t j = i; j < K; j++) {
+        Aj = basis.slice(j);
+        matElem->calculateH_noShift(Ai, Aj, Hij, Bij);
+        H(i,j) = Hij;
+        H(j,i) = Hij;
+        B(i,j) = Bij;
+        B(j,i) = Bij;
+      }
+    }
 
-  for (size_t i = 0; i < Npar; i++) {
-    analytical(i) = 2.0*c(index)*dot(c,(HG[i]-E*BG[i]));
-  }
-  analytical /= dot(c , B*c);
-  vec numeric = NumGradient(*sys, *matElem, basis, index);
+    for (size_t i = 0; i < K; i++) {
+      Ai = basis.slice(i);
+      Aj = basis.slice(index);
+      matElem->calculateH_noShift(Ai, Aj, Hij, Bij, Hg, Bg);
 
-  ASSERT_EQ(analytical.n_rows, numeric.n_rows);
-  for (size_t i = 0; i < analytical.n_rows; i++) {
-    EXPECT_NEAR(analytical(i),numeric(i),5*1e-5);
+      for (size_t j = 0; j < Npar; j++) {
+        (HG[j])(i) = Hg(j);
+        (BG[j])(i) = Bg(j);
+      }
+    }
+
+    mat L(K,K);
+    vec analytical(Npar);
+    vec eigval;
+    mat eigvec;
+    bool status = chol(L,B,"lower");
+    eig_sym(eigval,eigvec, L.i()*H*(L.t()).i() );
+
+    vec c = (L.t()).i() * eigvec.col(0);
+    double E = eigval(0);
+
+    for (size_t i = 0; i < Npar; i++) {
+      analytical(i) = 2.0*c(index)*dot(c,(HG[i]-E*BG[i]));
+    }
+    analytical /= dot(c , B*c);
+    vec numeric = NumGradient(*sys, *matElem, basis, index);
+
+    ASSERT_EQ(analytical.n_rows, numeric.n_rows);
+    for (size_t i = 0; i < analytical.n_rows; i++) {
+      EXPECT_NEAR(analytical(i),numeric(i),1e-4);
+    }
   }
 }
 
@@ -424,6 +430,7 @@ INSTANTIATE_TEST_CASE_P(gradtest,gradientTestFixture,
         ::testing::Combine(::testing::ValuesIn(Dlist),
                            ::testing::ValuesIn(mlist),
                            ::testing::ValuesIn(potlist),
+                           ::testing::ValuesIn(Klist),
                            ::testing::ValuesIn(Alist)
                            ));
 
@@ -435,7 +442,7 @@ INSTANTIATE_TEST_CASE_P(dimtest,dimensionTestFixture,
 
 
 int main(int argc, char **argv) {
-  size_t trials = 1;
+  size_t trials = 5;
   arma_rng::set_seed_random();
 
   Alist.reserve(trials);
@@ -474,6 +481,12 @@ int main(int argc, char **argv) {
   potlist.push_back(1);
   potlist.push_back(2);
   potlist.push_back(3);
+
+  Klist.push_back(2);
+  Klist.push_back(3);
+  Klist.push_back(5);
+  Klist.push_back(7);
+  Klist.push_back(10);
 
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
