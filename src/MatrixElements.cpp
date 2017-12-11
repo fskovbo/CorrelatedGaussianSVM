@@ -103,7 +103,7 @@ void MatrixElements::calculateH(mat& A1, mat& A2, vec& s1, vec& s2, double& Hij,
 
 
   size_t count = 0;
-  for (size_t i = 0; i < n; i++) {
+  for (size_t i = 0; i < n+1; i++) {
     for (size_t j = i+1; j < n+1; j++) {
       for (size_t k = 0; k < De; k++) {
         vArray                    = vArrayList.at(k);
@@ -122,8 +122,10 @@ void MatrixElements::calculateH(mat& A1, mat& A2, vec& s1, vec& s2, double& Hij,
   vec Mgrad_s = 0.5*Bi*v*overlap;
   vec Tgrad_A = (6.0/De*trace(A1*0.5*lambda*A2*Bi) + dot(s1-2.0*A1*u,0.5*lambda*(s2-2.0*A2*u)))*Mgrad_A
             + 6.0/De*(Tgrad2_A+Tgrad3_A)*overlap + (Tgrad4_A+Tgrad5_A)*overlap;
+  // vec Tgrad_s = (6.0/De*trace(A1*0.5*lambda*A2*Bi) + dot(s1-2.0*A1*u,0.5*lambda*(s2-2.0*A2*u)))*Mgrad_s
+  //           + (-A1*Bi*0.5*lambda*(s2-2.0*A2*u) + (0.5*lambda - 0.5*lambda*A2*Bi)*(s1-2.0*A1*u) )*overlap;
   vec Tgrad_s = (6.0/De*trace(A1*0.5*lambda*A2*Bi) + dot(s1-2.0*A1*u,0.5*lambda*(s2-2.0*A2*u)))*Mgrad_s
-            + (-A1*Bi*0.5*lambda*(s2-2.0*A2*u) + (0.5*lambda - 0.5*lambda*A2*Bi)*(s1-2.0*A1*u) )*overlap;
+            + (0.5*lambda*s1-2.0*0.5*lambda*A1*u-Bi*A1*0.5*lambda*s2-Bi*A2*0.5*lambda*s1+2.0*Bi*A2*0.5*lambda*A1*u+2.0*Bi*A1*0.5*lambda*A2*u)*overlap;
 
   vec Vgrad_A(De*n*(n+1)/2);
   vec Vgrad_s(De*n);
