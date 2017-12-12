@@ -192,7 +192,7 @@ vec Variational::sweepDeterministic(size_t state, size_t sweeps, size_t Nunique,
   //
   std::vector<double> lb(Npar);
   std::vector<double> xs(Npar);
-  std::vector<mat> dummy;
+  std::vector<vec> dummy;
   for (size_t i = 0; i < Npar; i++) {
     lb[i] = 1e-6;
   }
@@ -609,12 +609,12 @@ double Variational::myvfunc_grad(const std::vector<double> &x, std::vector<doubl
   vec& uniquePar = d->uniquePar;
   vector<vec**>& vArrayList = d->vArrayList;
   mat H = d->H, B = d->B;
-  vector<mat> HG = d->HG, BG = d->BG;
+  vector<vec> HG = d->HG, BG = d->BG;
   cube& basis = d->basis;
   MatrixElements& matElem = d->matElem;
 
   double Hij, Bij;
-  vec Hgradij, Bgradij;
+  vec Hgrad, Bgrad;
   mat Acurrent(De*n,De*n), Atrial = zeros<mat>(De*n,De*n);
   size_t count = 0;
   vec** vArray;
@@ -631,31 +631,21 @@ double Variational::myvfunc_grad(const std::vector<double> &x, std::vector<doubl
 
   for (size_t j = 0; j < K; j++) {
     if (j == index) {
-      matElem.calculateH_noShift(Atrial,Atrial,Hij,Bij,Hgradij,Bgradij);
-      count = 0;
-      for (auto iH = begin(HG), iB = begin(BG), e = end(HG); iH != e; ++iH, ++iB){
-        (*iH)(index,index) = 2*Hgradij(count);
-        (*iB)(index,index) = 2*Bgradij(count);
-        count++;
-      }
+      matElem.calculateH_noShift(Atrial,Atrial,Hij,Bij,Hgrad,Bgrad);
       H(index,index) = Hij;
       B(index,index) = Bij;
     } else {
       Acurrent = basis.slice(j);
 
-      matElem.calculateH_noShift(Acurrent,Atrial,Hij,Bij,Hgradij,Bgradij);
-      count = 0;
-      for (auto iH = begin(HG), iB = begin(BG), e = end(HG); iH != e; ++iH, ++iB){
-        (*iH)(j,index) = Hgradij(count);
-        (*iH)(index,j) = Hgradij(count);
-        (*iB)(j,index) = Bgradij(count);
-        (*iB)(index,j) = Bgradij(count);
-        count++;
-      }
+      matElem.calculateH_noShift(Acurrent,Atrial,Hij,Bij,Hgrad,Bgrad);
       H(j,index) = Hij;
       H(index,j) = Hij;
       B(j,index) = Bij;
       B(index,j) = Bij;
+    }
+    for (size_t l = 0; l < Nunique; l++) {
+      (HG[l])(j) = Hgrad(l);
+      (BG[l])(j) = Bgrad(l);
     }
   }
 
@@ -670,16 +660,17 @@ double Variational::myvfunc_grad(const std::vector<double> &x, std::vector<doubl
     eigval = 9999*1e10*ones<vec>(K);
   }
 
-  count = 0;
+  vec c = (L.t()).i() * eigvec.col(0);
+  double E = eigval(0);
+  double norm = dot(c , B*c);
+
   if (!grad.empty()){
-    for (auto iH = begin(HG), iB = begin(BG), e = end(HG); iH != e; ++iH, ++iB){
-      grad.at(count) = dot(eigvec.col(0), ((*iH)-eigval(0)*(*iB)) * eigvec.col(0))/dot(eigvec.col(0), B*eigvec.col(0));
-      count++;
+    for (size_t i = 0; i < Nunique; i++) {
+      grad[i] = 2.0*c(index)*dot(c,(HG[i]-E*BG[i]))/norm;
     }
   }
 
-  cout << eigval(0) << endl;
-  return eigval(0);
+  return E;
 }
 
 double Variational::myvfunc_grad_test(const std::vector<double> &x, std::vector<double> &grad, void *data)
@@ -689,7 +680,7 @@ double Variational::myvfunc_grad_test(const std::vector<double> &x, std::vector<
   vec& uniquePar = d->uniquePar;
   vector<vec**>& vArrayList = d->vArrayList;
   mat H = d->H, B = d->B;
-  vector<mat> HG = d->HG, BG = d->BG;
+  vector<vec> HG = d->HG, BG = d->BG;
   cube& basis = d->basis;
   MatrixElements& matElem = d->matElem;
 
@@ -745,11 +736,11 @@ vec Variational::sweepDeterministic_grad_test(){
   //
   //  Set initial matrix gradients
   //
-  std::vector<mat> HG(Npar);
-  std::vector<mat> BG(Npar);
+  std::vector<vec> HG(Npar);
+  std::vector<vec> BG(Npar);
   for (size_t i = 0; i < Npar; i++) {
-    HG.at(i) = (mat(K,K));
-    BG.at(i) = (mat(K,K));
+    HG.at(i) = (vec(K));
+    BG.at(i) = (vec(K));
   }
 
   //
@@ -788,33 +779,11 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
   //
   //  Set initial matrix gradients
   //
-  std::vector<mat> HG(Npar);
-  std::vector<mat> BG(Npar);
+  std::vector<vec> HG(Npar);
+  std::vector<vec> BG(Npar);
   for (size_t i = 0; i < Npar; i++) {
-    HG.at(i) = (mat(K,K));
-    BG.at(i) = (mat(K,K));
-  }
-  for (size_t i = 0; i < K; i++) {
-    mat Ai = basis.slice(i);
-    for (size_t j = i; j < K; j++) {
-      mat Aj = basis.slice(j);
-      double Hij, Bij;
-      vec Hgradij, Bgradij;
-
-      matElem.calculateH_noShift(Ai,Aj,Hij,Bij,Hgradij,Bgradij);
-      if (j == i) {
-        Hgradij *= 2;
-        Bgradij *= 2;
-      }
-      size_t count = 0;
-      for (auto iH = begin(HG), iB = begin(BG), e = end(HG); iH != e; ++iH, ++iB){
-        (*iH)(i,j) = Hgradij(count);
-        (*iH)(j,i) = Hgradij(count);
-        (*iB)(i,j) = Bgradij(count);
-        (*iB)(j,i) = Bgradij(count);
-        count++;
-      }
-    }
+    HG.at(i) = zeros<vec>(K);
+    BG.at(i) = zeros<vec>(K);
   }
 
   //
@@ -827,12 +796,11 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
   }
   nlopt::opt opt(nlopt::LD_MMA, Npar);
   opt.set_lower_bounds(lb);
-  opt.set_xtol_abs(1e-10); // tolerance on parametres
+  opt.set_xtol_abs(1e-8); // tolerance on parametres
   double minf;
 
   for (size_t l = 0; l < sweeps; l++) {
     for (size_t index = 0; index < K; index++) {
-      cout << "index " << index << endl;
       //
       // optimize basis function index using its current values as starting guess
       //
@@ -878,31 +846,16 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
         }
       }
 
-
-      vec Hgradij, Bgradij;
       for (size_t j = 0; j < K; j++) {
         if (j == index) {
-          matElem.calculateH_noShift(Anew,Anew,Hij,Bij,Hgradij,Bgradij);
-          count = 0;
-          for (auto iH = begin(HG), iB = begin(BG), e = end(HG); iH != e; ++iH, ++iB){
-            (*iH)(index,index) = 2*Hgradij(count);
-            (*iB)(index,index) = 2*Bgradij(count);
-            count++;
-          }
+          matElem.calculateH_noShift(Anew,Anew,Hij,Bij);
           H(index,index) = Hij;
           B(index,index) = Bij;
+
         } else {
           Acurrent = basis.slice(j);
 
-          matElem.calculateH_noShift(Acurrent,Anew,Hij,Bij,Hgradij,Bgradij);
-          count = 0;
-          for (auto iH = begin(HG), iB = begin(BG), e = end(HG); iH != e; ++iH, ++iB){
-            (*iH)(index,j) = Hgradij(count);
-            (*iH)(j,index) = Hgradij(count);
-            (*iB)(index,j) = Bgradij(count);
-            (*iB)(j,index) = Bgradij(count);
-            count++;
-          }
+          matElem.calculateH_noShift(Acurrent,Anew,Hij,Bij);
           H(j,index) = Hij;
           H(index,j) = Hij;
           B(j,index) = Bij;

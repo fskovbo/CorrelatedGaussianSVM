@@ -68,7 +68,8 @@ double TrapPotential::calculateExpectedPotential(mat& A1, mat& A2, vec& s1, vec&
   }
   vec Mgrad_A = 0.25*Mgrad2_A*overlap -1.5/De/detB *overlap*detBgrad;
 
-  Vgrad_A = (1.5/De*trace(Omega*Binv) + dot(u,Omega*u))*Mgrad_A + (1.5/De*Vgrad2_A + ugrad_A)*overlap;
-  Vgrad_s = (1.5/De*trace(Omega*Binv) + dot(u,Omega*u))*0.5*Binv*v*overlap + (Omega*Binv*u)*overlap;
-  return overlap*(1.5/De*trace(Omega*Binv) + dot(u,Omega*u));
+  double trapval = 1.5/De*trace(Omega*Binv) + dot(u,Omega*u);
+  Vgrad_A = trapval*Mgrad_A + (1.5/De*Vgrad2_A + ugrad_A)*overlap;
+  Vgrad_s = trapval*0.5*Binv*v*overlap + (Omega*Binv*u)*overlap;
+  return overlap*trapval;
 }

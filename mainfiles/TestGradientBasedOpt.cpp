@@ -16,8 +16,8 @@ int main() {
   clock_t begin = clock();
   arma_rng::set_seed_random();
 
-  size_t De             = 1;
-  vec masses            = {1 , 1  ,1};
+  size_t De             = 3;
+  vec masses            = {1 , 1 , 1};
   vec charges           = {0 , 0 , 0};
   auto Test             = System(masses,charges,De);
 
@@ -28,13 +28,13 @@ int main() {
   auto ansatz           = Variational(Test,elem);
 
   Trap.updateTrap(1e-2);
-  ansatz.initializeBasis(1);
+  ansatz.initializeBasis(5);
 
-  vec aGuess            = {0.5*1e-2 , 0.5*1e-2 , 0.5*1e-2};
-  vec res1              = ansatz.sweepStochastic(0,5,1e2,aGuess);
-  vec res2              = ansatz.sweepDeterministic_grad_test();
+  vec aGuess            = {0.5*1e-2 , 2.5 , 2.5};
+  vec res1              = ansatz.sweepStochastic(0,5,1e4,aGuess);
+  vec res2              = ansatz.sweepDeterministic_grad(5);
 
-  cout << res2(0) << endl;
+  cout << res2(res2.n_rows-1)-Trap.gsExpectedVal() << endl;
 
   clock_t end = clock();
   cout << "Runtime = " <<  double(end - begin) / CLOCKS_PER_SEC << endl;

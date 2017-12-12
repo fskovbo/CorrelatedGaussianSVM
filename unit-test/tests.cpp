@@ -230,10 +230,6 @@ TEST_P(gradientTestFixture, MatchOneNumericalAnalyticalGradientFullBasis){
         B(i,j) = Bij;
         B(j,i) = Bij;
       }
-    }
-
-    for (size_t i = 0; i < K; i++) {
-      Ai = basis.slice(i);
       Aj = basis.slice(index);
       matElem->calculateH_noShift(Ai, Aj, Hij, Bij, Hg, Bg);
 

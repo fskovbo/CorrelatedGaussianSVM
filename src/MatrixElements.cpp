@@ -101,6 +101,11 @@ void MatrixElements::calculateH(mat& A1, mat& A2, vec& s1, vec& s2, double& Hij,
   vec Tgrad5_A(De*n*(n+1)/2);
   vec Mgrad2_A(De*n*(n+1)/2);
 
+  //  common calculations
+
+  vec S1 = s1-2.0*A1*u;
+  vec S2 = s2-2.0*A2*u;
+  mat Lambda = 0.5*lambda;
 
   size_t count = 0;
   for (size_t i = 0; i < n+1; i++) {
@@ -110,27 +115,25 @@ void MatrixElements::calculateH(mat& A1, mat& A2, vec& s1, vec& s2, double& Hij,
         Bigrad_A.slice(De*count+k)= -Bi*vArray[i][j]*(vArray[i][j]).t()*Bi;
         detBgrad_A(De*count+k)    = detB * dot(vArray[i][j],Bi*vArray[i][j]);
         Mgrad2_A(De*count+k)      = dot(v,Bigrad_A.slice(De*count+k)*v);
-        Tgrad2_A(De*count+k)      = trace(A1*0.5*lambda*A2*Bigrad_A.slice(De*count+k)); // dB-1/da
-        Tgrad3_A(De*count+k)      = trace(A1*0.5*lambda*vArray[i][j]*(vArray[i][j]).t()*Bi); // dA/da
-        Tgrad4_A(De*count+k)      = dot(-2.0*A1*Bigrad_A.slice(De*count+k)*v, 0.5*lambda*(s2-2.0*A2*u));
-        Tgrad5_A(De*count+k)      = dot(s1-2.0*A1*u, 0.5*lambda * (-vArray[i][j]*(vArray[i][j]).t()*Bi*v -A2*Bigrad_A.slice(De*count+k)*v));
+        Tgrad2_A(De*count+k)      = trace(A1*Lambda*A2*Bigrad_A.slice(De*count+k)); // dB-1/da
+        Tgrad3_A(De*count+k)      = trace(A1*Lambda*vArray[i][j]*(vArray[i][j]).t()*Bi); // dA/da
+        Tgrad4_A(De*count+k)      = dot(-2.0*A1*Bigrad_A.slice(De*count+k)*v, Lambda*S2);
+        Tgrad5_A(De*count+k)      = dot(S1, Lambda * (-vArray[i][j]*(vArray[i][j]).t()*Bi*v -A2*Bigrad_A.slice(De*count+k)*v));
       }
       count++;
     }
   }
+  double T = 6.0/De*trace(A1*Lambda*A2*Bi) + dot(S1,Lambda*S2);
   vec Mgrad_A = 0.25*Mgrad2_A*overlap -1.5/De/detB *overlap*detBgrad_A;
   vec Mgrad_s = 0.5*Bi*v*overlap;
-  vec Tgrad_A = (6.0/De*trace(A1*0.5*lambda*A2*Bi) + dot(s1-2.0*A1*u,0.5*lambda*(s2-2.0*A2*u)))*Mgrad_A
-            + 6.0/De*(Tgrad2_A+Tgrad3_A)*overlap + (Tgrad4_A+Tgrad5_A)*overlap;
-  // vec Tgrad_s = (6.0/De*trace(A1*0.5*lambda*A2*Bi) + dot(s1-2.0*A1*u,0.5*lambda*(s2-2.0*A2*u)))*Mgrad_s
-  //           + (-A1*Bi*0.5*lambda*(s2-2.0*A2*u) + (0.5*lambda - 0.5*lambda*A2*Bi)*(s1-2.0*A1*u) )*overlap;
-  vec Tgrad_s = (6.0/De*trace(A1*0.5*lambda*A2*Bi) + dot(s1-2.0*A1*u,0.5*lambda*(s2-2.0*A2*u)))*Mgrad_s
-            + (0.5*lambda*s1-2.0*0.5*lambda*A1*u-Bi*A1*0.5*lambda*s2-Bi*A2*0.5*lambda*s1+2.0*Bi*A2*0.5*lambda*A1*u+2.0*Bi*A1*0.5*lambda*A2*u)*overlap;
+  vec Tgrad_A = T*Mgrad_A + 6.0/De*(Tgrad2_A+Tgrad3_A)*overlap + (Tgrad4_A+Tgrad5_A)*overlap;
+  vec Tgrad_s = T*Mgrad_s
+            + (Lambda*s1-2.0*Lambda*A1*u-Bi*A1*Lambda*s2-Bi*A2*Lambda*s1+2.0*Bi*A2*Lambda*A1*u+2.0*Bi*A1*Lambda*A2*u)*overlap;
 
   vec Vgrad_A(De*n*(n+1)/2);
   vec Vgrad_s(De*n);
 
-  double T = overlap*(6.0/De*trace(A1*0.5*lambda*A2*Bi) + dot(s1-2.0*A1*u,0.5*lambda*(s2-2.0*A2*u)));
+  T *= overlap;
   double V = Vstrat.calculateExpectedPotential(A1, A2, s1, s2, Bi, detB, Vgrad_A, Vgrad_s, Bigrad_A, detBgrad_A);
 
   Hij         = T+V;

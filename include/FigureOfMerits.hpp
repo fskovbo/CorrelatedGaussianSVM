@@ -15,7 +15,7 @@ typedef struct {
     vec& uniquePar;
     vector<vec**>& vArrayList;
     mat H, B;
-    vector<mat> HG, BG;
+    vector<vec> HG, BG;
     cube& basis;
     MatrixElements& matElem;
 } my_function_data;
