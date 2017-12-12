@@ -221,6 +221,129 @@ inline vec NumGradient(System& sys, MatrixElements& elem, cube& basis, size_t in
   return g;
 }
 
+inline vec NumGradient(System& sys, MatrixElements& elem, cube& basis, mat& shift, size_t index){
+  std::vector<mat> dH;
+  std::vector<mat> dM;
+  size_t count = 0;
+  size_t K = basis.n_slices;
+  vec** vA;
+  vec v, g(sys.De*sys.n*(sys.n+1)/2 + sys.De*sys.n);
+  double eps = 1e-3;
+  mat Hp(K,K), Hm(K,K), Bp(K,K), Bm(K,K), H(K,K), B(K,K);
+  double Hxyp, Bxyp, Hxym, Bxym, Hxy, Bxy;
+
+  for (size_t i = 0; i < sys.n+1; i++) {
+    for (size_t j = i+1; j < sys.n+1; j++) {
+      for (size_t k = 0; k < sys.De; k++) {
+        vA = sys.vArrayList.at(k);
+        v  = vA[i][j];
+
+        mat temp = eps*v*v.t();
+
+        for (size_t x = 0; x < K; x++) {
+          mat Ax = basis.slice(x);
+          vec sx = shift.col(x);
+          for (size_t y = x; y < K; y++) {
+            mat Ay = basis.slice(y);
+            vec sy = shift.col(y);
+
+            elem.calculateH(Ax,Ay,sx,sy,Hxy,Bxy);
+            H(x,y) = Hxy;
+            H(y,x) = Hxy;
+            B(x,y) = Bxy;
+            B(y,x) = Bxy;
+          }
+        }
+
+        Hp = Hm = H;
+        Bp = Bm = B;
+
+        mat Ap = basis.slice(index) + temp;
+        mat Am = basis.slice(index) - temp;
+        vec sf = shift.col(index);
+        for (size_t x = 0; x < K; x++) {
+          mat Ax = basis.slice(x);
+          vec sx = shift.col(x);
+
+          if (x == index) {
+            elem.calculateH(Ap,Ap,sx,sx,Hxyp,Bxyp);
+            elem.calculateH(Am,Am,sx,sx,Hxym,Bxym);
+          }
+          else{
+            elem.calculateH(Ax,Ap,sx,sf,Hxyp,Bxyp);
+            elem.calculateH(Ax,Am,sx,sf,Hxym,Bxym);
+          }
+          Hp(x,index) = Hxyp; Hm(x,index) = Hxym;
+          Hp(index,x) = Hxyp; Hm(index,x) = Hxym;
+          Bp(x,index) = Bxyp; Bm(x,index) = Bxym;
+          Bp(index,x) = Bxyp; Bm(index,x) = Bxym;
+        }
+        dH.emplace_back((Hp-Hm)/(2*eps));
+        dM.emplace_back((Bp-Bm)/(2*eps));
+
+        mat Lp(K,K), Lm(K,K);
+        vec eigvalp, eigvalm;
+        mat eigvecp, eigvecm;
+        chol(Lp,Bp,"lower");
+        chol(Lm,Bm,"lower");
+
+        eig_sym(eigvalp,eigvecp, Lp.i()*Hp*(Lp.t()).i() );
+        eig_sym(eigvalm,eigvecm, Lm.i()*Hm*(Lm.t()).i() );
+
+        g(count) = ( eigvalp(0) - eigvalm(0) )/(2*eps);
+
+        count++;
+      }
+    }
+  }
+
+  for (size_t i = 0; i < sys.De*sys.n; i++) {
+    vec temp = zeros<vec>(sys.De*sys.n);
+    temp(i) = 1;
+    vec sp = shift.col(index) + eps*temp;
+    vec sm = shift.col(index) - eps*temp;
+    mat Af = basis.slice(index);
+
+    Hp = Hm = H;
+    Bp = Bm = B;
+
+    for (size_t x = 0; x < K; x++) {
+      mat Ax = basis.slice(x);
+      vec sx = shift.col(x);
+
+      if (x == index) {
+        elem.calculateH(Ax,Ax,sp,sp,Hxyp,Bxyp);
+        elem.calculateH(Ax,Ax,sm,sm,Hxym,Bxym);
+      }
+      else{
+        elem.calculateH(Ax,Af,sx,sp,Hxyp,Bxyp);
+        elem.calculateH(Ax,Af,sx,sm,Hxym,Bxym);
+      }
+      Hp(x,index) = Hxyp; Hm(x,index) = Hxym;
+      Hp(index,x) = Hxyp; Hm(index,x) = Hxym;
+      Bp(x,index) = Bxyp; Bm(x,index) = Bxym;
+      Bp(index,x) = Bxyp; Bm(index,x) = Bxym;
+    }
+    dH.emplace_back((Hp-Hm)/(2*eps));
+    dM.emplace_back((Bp-Bm)/(2*eps));
+
+    mat Lp(K,K), Lm(K,K);
+    vec eigvalp, eigvalm;
+    mat eigvecp, eigvecm;
+
+    chol(Lp,Bp,"lower");
+    chol(Lm,Bm,"lower");
+    eig_sym(eigvalp,eigvecp, Lp.i()*Hp*(Lp.t()).i() );
+    eig_sym(eigvalm,eigvecm, Lm.i()*Hm*(Lm.t()).i() );
+
+    g(count) = ( eigvalp(0) - eigvalm(0) )/(2*eps);
+
+    count++;
+  }
+
+  return g;
+}
+
 inline mat buildA(System* sys){
   vec vals = 1e4*randu<vec>(sys->De * sys->n * (sys->n +1)/2);
   vec** vA;
