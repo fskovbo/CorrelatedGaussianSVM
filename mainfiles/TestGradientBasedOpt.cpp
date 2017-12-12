@@ -32,7 +32,8 @@ int main() {
 
   vec aGuess            = {0.5*1e-2 , 2.5 , 2.5};
   vec res1              = ansatz.sweepStochastic(0,5,1e2,aGuess);
-  vec res2              = ansatz.sweepDeterministic_grad(0,5);
+  // vec res2              = ansatz.sweepDeterministic_grad(0,5);
+  vec res2              = ansatz.stochasticGradient(1,5,1e1,aGuess);
 
   cout << res2(res2.n_rows-1)-Trap.gsExpectedVal() << endl;
 

@@ -498,6 +498,56 @@ vec Variational::sweepDeterministic_grad(size_t state, size_t sweeps){
   return results;
 }
 
+vec Variational::stochasticGradient(size_t state, size_t sweeps, size_t trials, vec Ameanval){
+  size_t Npar = De*n*(n+1)/2;
+  double Etrial, Ebest = eigenEnergy(state);
+  mat Hbest = H, Bbest = B;
+  vec dummy, results = Ebest*ones<vec>(sweeps+1);
+  vec** vArray;
+  std::vector<double> lb(Npar,1e-6);
+  std::vector<double> xs(Npar);
+  nlopt::opt opt(nlopt::LD_MMA, Npar); //<--- sets optimization algorithm
+  opt.set_lower_bounds(lb);
+  opt.set_xtol_abs(1e-6); // tolerance on parametres
+
+  for (size_t l = 0; l < sweeps; l++) {
+    for (size_t j = 0; j < K; j++) {
+      for (size_t k = 0; k < trials; k++) {
+        generateRandomGaussian(Ameanval,xs);
+        my_function_data data = { j,n,K,De,De,state,dummy,vArrayList,H,B,basis,matElem };
+        opt.set_min_objective(myvfunc_grad, &data);
+
+        bool status = false;
+        size_t attempts = 0;
+        while (!status && attempts < 5) {
+          try{
+            nlopt::result optresult = opt.optimize(xs, Etrial);
+            status = true;
+          }
+          catch (const std::exception& e) {
+            attempts++;
+          }
+        }
+
+        if (Etrial < Ebest) { //if trial is better: update basis
+          basis.slice(j) = updateMatrices(xs,j,false,dummy);
+          Ebest = Etrial;
+          Hbest = H;
+          Bbest = B;
+          basisCoefficients[j] = xs;
+        }
+        else{ //otherwise revert to old H,B
+          H = Hbest;
+          B = Bbest;
+        }
+      }
+    }
+    cout << "Energy after stochastic sweep " << l+1 << ": " << Ebest << "\n";
+    results(l+1) = Ebest;
+  }
+  return results;
+}
+
 void Variational::printBasis(){
   cout << "Current basis:" << endl << basis << endl;
 }

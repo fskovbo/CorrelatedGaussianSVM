@@ -44,6 +44,7 @@ public:
   vec sweepDeterministicShift(size_t state, size_t sweeps, vec maxShift = {1,1,1}, size_t Nunique = 3, vec uniquePar = {0,1,2});
   vec sweepDeterministicCMAES(size_t state, size_t sweeps, size_t maxeval);
   vec sweepDeterministic_grad(size_t state, size_t sweeps);
+  vec stochasticGradient(size_t state, size_t sweeps, size_t trials, vec Ameanval);
 
   void printBasis();
   void printShift();
