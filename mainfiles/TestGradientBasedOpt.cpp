@@ -28,10 +28,10 @@ int main() {
   auto ansatz           = Variational(Test,elem);
 
   Trap.updateTrap(1e-2);
-  ansatz.initializeBasis(5);
+  ansatz.initializeBasis(8);
 
   vec aGuess            = {0.5*1e-2 , 2.5 , 2.5};
-  vec res1              = ansatz.sweepStochastic(0,5,1e4,aGuess);
+  vec res1              = ansatz.sweepStochastic(0,5,1e2,aGuess);
   vec res2              = ansatz.sweepDeterministic_grad(5);
 
   cout << res2(res2.n_rows-1)-Trap.gsExpectedVal() << endl;
