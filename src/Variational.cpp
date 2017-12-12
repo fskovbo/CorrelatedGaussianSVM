@@ -464,217 +464,8 @@ vec Variational::sweepDeterministicCMAES(size_t state, size_t sweeps, size_t max
   return results;
 }
 
-vec Variational::addBasisFunction(size_t state, size_t tries, vec startGuess, vec maxShift, size_t Nunique, vec uniquePar){
-  size_t NparA = Nunique*n*(n+1)/2;
-  size_t NparS = 3*n;
-  size_t Npar  = NparA + NparS;
-  vec xstart(De*n*(n+1)/2), results(state+1);
-  vec** vArray;
-
-  K++;
-  basis.resize(De*n,De*n,K);
-  basisCoefficients.resize(De*n*(n+1)/2,K);
-  shift.resize(3*n,K);
-  H.resize(K,K);
-  B.resize(K,K);
-  //
-  //  NLOpt setup
-  //
-  std::vector<double> lb(Npar);
-  std::vector<double> ub(Npar);
-  std::vector<double> xs(Npar);
-  for (size_t i = 0; i < NparA; i++) {
-    lb[i] = 1e-6;
-    ub[i] = HUGE_VAL;
-  }
-  for (size_t i = 0; i < n; i++) {
-    for (size_t k = 0; k < 3; k++) {
-      lb[NparA + 3*i+k] = -3.0*maxShift(k);
-      ub[NparA + 3*i+k] = 3.0*maxShift(k);
-    }
-  }
-  nlopt::opt opt(nlopt::LN_NELDERMEAD, Npar);
-  opt.set_lower_bounds(lb);
-  opt.set_upper_bounds(ub);
-  opt.set_xtol_abs(1e-10); // tolerance on parametres
-  double minf;
-
-  for (size_t l = 0; l < tries; l++) {
-    generateRandomGaussian(startGuess,xstart);
-    for (size_t i = 0; i < n*(n+1)/2; i++) {
-      for (size_t k = 0; k < De; k++) {
-        xs[Nunique*i+uniquePar(k)] = xstart(De*i+k);
-      }
-    }
-    for (size_t i = 0; i < NparS; i++) {
-      xs[i+NparA] = shift(i,K-2);
-    }
-
-    my_function_data_shift data = { K-1,n,K,De,Nunique,state,uniquePar,vArrayList,H,B,basis,shift,matElem };
-    opt.set_min_objective(myvfunc_shift, &data);
-
-    bool status = false;
-    size_t attempts = 0;
-    while (!status && attempts < 5) {
-      try{
-        nlopt::result optresult = opt.optimize(xs, minf);
-        status = true;
-      }
-      catch (const std::exception& e) {
-        attempts++;
-      }
-    }
-
-    // ----------------------------------------- //
-    double Hij, Bij;
-    mat Acurrent(De*n,De*n), Anew = zeros<mat>(De*n,De*n);
-    vec scurrent(3*n), snew(3*n);
-    size_t count = 0;
-    for (size_t i = 0; i < n+1; i++) {
-      for (size_t j = i+1; j < n+1; j++) {
-        for (size_t k = 0; k < De; k++) {
-          vArray = vArrayList.at(k);
-          Anew += xs[Nunique*count+uniquePar(k)] * (vArray[i][j] * (vArray[i][j]).t());
-        }
-        count++;
-      }
-    }
-    for (size_t i = 0; i < NparS; i++) {
-      snew(i) = xs[NparA+i];
-    }
-
-    for (size_t j = 0; j < K-1; j++) {
-      Acurrent = basis.slice(j);
-      scurrent = shift.col(j);
-
-      matElem.calculateH(Acurrent,Anew,scurrent,snew,Hij,Bij);
-      H(j,K-1) = Hij;
-      H(K-1,j) = Hij;
-      B(j,K-1) = Bij;
-      B(K-1,j) = Bij;
-    }
-    matElem.calculateH(Anew,Anew,snew,snew,Hij,Bij);
-    H(K-1,K-1) = Hij;
-    B(K-1,K-1) = Bij;
-
-    // ----------------------------------------- //
-    //
-    // add optimized basis function to basis
-    //
-    vec Acoeffs(De*n*(n+1)/2);
-    for (size_t i = 0; i < n*(n+1)/2; i++) {
-      for (size_t k = 0; k < De; k++) {
-        Acoeffs(De*i+k) = xs[Nunique*i+uniquePar(k)];
-      }
-    }
-
-    basis.slice(K-1) = Anew;
-    basisCoefficients.col(K-1) = Acoeffs;
-    shift.col(K-1) = snew;
-  }
-  for (size_t i = 0; i <= state; i++) {
-    results(i) = eigenEnergy(i);
-  }
-  cout << "Energy after adding basis function " << K << ":\n" << results << "\n";
-  return results;
-}
-
-
-void Variational::printBasis(){
-  cout << "Current basis:" << endl << basis << endl;
-}
-
-void Variational::printShift(){
-  cout << "Current shift:" << endl << shift << endl;
-}
-
-void Variational::printBasisCoeffs(){
-  cout << "Current basis coefficients:" << endl << basisCoefficients << endl;
-}
-
-
-// -------------------------------------------------------------------------------------------------- //
-//
-//
-//      Gradient based methods below. Does not appear to work on this problem.
-//
-//
-// -------------------------------------------------------------------------------------------------- //
-
-
-double Variational::myvfunc_grad(const std::vector<double> &x, std::vector<double> &grad, void *data)
-{
-  my_function_data *d = reinterpret_cast<my_function_data*>(data);
-  size_t index = d->index, n = d->n, K = d->K, De = d->De, Nunique = d->Nunique;
-  vec& uniquePar = d->uniquePar;
-  vector<vec**>& vArrayList = d->vArrayList;
-  mat H = d->H, B = d->B;
-  vector<vec> HG = d->HG, BG = d->BG;
-  cube& basis = d->basis;
-  MatrixElements& matElem = d->matElem;
-
-  double Hij, Bij;
-  vec Hgrad, Bgrad;
-  mat Acurrent(De*n,De*n), Atrial = zeros<mat>(De*n,De*n);
-  size_t count = 0;
-  vec** vArray;
-
-  for (size_t i = 0; i < n+1; i++) {
-    for (size_t j = i+1; j < n+1; j++) {
-      for (size_t k = 0; k < De; k++) {
-        vArray = vArrayList.at(k);
-        Atrial += x[Nunique*count+uniquePar(k)] * (vArray[i][j] * (vArray[i][j]).t());
-      }
-      count++;
-    }
-  }
-
-  for (size_t j = 0; j < K; j++) {
-    if (j == index) {
-      matElem.calculateH_noShift(Atrial,Atrial,Hij,Bij,Hgrad,Bgrad);
-      H(index,index) = Hij;
-      B(index,index) = Bij;
-    } else {
-      Acurrent = basis.slice(j);
-
-      matElem.calculateH_noShift(Acurrent,Atrial,Hij,Bij,Hgrad,Bgrad);
-      H(j,index) = Hij;
-      H(index,j) = Hij;
-      B(j,index) = Bij;
-      B(index,j) = Bij;
-    }
-    for (size_t l = 0; l < Nunique*n*(n+1)/2; l++) {
-      (HG[l])(j) = Hgrad(l);
-      (BG[l])(j) = Bgrad(l);
-    }
-  }
-
-  mat L(K,K);
-  vec eigval;
-  mat eigvec;
-  bool status = chol(L,B,"lower");
-  if (status) {
-    eig_sym(eigval,eigvec, L.i()*H*(L.t()).i() );
-  }
-  else{
-    eigval = 9999*1e10*ones<vec>(K);
-  }
-
-  vec c = (L.t()).i() * eigvec.col(0);
-  double E = eigval(0);
-  double norm = dot(c , B*c);
-
-  if (!grad.empty()){
-    for (size_t i = 0; i < Nunique*n*(n+1)/2; i++) {
-      grad[i] = 2.0*c(index)*dot(c,(HG[i]-E*BG[i]))/norm;
-    }
-  }
-
-  return E;
-}
-
-vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniquePar){
-  size_t Npar = Nunique*n*(n+1)/2;
+vec Variational::sweepDeterministic_grad(size_t state, size_t sweeps){
+  size_t Npar = De*n*(n+1)/2;
   vec results(sweeps), xstart(Npar);
   vec** vArray;
 
@@ -698,7 +489,7 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
   }
   nlopt::opt opt(nlopt::LD_MMA, Npar);
   opt.set_lower_bounds(lb);
-  opt.set_xtol_abs(1e-8); // tolerance on parametres
+  opt.set_xtol_abs(1e-6); // tolerance on parametres
   double minf;
 
   for (size_t l = 0; l < sweeps; l++) {
@@ -709,11 +500,11 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
       xstart = basisCoefficients.col(index);
       for (size_t i = 0; i < n*(n+1)/2; i++) {
         for (size_t k = 0; k < De; k++) {
-          xs[Nunique*i+uniquePar(k)] = xstart(De*i+k);
+          xs[De*i+k] = xstart(De*i+k);
         }
       }
-      size_t state = 0;
-      my_function_data data = { index,n,K,De,Nunique,state,uniquePar,vArrayList,H,B,HG,BG,basis,matElem };
+
+      my_function_data data = { index,n,K,De,De,state,xstart,vArrayList,H,B,HG,BG,basis,matElem };
       opt.set_min_objective(myvfunc_grad, &data);
 
       bool status = false;
@@ -730,7 +521,7 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
 
       for (size_t i = 0; i < n*(n+1)/2; i++) {
         for (size_t k = 0; k < De; k++) {
-          xstart(De*i+k) = xs[Nunique*i+uniquePar(k)];
+          xstart(De*i+k) = xs[De*i+k];
         }
       }
 
@@ -742,7 +533,7 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
         for (size_t j = i+1; j < n+1; j++) {
           for (size_t k = 0; k < De; k++) {
             vArray = vArrayList.at(k);
-            Anew += xs[Nunique*count+uniquePar(k)] * (vArray[i][j] * (vArray[i][j]).t());
+            Anew += xs[De*count+k] * (vArray[i][j] * (vArray[i][j]).t());
           }
           count++;
         }
@@ -775,4 +566,16 @@ vec Variational::sweepDeterministic_grad(size_t sweeps, size_t Nunique, vec uniq
     results(l) = minf;
   }
   return results;
+}
+
+void Variational::printBasis(){
+  cout << "Current basis:" << endl << basis << endl;
+}
+
+void Variational::printShift(){
+  cout << "Current shift:" << endl << shift << endl;
+}
+
+void Variational::printBasisCoeffs(){
+  cout << "Current basis coefficients:" << endl << basisCoefficients << endl;
 }

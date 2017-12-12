@@ -198,4 +198,74 @@ inline double myvfunc_shift_add(const std::vector<double> &x, std::vector<double
   }
 }
 
+inline double myvfunc_grad(const std::vector<double> &x, std::vector<double> &grad, void *data)
+{
+  my_function_data *d = reinterpret_cast<my_function_data*>(data);
+  size_t index = d->index, n = d->n, K = d->K, De = d->De, state = d->state;
+  vector<vec**>& vArrayList = d->vArrayList;
+  mat H = d->H, B = d->B;
+  vector<vec> HG = d->HG, BG = d->BG;
+  cube& basis = d->basis;
+  MatrixElements& matElem = d->matElem;
+
+  double Hij, Bij;
+  vec Hgrad, Bgrad;
+  mat Acurrent(De*n,De*n), Atrial = zeros<mat>(De*n,De*n);
+  size_t count = 0;
+  vec** vArray;
+
+  for (size_t i = 0; i < n+1; i++) {
+    for (size_t j = i+1; j < n+1; j++) {
+      for (size_t k = 0; k < De; k++) {
+        vArray = vArrayList.at(k);
+        Atrial += x[De*count+k] * (vArray[i][j] * (vArray[i][j]).t());
+      }
+      count++;
+    }
+  }
+
+  for (size_t j = 0; j < K; j++) {
+    if (j == index) {
+      matElem.calculateH_noShift(Atrial,Atrial,Hij,Bij,Hgrad,Bgrad);
+      H(index,index) = Hij;
+      B(index,index) = Bij;
+    } else {
+      Acurrent = basis.slice(j);
+
+      matElem.calculateH_noShift(Acurrent,Atrial,Hij,Bij,Hgrad,Bgrad);
+      H(j,index) = Hij;
+      H(index,j) = Hij;
+      B(j,index) = Bij;
+      B(index,j) = Bij;
+    }
+    for (size_t l = 0; l < De*n*(n+1)/2; l++) {
+      (HG[l])(j) = Hgrad(l);
+      (BG[l])(j) = Bgrad(l);
+    }
+  }
+
+  mat L(K,K);
+  vec eigval;
+  mat eigvec;
+  bool status = chol(L,B,"lower");
+  if (status) {
+    eig_sym(eigval,eigvec, L.i()*H*(L.t()).i() );
+  }
+  else{
+    eigval = 9999*1e10*ones<vec>(K);
+  }
+
+  vec c = (L.t()).i() * eigvec.col(state);
+  double E = eigval(state);
+  double norm = dot(c , B*c);
+
+  if (!grad.empty()){
+    for (size_t i = 0; i < De*n*(n+1)/2; i++) {
+      grad[i] = 2.0*c(index)*dot(c,(HG[i]-E*BG[i]))/norm;
+    }
+  }
+
+  return E;
+}
+
 #endif
