@@ -18,7 +18,7 @@ double Variational::eigenEnergy(size_t state){
   }
 }
 
-mat Variational::generateRandomGaussian(vec& Ameanval, vec& coeffs){
+mat Variational::generateRandomGaussian(vec& Ameanval, vector<double>& coeffs){
   size_t count = 0;
   mat A = zeros<mat>(De*n,De*n);
   vec alpha;
@@ -30,7 +30,7 @@ mat Variational::generateRandomGaussian(vec& Ameanval, vec& coeffs){
         vArray = vArrayList.at(k);
         alpha = 1.0/pow(-Ameanval(k)*log(randu<vec>(n*(n+1)/2)),2);
         A += alpha(count) * (vArray[i][j] * (vArray[i][j]).t());
-        coeffs(De*count+k) = alpha(count);
+        coeffs[De*count+k] = alpha(count);
       }
       count++;
     }
@@ -38,20 +38,75 @@ mat Variational::generateRandomGaussian(vec& Ameanval, vec& coeffs){
   return A;
 }
 
+mat Variational::updateMatrices(vector<double> x, size_t index, bool shifted, vec& snew){
+  vec ** vArray;
+  size_t count = 0, NparA = De*n*(n+1)/2, NparS = 3*n;
+  double Hij, Bij;
+  mat Acurrent(De*n,De*n), Anew = zeros<mat>(De*n,De*n);
+  vec scurrent(NparS);
+  snew = zeros<vec>(NparS);
+
+  for (size_t i = 0; i < n+1; i++) {
+    for (size_t j = i+1; j < n+1; j++) {
+      for (size_t k = 0; k < De; k++) {
+        vArray = vArrayList.at(k);
+        Anew += x[De*count+k] * (vArray[i][j] * (vArray[i][j]).t());
+      }
+      count++;
+    }
+  }
+  if (shifted) {
+    for (size_t i = 0; i < NparS; i++) {
+      snew(i) = x[NparA+i];
+    }
+  }
+
+  for (size_t j = 0; j < K; j++) {
+    if (j == index) {
+      if (shifted) {
+        matElem.calculateH(Anew,Anew,snew,snew,Hij,Bij);
+      }
+      else{
+        matElem.calculateH_noShift(Anew,Anew,Hij,Bij);
+      }
+      H(index,index) = Hij;
+      B(index,index) = Bij;
+
+    } else {
+      Acurrent = basis.slice(j);
+
+      if (shifted) {
+        scurrent = shift.col(j);
+        matElem.calculateH(Acurrent,Anew,scurrent,snew,Hij,Bij);
+      }
+      else{
+        matElem.calculateH_noShift(Acurrent,Anew,Hij,Bij);
+      }
+      H(j,index) = Hij;
+      H(index,j) = Hij;
+      B(j,index) = Bij;
+      B(index,j) = Bij;
+    }
+  }
+  return Anew;
+}
+
 double Variational::initializeBasis(size_t basisSize){
   K = basisSize;
   H.resize(K,K);
   B.resize(K,K);
   basis.set_size(De*n,De*n,K);
-  basisCoefficients.set_size(De*n*(n+1)/2,K);
+  for (size_t i = 0; i < K; i++) {
+    basisCoefficients.emplace_back(vector<double>(De*n*(n+1)/2));
+  }
   shift = zeros<mat>(3*n,K);
 
-  vec coeffs(De*n*(n+1)/2);
+  vector<double> coeffs(De*n*(n+1)/2);
   vec startingGuess = 10*ones<vec>(De);
 
   for (size_t i = 0; i < K; i++) {
     basis.slice(i) = generateRandomGaussian(startingGuess,coeffs);
-    basisCoefficients.col(i) = coeffs;
+    basisCoefficients[i] = coeffs;
   }
 
   mat A1(De*n,De*n), A2(De*n,De*n);
@@ -76,7 +131,7 @@ vec Variational::sweepStochastic(size_t state, size_t sweeps, size_t trials, vec
   double Hij, Bij, Etrial;
   double Ebest = eigenEnergy(state);
   mat Hbest = H, Bbest = B;
-  vec trialCoeffs(De*n*(n+1)/2);
+  vector<double> trialCoeffs(De*n*(n+1)/2);
   vec results = Ebest*ones<vec>(sweeps+1);
 
   for (size_t l = 0; l < sweeps; l++) {
@@ -108,7 +163,7 @@ vec Variational::sweepStochastic(size_t state, size_t sweeps, size_t trials, vec
           Hbest = H;
           Bbest = B;
           basis.slice(j) = Atrial;
-          basisCoefficients.col(j) = trialCoeffs;
+          basisCoefficients[j] = trialCoeffs;
         }
         else{ //otherwise revert to old H,B
           H = Hbest;
@@ -129,7 +184,7 @@ vec Variational::sweepStochasticShift(size_t state, size_t sweeps, size_t trials
   double Hij, Bij, Etrial;
   double Ebest = eigenEnergy(state);
   mat Hbest = H, Bbest = B;
-  vec trialCoeffs(De*n*(n+1)/2);
+  vector<double> trialCoeffs(De*n*(n+1)/2);
   vec results = Ebest*ones<vec>(sweeps+1);
 
   for (size_t l = 0; l < sweeps; l++) {
@@ -166,7 +221,7 @@ vec Variational::sweepStochasticShift(size_t state, size_t sweeps, size_t trials
           Hbest = H;
           Bbest = B;
           basis.slice(j) = Atrial;
-          basisCoefficients.col(j) = trialCoeffs;
+          basisCoefficients[j] = trialCoeffs;
           shift.col(j) = strial;
         }
         else{ //otherwise revert to old H,B
@@ -184,18 +239,14 @@ vec Variational::sweepStochasticShift(size_t state, size_t sweeps, size_t trials
 
 vec Variational::sweepDeterministic(size_t state, size_t sweeps, size_t Nunique, vec uniquePar){
   size_t Npar = Nunique*n*(n+1)/2;
-  vec results(sweeps), xstart(Npar);
+  vec results(sweeps);
   vec** vArray;
 
   //
   //  NLOpt setup
   //
-  std::vector<double> lb(Npar);
+  std::vector<double> lb(Npar,1e-6);
   std::vector<double> xs(Npar);
-  std::vector<vec> dummy;
-  for (size_t i = 0; i < Npar; i++) {
-    lb[i] = 1e-6;
-  }
   nlopt::opt opt(nlopt::LN_NELDERMEAD, Npar);
   opt.set_lower_bounds(lb);
   opt.set_xtol_abs(1e-10); // tolerance on parametres
@@ -206,13 +257,13 @@ vec Variational::sweepDeterministic(size_t state, size_t sweeps, size_t Nunique,
       //
       // optimize basis function index using its current values as starting guess
       //
-      xstart = basisCoefficients.col(index);
+      auto xstart = basisCoefficients[index];
       for (size_t i = 0; i < n*(n+1)/2; i++) {
         for (size_t k = 0; k < De; k++) {
-          xs[Nunique*i+uniquePar(k)] = xstart(De*i+k);
+          xs[Nunique*i+uniquePar(k)] = xstart[De*i+k];
         }
       }
-      my_function_data data = { index,n,K,De,Nunique,state,uniquePar,vArrayList,H,B,dummy,dummy,basis,matElem };
+      my_function_data data = { index,n,K,De,Nunique,state,uniquePar,vArrayList,H,B,basis,matElem };
       opt.set_min_objective(myvfunc, &data);
 
       bool status = false;
@@ -229,45 +280,16 @@ vec Variational::sweepDeterministic(size_t state, size_t sweeps, size_t Nunique,
 
       for (size_t i = 0; i < n*(n+1)/2; i++) {
         for (size_t k = 0; k < De; k++) {
-          xstart(De*i+k) = xs[Nunique*i+uniquePar(k)];
+          xstart[De*i+k] = xs[Nunique*i+uniquePar(k)];
         }
       }
 
-      // ----------------------------------------- //
-      double Hij, Bij;
-      mat Acurrent(De*n,De*n), Anew = zeros<mat>(De*n,De*n);
-      size_t count = 0;
-      for (size_t i = 0; i < n+1; i++) {
-        for (size_t j = i+1; j < n+1; j++) {
-          for (size_t k = 0; k < De; k++) {
-            vArray = vArrayList.at(k);
-            Anew += xs[Nunique*count+uniquePar(k)] * (vArray[i][j] * (vArray[i][j]).t());
-          }
-          count++;
-        }
-      }
-
-      for (size_t j = 0; j < K; j++) {
-        if (j == index) {
-          matElem.calculateH_noShift(Anew,Anew,Hij,Bij);
-          H(index,index) = Hij;
-          B(index,index) = Bij;
-        } else {
-          Acurrent = basis.slice(j);
-
-          matElem.calculateH_noShift(Acurrent,Anew,Hij,Bij);
-          H(j,index) = Hij;
-          H(index,j) = Hij;
-          B(j,index) = Bij;
-          B(index,j) = Bij;
-        }
-      }
-      // ----------------------------------------- //
       //
       // add optimized basis function to basis
       //
-      basis.slice(index) = Anew;
-      basisCoefficients.col(index) = xstart;
+      vec dummy;
+      basis.slice(index) = updateMatrices(xs,index,false,dummy);
+      basisCoefficients[index] = xstart;
     }
     cout << "Energy after deterministic sweep " << l+1 << ": " << minf << "\n";
     results(l) = minf;
@@ -279,7 +301,7 @@ vec Variational::sweepDeterministicShift(size_t state, size_t sweeps, vec maxShi
   size_t NparA = Nunique*n*(n+1)/2;
   size_t NparS = 3*n;
   size_t Npar  = NparA + NparS;
-  vec results(sweeps), xstart(NparA);
+  vec results(sweeps);
   vec** vArray;
 
   //
@@ -310,10 +332,10 @@ vec Variational::sweepDeterministicShift(size_t state, size_t sweeps, vec maxShi
       // optimize basis function index using its current values as starting guess
       //
 
-      xstart = basisCoefficients.col(index);
+      auto xstart = basisCoefficients[index];
       for (size_t i = 0; i < n*(n+1)/2; i++) {
         for (size_t k = 0; k < De; k++) {
-          xs[Nunique*i+uniquePar(k)] = xstart(De*i+k);
+          xs[Nunique*i+uniquePar(k)] = xstart[De*i+k];
         }
       }
       for (size_t i = 0; i < NparS; i++) {
@@ -335,53 +357,19 @@ vec Variational::sweepDeterministicShift(size_t state, size_t sweeps, vec maxShi
         }
       }
 
-      // ----------------------------------------- //
-      double Hij, Bij;
-      mat Acurrent(De*n,De*n), Anew = zeros<mat>(De*n,De*n);
-      vec scurrent(3*n), snew(3*n);
-      size_t count = 0;
-      for (size_t i = 0; i < n+1; i++) {
-        for (size_t j = i+1; j < n+1; j++) {
-          for (size_t k = 0; k < De; k++) {
-            vArray = vArrayList.at(k);
-            Anew += xs[Nunique*count+uniquePar(k)] * (vArray[i][j] * (vArray[i][j]).t());
-          }
-          count++;
-        }
-      }
-      for (size_t i = 0; i < NparS; i++) {
-        snew(i) = xs[NparA+i];
-      }
-
-      for (size_t j = 0; j < K; j++) {
-        if (j == index) {
-          matElem.calculateH(Anew,Anew,snew,snew,Hij,Bij);
-          H(index,index) = Hij;
-          B(index,index) = Bij;
-        } else {
-          Acurrent = basis.slice(j);
-          scurrent = shift.col(j);
-
-          matElem.calculateH(Acurrent,Anew,scurrent,snew,Hij,Bij);
-          H(j,index) = Hij;
-          H(index,j) = Hij;
-          B(j,index) = Bij;
-          B(index,j) = Bij;
-        }
-      }
-      // ----------------------------------------- //
       //
       // add optimized basis function to basis
       //
-      vec Acoeffs(De*n*(n+1)/2);
+      vector<double> Acoeffs(De*n*(n+1)/2);
       for (size_t i = 0; i < n*(n+1)/2; i++) {
         for (size_t k = 0; k < De; k++) {
-          Acoeffs(De*i+k) = xs[Nunique*i+uniquePar(k)];
+          Acoeffs[De*i+k] = xs[Nunique*i+uniquePar(k)];
         }
       }
 
-      basis.slice(index) = Anew;
-      basisCoefficients.col(index) = Acoeffs;
+      vec snew;
+      basis.slice(index) = updateMatrices(xs,index,true,snew);
+      basisCoefficients[index] = Acoeffs;
       shift.col(index) = snew;
     }
     cout << "Energy after deterministic sweep " << l+1 << ": " << minf << "\n";
@@ -391,7 +379,8 @@ vec Variational::sweepDeterministicShift(size_t state, size_t sweeps, vec maxShi
 }
 
 vec Variational::sweepDeterministicCMAES(size_t state, size_t sweeps, size_t maxeval){
-  vec results(sweeps), xstart(De*n*(n+1)/2);
+  vec results(sweeps);
+  vector<double> xstart(De*n*(n+1)/2);
   mat Anew(3*n,3*n);
   size_t index, vcount;
   double Ebest;
@@ -400,8 +389,8 @@ vec Variational::sweepDeterministicCMAES(size_t state, size_t sweeps, size_t max
   function<double(vec&)> fitness = [&](vec& alpha){
     double Hij, Bij;
     mat Acurrent(De*n,De*n), Atrial = zeros<mat>(De*n,De*n);
-    alpha = abs(alpha); // ensure only positive values
     size_t count = 0;
+    alpha = abs(alpha);
 
     for (size_t i = 0; i < n+1; i++) {
       for (size_t j = i+1; j < n+1; j++) {
@@ -437,9 +426,16 @@ vec Variational::sweepDeterministicCMAES(size_t state, size_t sweeps, size_t max
       //
       // optimize basis function index using its current values as starting guess
       //
-      xstart = basisCoefficients.col(index);
-      CMAES::optimize(fitness, xstart, 200, 50, 1e-2, maxeval);
-      Ebest = fitness(xstart); // needed to set H,B corresponding to optimized parameters
+      xstart = basisCoefficients[index];
+      vec xs(xstart.size());
+      for (size_t i = 0; i < xstart.size(); i++) {
+        xs(i) = xstart[i];
+      }
+      CMAES::optimize(fitness, xs, 200, 50, 1e-2, maxeval);
+      Ebest = fitness(xs); // needed to set H,B corresponding to optimized parameters
+      for (size_t i = 0; i < xstart.size(); i++) {
+        xstart[i] = xs(i);
+      }
 
       //
       // add optimized basis function to basis
@@ -450,13 +446,13 @@ vec Variational::sweepDeterministicCMAES(size_t state, size_t sweeps, size_t max
         for (size_t j = i+1; j < n+1; j++) {
           for (size_t k = 0; k < De; k++) {
             vArray = vArrayList.at(k);
-            Anew += xstart(De*vcount+k) * (vArray[i][j] * (vArray[i][j]).t());
+            Anew += xstart[De*vcount+k] * (vArray[i][j] * (vArray[i][j]).t());
           }
           vcount++;
         }
       }
       basis.slice(index) = Anew;
-      basisCoefficients.col(index) = xstart;
+      basisCoefficients[index] = xstart;
     }
     cout << "Energy after deterministic sweep " << l+1 << ": " << Ebest << "\n";
     results(l) = Ebest;
@@ -466,45 +462,19 @@ vec Variational::sweepDeterministicCMAES(size_t state, size_t sweeps, size_t max
 
 vec Variational::sweepDeterministic_grad(size_t state, size_t sweeps){
   size_t Npar = De*n*(n+1)/2;
-  vec results(sweeps), xstart(Npar);
+  vec results(sweeps);
   vec** vArray;
-
-  //
-  //  Set initial matrix gradients
-  //
-  std::vector<vec> HG(Npar);
-  std::vector<vec> BG(Npar);
-  for (size_t i = 0; i < Npar; i++) {
-    HG.at(i) = zeros<vec>(K);
-    BG.at(i) = zeros<vec>(K);
-  }
-
-  //
-  //  NLOpt setup
-  //
-  std::vector<double> lb(Npar);
+  std::vector<double> lb(Npar,1e-6);
   std::vector<double> xs(Npar);
-  for (size_t i = 0; i < Npar; i++) {
-    lb[i] = 1e-6;
-  }
-  nlopt::opt opt(nlopt::LD_MMA, Npar);
+  nlopt::opt opt(nlopt::LD_MMA, Npar); //<--- sets optimization algorithm
   opt.set_lower_bounds(lb);
   opt.set_xtol_abs(1e-6); // tolerance on parametres
   double minf;
 
   for (size_t l = 0; l < sweeps; l++) {
     for (size_t index = 0; index < K; index++) {
-      //
-      // optimize basis function index using its current values as starting guess
-      //
-      xstart = basisCoefficients.col(index);
-      for (size_t i = 0; i < n*(n+1)/2; i++) {
-        for (size_t k = 0; k < De; k++) {
-          xs[De*i+k] = xstart(De*i+k);
-        }
-      }
-
-      my_function_data data = { index,n,K,De,De,state,xstart,vArrayList,H,B,HG,BG,basis,matElem };
+      xs = basisCoefficients[index];
+      my_function_data data = { index,n,K,De,De,state,results,vArrayList,H,B,basis,matElem };
       opt.set_min_objective(myvfunc_grad, &data);
 
       bool status = false;
@@ -518,49 +488,9 @@ vec Variational::sweepDeterministic_grad(size_t state, size_t sweeps){
           attempts++;
         }
       }
-
-      for (size_t i = 0; i < n*(n+1)/2; i++) {
-        for (size_t k = 0; k < De; k++) {
-          xstart(De*i+k) = xs[De*i+k];
-        }
-      }
-
-      // ----------------------------------------- //
-      double Hij, Bij;
-      mat Acurrent(De*n,De*n), Anew = zeros<mat>(De*n,De*n);
-      size_t count = 0;
-      for (size_t i = 0; i < n+1; i++) {
-        for (size_t j = i+1; j < n+1; j++) {
-          for (size_t k = 0; k < De; k++) {
-            vArray = vArrayList.at(k);
-            Anew += xs[De*count+k] * (vArray[i][j] * (vArray[i][j]).t());
-          }
-          count++;
-        }
-      }
-
-      for (size_t j = 0; j < K; j++) {
-        if (j == index) {
-          matElem.calculateH_noShift(Anew,Anew,Hij,Bij);
-          H(index,index) = Hij;
-          B(index,index) = Bij;
-
-        } else {
-          Acurrent = basis.slice(j);
-
-          matElem.calculateH_noShift(Acurrent,Anew,Hij,Bij);
-          H(j,index) = Hij;
-          H(index,j) = Hij;
-          B(j,index) = Bij;
-          B(index,j) = Bij;
-        }
-      }
-      // ----------------------------------------- //
-      //
-      // add optimized basis function to basis
-      //
-      basis.slice(index) = Anew;
-      basisCoefficients.col(index) = xstart;
+      vec dummy;
+      basis.slice(index) = updateMatrices(xs,index,false,dummy);
+      basisCoefficients[index] = xs;
     }
     cout << "Energy after deterministic sweep " << l+1 << ": " << minf << "\n";
     results(l) = minf;
@@ -574,8 +504,4 @@ void Variational::printBasis(){
 
 void Variational::printShift(){
   cout << "Current shift:" << endl << shift << endl;
-}
-
-void Variational::printBasisCoeffs(){
-  cout << "Current basis coefficients:" << endl << basisCoefficients << endl;
 }

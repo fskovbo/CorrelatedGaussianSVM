@@ -15,7 +15,6 @@ typedef struct {
     vec& uniquePar;
     vector<vec**>& vArrayList;
     mat H, B;
-    vector<vec> HG, BG;
     cube& basis;
     MatrixElements& matElem;
 } my_function_data;
@@ -142,77 +141,22 @@ inline double myvfunc_shift(const std::vector<double> &x, std::vector<double> &g
   }
 }
 
-inline double myvfunc_shift_add(const std::vector<double> &x, std::vector<double> &grad, void *data)
-{
-  my_function_data_shift *d = reinterpret_cast<my_function_data_shift*>(data);
-  size_t index = d->index, n = d->n, K = d->K, De = d->De, Nunique = d->Nunique, state = d->state;
-  vec& uniquePar = d->uniquePar;
-  vector<vec**>& vArrayList = d->vArrayList;
-  mat H = d->H, B = d->B;
-  cube& basis = d->basis;
-  mat& shift = d->shift;
-  MatrixElements& matElem = d->matElem;
-
-  double Hij, Bij;
-  mat Acurrent(De*n,De*n), Atrial = zeros<mat>(De*n,De*n);
-  vec scurrent(3*n), strial(3*n);
-  size_t count = 0;
-  vec** vArray;
-
-  for (size_t i = 0; i < n+1; i++) {
-    for (size_t j = i+1; j < n+1; j++) {
-      for (size_t k = 0; k < De; k++) {
-        vArray = vArrayList.at(k);
-        Atrial += x[Nunique*count+uniquePar(k)] * (vArray[i][j] * (vArray[i][j]).t());
-      }
-      count++;
-    }
-  }
-
-  for (size_t i = 0; i < 3*n; i++) {
-    strial(i) = x[i+count*Nunique];
-  }
-
-  for (size_t j = 0; j < K-1; j++) {
-    Acurrent = basis.slice(j);
-    scurrent = shift.col(j);
-
-    matElem.calculateH(Acurrent,Atrial,scurrent,strial,Hij,Bij);
-    H(j,K-1) = Hij;
-    H(K-1,j) = Hij;
-    B(j,K-1) = Bij;
-    B(K-1,j) = Bij;
-  }
-  matElem.calculateH(Atrial,Atrial,strial,strial,Hij,Bij);
-  H(K-1,K-1) = Hij;
-  B(K-1,K-1) = Bij;
-
-  mat L(K,K);
-  bool status = chol(L,B,"lower");
-  if (status) {
-    vec eigs = eig_sym( L.i()*H*(L.t()).i() );
-    return eigs(state);
-  }
-  else{
-    return 9999*1e10;
-  }
-}
-
 inline double myvfunc_grad(const std::vector<double> &x, std::vector<double> &grad, void *data)
 {
   my_function_data *d = reinterpret_cast<my_function_data*>(data);
   size_t index = d->index, n = d->n, K = d->K, De = d->De, state = d->state;
   vector<vec**>& vArrayList = d->vArrayList;
   mat H = d->H, B = d->B;
-  vector<vec> HG = d->HG, BG = d->BG;
   cube& basis = d->basis;
   MatrixElements& matElem = d->matElem;
 
   double Hij, Bij;
   vec Hgrad, Bgrad;
   mat Acurrent(De*n,De*n), Atrial = zeros<mat>(De*n,De*n);
-  size_t count = 0;
+  size_t count = 0, Npar = De*n*(n+1)/2;
   vec** vArray;
+  std::vector<vec> HG(Npar,zeros<vec>(K));
+  std::vector<vec> BG(Npar,zeros<vec>(K));
 
   for (size_t i = 0; i < n+1; i++) {
     for (size_t j = i+1; j < n+1; j++) {
@@ -238,7 +182,7 @@ inline double myvfunc_grad(const std::vector<double> &x, std::vector<double> &gr
       B(j,index) = Bij;
       B(index,j) = Bij;
     }
-    for (size_t l = 0; l < De*n*(n+1)/2; l++) {
+    for (size_t l = 0; l < Npar; l++) {
       (HG[l])(j) = Hgrad(l);
       (BG[l])(j) = Bgrad(l);
     }
@@ -260,7 +204,7 @@ inline double myvfunc_grad(const std::vector<double> &x, std::vector<double> &gr
   double norm = dot(c , B*c);
 
   if (!grad.empty()){
-    for (size_t i = 0; i < De*n*(n+1)/2; i++) {
+    for (size_t i = 0; i < Npar; i++) {
       grad[i] = 2.0*c(index)*dot(c,(HG[i]-E*BG[i]))/norm;
     }
   }

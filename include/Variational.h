@@ -27,14 +27,15 @@ private:
   mat H, B, shift;
   MatrixElements matElem;
   cube basis;
-  mat basisCoefficients;
+  vector< vector<double> > basisCoefficients;
   vector<vec**> vArrayList;
 
   double eigenEnergy(size_t state);
+  mat generateRandomGaussian(vec& Ameanval, vector<double>& coeffs);
+  mat updateMatrices(vector<double> x, size_t index, bool shifted, vec& snew);
 
 public:
   Variational(System& sys, MatrixElements& matElem);
-  mat generateRandomGaussian(vec& Ameanval, vec& coeffs);
 
   double initializeBasis(size_t basisSize);
   vec sweepStochastic(size_t state, size_t sweeps, size_t trials, vec Ameanval);
@@ -46,7 +47,6 @@ public:
 
   void printBasis();
   void printShift();
-  void printBasisCoeffs();
 };
 
 #endif
