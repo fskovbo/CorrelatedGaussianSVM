@@ -19,6 +19,7 @@ private:
   mat lambdamat;
 
   vector<mat> interactions;
+  vector<vec> vList;
 
   vec calculateIntStr(vec& masses, double baseStr, double intRange);
   void buildInteractions(mat& Ui);

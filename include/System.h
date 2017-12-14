@@ -24,6 +24,7 @@ public:
   vec masses, charges;
   vector<vec**> vArrayList;
   vector<vec> vList;
+  vector<mat> vprodList;
 
   System(vec& masses, vec& charges, size_t De = 3);
 

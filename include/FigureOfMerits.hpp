@@ -14,6 +14,7 @@ typedef struct {
     size_t index, n, K, De, Nunique, state;
     vec& uniquePar;
     vector<vec**>& vArrayList;
+    vector<vec>& vList;
     mat H, B;
     cube& basis;
     MatrixElements& matElem;
@@ -23,6 +24,7 @@ typedef struct {
     size_t index, n, K, De, Nunique, state;
     vec& uniquePar;
     vector<vec**>& vArrayList;
+    vector<vec>& vList;
     mat H, B;
     cube& basis;
     mat& shift;
@@ -31,7 +33,7 @@ typedef struct {
 
 typedef struct {
     size_t n, K, De, Npar, state;
-    vector<vec**>& vArrayList;
+    vector<vec>& vList;
     MatrixElements& matElem;
 } global_data;
 
@@ -151,7 +153,7 @@ inline double myvfunc_grad(const std::vector<double> &x, std::vector<double> &gr
 {
   my_function_data *d = reinterpret_cast<my_function_data*>(data);
   size_t index = d->index, n = d->n, K = d->K, De = d->De, state = d->state;
-  vector<vec**>& vArrayList = d->vArrayList;
+  vector<vec>& vList = d->vList;
   mat H = d->H, B = d->B;
   cube& basis = d->basis;
   MatrixElements& matElem = d->matElem;
@@ -160,18 +162,12 @@ inline double myvfunc_grad(const std::vector<double> &x, std::vector<double> &gr
   vec Hgrad, Bgrad;
   mat Acurrent(De*n,De*n), Atrial = zeros<mat>(De*n,De*n);
   size_t count = 0, Npar = De*n*(n+1)/2;
-  vec** vArray;
   std::vector<vec> HG(Npar,zeros<vec>(K));
   std::vector<vec> BG(Npar,zeros<vec>(K));
 
-  for (size_t i = 0; i < n+1; i++) {
-    for (size_t j = i+1; j < n+1; j++) {
-      for (size_t k = 0; k < De; k++) {
-        vArray = vArrayList.at(k);
-        Atrial += x[De*count+k] * (vArray[i][j] * (vArray[i][j]).t());
-      }
-      count++;
-    }
+  for (auto& w : vList){
+    Atrial += x[count] * w*w.t();
+    count++;
   }
 
   for (size_t j = 0; j < K; j++) {
@@ -222,26 +218,20 @@ inline double globalvfunc(const std::vector<double> &x, std::vector<double> &gra
 {
   global_data *d = reinterpret_cast<global_data*>(data);
   size_t n = d->n, K = d->K, De = d->De, Npar = d->Npar, state = d->state;
-  vector<vec**>& vArrayList = d->vArrayList;
+  vector<vec>& vList = d->vList;
   MatrixElements& matElem = d->matElem;
 
   double Hij, Bij;
   mat Ai(De*n,De*n), Aj(De*n,De*n), H(K,K), B(K,K);
   cube basis(De*n,De*n,K);
-  vec** vArray;
 
   for (size_t l = 0; l < K; l++) {
     Ai.zeros();
     size_t count = 0;
 
-    for (size_t i = 0; i < n+1; i++) {
-      for (size_t j = i+1; j < n+1; j++) {
-        for (size_t k = 0; k < De; k++) {
-          vArray = vArrayList.at(k);
-          Ai += x[l*De*n*(n+1)/2 +De*count+k] * (vArray[i][j] * (vArray[i][j]).t());
-        }
-        count++;
-      }
+    for (auto& w : vList){
+      Ai += x[l*De*n*(n+1)/2 + count] * w*w.t();
+      count++;
     }
     basis.slice(l) = Ai;
   }

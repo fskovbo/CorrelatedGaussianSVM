@@ -1,7 +1,7 @@
 #include "Variational.h"
 
 Variational::Variational(System& sys, MatrixElements& matElem)
-: n(sys.n), De(sys.De), matElem(matElem), vArrayList(sys.vArrayList) {
+: n(sys.n), De(sys.De), matElem(matElem), vArrayList(sys.vArrayList), vList(sys.vList) {
   K = 0;
 }
 
@@ -263,7 +263,7 @@ vec Variational::sweepDeterministic(size_t state, size_t sweeps, size_t Nunique,
           xs[Nunique*i+uniquePar(k)] = xstart[De*i+k];
         }
       }
-      my_function_data data = { index,n,K,De,Nunique,state,uniquePar,vArrayList,H,B,basis,matElem };
+      my_function_data data = { index,n,K,De,Nunique,state,uniquePar,vArrayList,vList,H,B,basis,matElem };
       opt.set_min_objective(myvfunc, &data);
 
       bool status = false;
@@ -342,7 +342,7 @@ vec Variational::sweepDeterministicShift(size_t state, size_t sweeps, vec maxShi
         xs[i+NparA] = shift(i,index);
       }
 
-      my_function_data_shift data = { index,n,K,De,Nunique,state,uniquePar,vArrayList,H,B,basis,shift,matElem };
+      my_function_data_shift data = { index,n,K,De,Nunique,state,uniquePar,vArrayList,vList,H,B,basis,shift,matElem };
       opt.set_min_objective(myvfunc_shift, &data);
 
       bool status = false;
@@ -474,7 +474,7 @@ vec Variational::sweepDeterministic_grad(size_t state, size_t sweeps){
   for (size_t l = 0; l < sweeps; l++) {
     for (size_t index = 0; index < K; index++) {
       xs = basisCoefficients[index];
-      my_function_data data = { index,n,K,De,De,state,results,vArrayList,H,B,basis,matElem };
+      my_function_data data = { index,n,K,De,De,state,results,vArrayList,vList,H,B,basis,matElem };
       opt.set_min_objective(myvfunc_grad, &data);
 
       bool status = false;
@@ -514,7 +514,7 @@ vec Variational::stochasticGradient(size_t state, size_t sweeps, size_t trials, 
     for (size_t j = 0; j < K; j++) {
       for (size_t k = 0; k < trials; k++) {
         generateRandomGaussian(Ameanval,xs);
-        my_function_data data = { j,n,K,De,De,state,dummy,vArrayList,H,B,basis,matElem };
+        my_function_data data = { j,n,K,De,De,state,dummy,vArrayList,vList,H,B,basis,matElem };
         opt.set_min_objective(myvfunc_grad, &data);
 
         bool status = false;
@@ -565,7 +565,7 @@ vec Variational::CMAES_Gradient(size_t state, size_t sweeps, size_t maxeval){
       beta[i] = max(alpha(i),lb[i]);
     }
 
-    my_function_data data = { index,n,K,De,De,state,dummy,vArrayList,H,B,basis,matElem };
+    my_function_data data = { index,n,K,De,De,state,dummy,vArrayList,vList,H,B,basis,matElem };
     opt.set_min_objective(myvfunc_grad, &data);
 
     bool status = false;
@@ -637,7 +637,7 @@ vec Variational::multistarting(size_t state, size_t sweeps, size_t trials){
             xmean[i] -= 0.1*trial(i,k);
           }
         }
-        my_function_data data = { index,n,K,De,De,state,dummy,vArrayList,H,B,basis,matElem };
+        my_function_data data = { index,n,K,De,De,state,dummy,vArrayList,vList,H,B,basis,matElem };
         // opt.set_min_objective(myvfunc, &data);
         opt.set_min_objective(myvfunc_grad, &data);
 
@@ -694,7 +694,7 @@ double Variational::fullBasisSearch(size_t state){
   }
 
 
-  global_data data = { n,K,De,Npar,state,vArrayList,matElem };
+  global_data data = { n,K,De,Npar,state,vList,matElem };
   opt.set_min_objective(globalvfunc, &data);
   bool status = false;
   size_t attempts = 0;

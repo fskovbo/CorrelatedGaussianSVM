@@ -29,6 +29,7 @@ private:
   cube basis;
   vector< vector<double> > basisCoefficients;
   vector<vec**> vArrayList;
+  vector<vec> vList;
 
   double eigenEnergy(size_t state);
   mat generateRandomGaussian(vec& Ameanval, vector<double>& coeffs);

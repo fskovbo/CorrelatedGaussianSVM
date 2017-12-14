@@ -139,6 +139,7 @@ void System::setupvList(){
       for (size_t k = 0; k < De; k++) {
         vArray = vArrayList.at(k);
         vList.push_back(vArray[i][j]);
+        vprodList.emplace_back(vArray[i][j]*(vArray[i][j]).t());
       }
     }
   }

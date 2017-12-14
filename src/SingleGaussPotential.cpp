@@ -1,7 +1,7 @@
 #include "SingleGaussPotential.h"
 
 SingleGaussPotential::SingleGaussPotential(System& sys, double baseStr, double interactionRange)
-  : vArrayList(sys.vArrayList), n(sys.n), De(sys.De), lambdamat(sys.lambdamat) {
+  : vArrayList(sys.vArrayList), n(sys.n), De(sys.De), lambdamat(sys.lambdamat), vList(sys.vList) {
   alpha = 1.0/pow(interactionRange,2);
   interStr = calculateIntStr(sys.masses,baseStr,interactionRange);
 
@@ -113,15 +113,8 @@ double SingleGaussPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2
     Mp = pow(datum::pi,3.0*n/2.0)*pow(detBp,-3.0/De/2.0);
 
     pcount = 0;
-    for (size_t iparam = 0; iparam < n; iparam++) {
-      for (size_t jparam = iparam+1; jparam < n+1; jparam++) {
-        for (size_t kparam = 0; kparam < De; kparam++) {
-          vec** wArray      = vArrayList.at(kparam);
-          vec v             = wArray[iparam][jparam];
-          ddetBpdx(pcount)  = detBp*dot(v,Bp*v);
-          pcount++;
-        }
-      }
+    for (auto& w : vList){
+      ddetBpdx(pcount++)  = detBp*dot(w,Bp*w);
     }
 
     kappavec(intcount)  = Mp;
@@ -160,16 +153,10 @@ double SingleGaussPotential::calculateExpectedPotential(mat& A1, mat& A2, vec& s
     Mp = pow(datum::pi,3.0*n/2.0)*pow(detBp,-3.0/De/2.0)*exp(0.25*dot(v,Bp*v));
 
     pcount = 0;
-    for (size_t iparam = 0; iparam < n+1; iparam++) {
-      for (size_t jparam = iparam+1; jparam < n+1; jparam++) {
-        for (size_t kparam = 0; kparam < De; kparam++) {
-          vec** wArray      = vArrayList.at(kparam);
-          vec w             = wArray[iparam][jparam];
-          ddetBpdx(pcount)  = detBp*dot(w,Bp*w);
-          dMp(pcount)       = dot(v,Binvgrad.slice(pcount)*v);
-          pcount++;
-        }
-      }
+    for (auto& w : vList){
+      ddetBpdx(pcount)  = detBp*dot(w,Bp*w);
+      dMp(pcount)       = dot(v,Binvgrad.slice(pcount)*v);
+      pcount++;
     }
 
     kappavec(intcount)      = Mp;

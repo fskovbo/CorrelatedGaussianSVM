@@ -121,7 +121,7 @@ void MatrixElements::calculateH(mat& A1, mat& A2, vec& s1, vec& s2, double& Hij,
   cube Bigrad(De*n,De*n,NparA);
   vec detBgrad(NparA), Tgrad_A(NparA), Vgrad_A(NparA), Vgrad_s(De*n), Mgrad_A(NparA);
   size_t count = 0;
-  for (auto w : vList){
+  for (auto& w : vList){
     Bigrad.slice(count) = -B*w*w.t()*B;
     detBgrad(count)     = detB*dot(w,B*w);
     Mgrad_A(count)      = 0.25*overlap*dot(v,Bigrad.slice(count)*v);
