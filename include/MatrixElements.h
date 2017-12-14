@@ -11,10 +11,11 @@ using namespace std;
 
 class MatrixElements {
 private:
-  size_t n, De;
+  size_t n, De, NparA;
   mat Lambda;
   PotentialStrategy& Vstrat;
   vector<vec**> vArrayList;
+  vector<vec> vList;
 
 public:
   MatrixElements(System& sys, PotentialStrategy& Vstrat);

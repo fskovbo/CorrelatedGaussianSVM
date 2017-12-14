@@ -16,13 +16,14 @@ private:
   void setupCoordinates2();
   void setupLambdaMatrix();
   void setupvArray();
-  void setupvArray2();
+  void setupvList();
 
 public:
   size_t N, n, De;
   mat U, Ui, lambdamat;
   vec masses, charges;
   vector<vec**> vArrayList;
+  vector<vec> vList;
 
   System(vec& masses, vec& charges, size_t De = 3);
 

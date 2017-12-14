@@ -45,10 +45,15 @@ double TrapPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2, mat& 
   double overlap = pow(datum::pi,3.0*n/2.0)*pow(detB,-3.0/De/2.0);
   vec Mgrad = -1.5/De/detB *overlap*detBgrad;
   vec Vgrad2(Vgrad);
-  for (size_t i = 0; i < De*n*(n+1)/2; i++) {
-    Vgrad2(i) = trace(Omega*Binvgrad.slice(i));
-  }
-  Vgrad = 1.5/De*trace(Omega*Binv)*Mgrad + 1.5/De*Vgrad2*overlap;
+
+  size_t count = 0;
+  Binvgrad.each_slice(
+    [&](mat& X)
+    {
+      Vgrad(count++) = 1.5/De*overlap*trace(Omega*X);
+    }
+  );
+  Vgrad += 1.5/De*trace(Omega*Binv)*Mgrad;
   return overlap * 1.5/De*trace(Omega*Binv);
 }
 
@@ -59,17 +64,21 @@ double TrapPotential::calculateExpectedPotential(mat& A1, mat& A2, vec& s1, vec&
   vec v = s1+s2;
   vec u = 0.5*Binv*v;
   double overlap = pow(datum::pi,3.0*n/2.0)*pow(detB,-3.0/De/2.0)*exp(0.25*dot(v,Binv*v));
-
-  vec Vgrad2_A(Vgrad_A), ugrad_A(Vgrad_A), Mgrad2_A(Vgrad_A);
-  for (size_t i = 0; i < De*n*(n+1)/2; i++) {
-    Vgrad2_A(i) = trace(Omega*Binvgrad.slice(i));
-    Mgrad2_A(i) = dot(v,Binvgrad.slice(i)*v);
-    ugrad_A(i) = dot(u,Omega*Binvgrad.slice(i)*v);
-  }
-  vec Mgrad_A = 0.25*Mgrad2_A*overlap -1.5/De/detB *overlap*detBgrad;
-
   double trapval = 1.5/De*trace(Omega*Binv) + dot(u,Omega*u);
-  Vgrad_A = trapval*Mgrad_A + (1.5/De*Vgrad2_A + ugrad_A)*overlap;
+
+  vec Mgrad_A(size(Vgrad_A));  
+  size_t count = 0;
+  Binvgrad.each_slice(
+    [&](mat& X)
+    {
+      auto temp         = Omega*X;
+      Vgrad_A(count)    = overlap*(1.5/De*trace(temp) + dot(u,temp*v));
+      Mgrad_A(count++)  = 0.25*overlap*dot(v,X*v);
+    }
+  );
+
+  Mgrad_A -= 1.5/De/detB *overlap*detBgrad;
+  Vgrad_A += trapval*Mgrad_A;
   Vgrad_s = trapval*0.5*Binv*v*overlap + (Omega*Binv*u)*overlap;
   return overlap*trapval;
 }

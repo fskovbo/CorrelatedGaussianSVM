@@ -8,7 +8,8 @@ System::System(vec& masses, vec& charges, size_t De)
 
    setupCoordinates();
    setupLambdaMatrix();
-   setupvArray2();
+   setupvArray();
+   setupvList();
 }
 
 void System::setupCoordinates(){
@@ -88,89 +89,8 @@ void System::setupLambdaMatrix(){
   }
 }
 
+
 void System::setupvArray(){
-  //
-  // allocate vArrays
-  //
-  vec **vxArray = new vec*[N];
-  vec **vyArray = new vec*[N];
-  vec **vzArray = new vec*[N];
-  for (size_t i = 0; i < n+1; i++) {
-    vxArray[i] = new vec[N];
-    vyArray[i] = new vec[N];
-    vzArray[i] = new vec[N];
-  }
-
-  //
-  // build w vectors - need coordinates seperately
-  //
-  vec wxArray[N][N];
-  vec wyArray[N][N];
-  vec wzArray[N][N];
-  for (size_t i = 0; i < N; i++) {
-    for (size_t j = i; j < N; j++) {
-      wxArray[i][j] = vec(3*N,fill::zeros);
-      wxArray[j][i] = vec(3*N,fill::zeros);
-      wyArray[i][j] = vec(3*N,fill::zeros);
-      wyArray[j][i] = vec(3*N,fill::zeros);
-      wzArray[i][j] = vec(3*N,fill::zeros);
-      wzArray[j][i] = vec(3*N,fill::zeros);
-    }
-  }
-
-  for (size_t i = 0; i < N; i++) {
-    (wxArray[i][i])(3*i) = 1;
-    (wyArray[i][i])(3*i+1) = 1;
-    (wzArray[i][i])(3*i+2) = 1;
-    for (size_t j = i+1; j < N; j++) {
-      (wxArray[i][j])(3*i) = 1;
-      (wyArray[i][j])(3*i+1) = 1;
-      (wzArray[i][j])(3*i+2) = 1;
-      (wxArray[i][j])(3*j) = -1;
-      (wyArray[i][j])(3*j+1) = -1;
-      (wzArray[i][j])(3*j+2) = -1;
-
-      wxArray[j][i] = wxArray[i][j];
-      wyArray[j][i] = wyArray[i][j];
-      wzArray[j][i] = wzArray[i][j];
-    }
-  }
-
-  //
-  // transform w vector such that v = (U^-1)^t * w
-  //
-  vec v;
-  for (size_t i = 0; i < N; i++) {
-    v = Ui.t() * wxArray[i][i];
-    vxArray[i][i] = v.rows(0,3*(N-1)-1);
-    v = Ui.t() * wyArray[i][i];
-    vyArray[i][i] = v.rows(0,3*(N-1)-1);
-    v = Ui.t() * wzArray[i][i];
-    vzArray[i][i] = v.rows(0,3*(N-1)-1);
-
-    for (size_t j = i+1; j < N; j++) {
-      v = Ui.t() * wxArray[i][j];
-      vxArray[i][j] = v.rows(0,3*(N-1)-1);
-      vxArray[j][i] = vxArray[i][j];
-
-      v = Ui.t() * wyArray[i][j];
-      vyArray[i][j] = v.rows(0,3*(N-1)-1);
-      vyArray[j][i] = vxArray[i][j];
-
-      v = Ui.t() * wzArray[i][j];
-      vzArray[i][j] = v.rows(0,3*(N-1)-1);
-      vzArray[j][i] = vzArray[i][j];
-    }
-  }
-
-
-  //
-  // add vArrays to list
-  //
-  vArrayList = {vxArray, vyArray, vzArray};
-}
-
-void System::setupvArray2(){
   for (size_t k = 0; k < De; k++) {
 
     vec **vArray = new vec*[N];
@@ -209,5 +129,17 @@ void System::setupvArray2(){
     }
 
     vArrayList.emplace_back(vArray);
+  }
+}
+
+void System::setupvList(){
+  vec** vArray;
+  for (size_t i = 0; i < N; i++) {
+    for (size_t j = i+1; j < N; j++) {
+      for (size_t k = 0; k < De; k++) {
+        vArray = vArrayList.at(k);
+        vList.push_back(vArray[i][j]);
+      }
+    }
   }
 }

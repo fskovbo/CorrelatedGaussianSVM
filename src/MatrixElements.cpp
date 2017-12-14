@@ -1,8 +1,9 @@
 #include "MatrixElements.h"
 
 MatrixElements::MatrixElements(System& sys, PotentialStrategy& Vstrat)
-: Vstrat(Vstrat), n(sys.n), De(sys.De), Lambda(0.5*sys.lambdamat), vArrayList(sys.vArrayList) {
+: Vstrat(Vstrat), n(sys.n), De(sys.De), Lambda(0.5*sys.lambdamat), vArrayList(sys.vArrayList), vList(sys.vList) {
 
+  NparA = vList.size();
 }
 
 void MatrixElements::calculateH(mat& A1, mat& A2, vec& s1, vec& s2, double& Hij, double& Bij){
@@ -71,27 +72,17 @@ void MatrixElements::calculateH_noShift(mat& A1, mat& A2, double& Hij, double& B
   //
   //  gradient
   //
-  vec** vArray;
-  cube Bigrad(De*n,De*n,De*n*(n+1)/2);
-  vec detBgrad(De*n*(n+1)/2);
-  vec Tgrad2(De*n*(n+1)/2);
-  vec Tgrad3(De*n*(n+1)/2);
+  cube Bigrad(De*n,De*n,NparA);
+  vec detBgrad(NparA), Tgrad(NparA), Vgrad(NparA);
   size_t count = 0;
-  for (size_t i = 0; i < n; i++) {
-    for (size_t j = i+1; j < n+1; j++) {
-      for (size_t k = 0; k < De; k++) {
-        vArray                    = vArrayList.at(k);
-        Bigrad.slice(De*count+k)  = -B*vArray[i][j]*(vArray[i][j]).t()*B;
-        detBgrad(De*count+k)      = detB * dot(vArray[i][j],B*vArray[i][j]);
-        Tgrad2(De*count+k)        = trace(A1*Lambda*A2*Bigrad.slice(De*count+k)); // dB-1/da
-        Tgrad3(De*count+k)        = trace(A1*Lambda*vArray[i][j]*(vArray[i][j]).t()*B); // dA/da
-      }
-      count++;
-    }
+  for (auto& w : vList){
+    Bigrad.slice(count) = -B*w*w.t()*B;
+    detBgrad(count) = detB*dot(w,B*w);
+    Tgrad(count) = 6.0/De*overlap*trace(A1*Lambda*(A2*Bigrad.slice(count)+w*w.t()*B));
+    count++;
   }
   Mgrad = -1.5/De/detB *overlap*detBgrad;
-  vec Tgrad = 6.0/De*trace(A1*Lambda*A2*B)*Mgrad + 6.0/De*(Tgrad2+Tgrad3)*overlap;
-  vec Vgrad(De*n*(n+1)/2);
+  Tgrad += 6.0/De*trace(A1*Lambda*A2*B)*Mgrad;
 
   double T = overlap*(6.0/De*trace(A1*Lambda*A2*B) );
   double V = Vstrat.calculateExpectedPotential_noShift(A1, A2, B, detB, Vgrad, Bigrad, detBgrad);
@@ -124,48 +115,30 @@ void MatrixElements::calculateH(mat& A1, mat& A2, vec& s1, vec& s2, double& Hij,
   //
   //  gradient
   //
-  vec** vArray;
-  cube Bigrad_A(De*n,De*n,De*n*(n+1)/2);
-  vec detBgrad_A(De*n*(n+1)/2);
-  vec Tgrad2_A(De*n*(n+1)/2);
-  vec Tgrad3_A(De*n*(n+1)/2);
-  vec Tgrad4_A(De*n*(n+1)/2);
-  vec Tgrad5_A(De*n*(n+1)/2);
-  vec Mgrad2_A(De*n*(n+1)/2);
-
-  //  common calculations
-
   vec S1 = s1-2.0*A1*u;
   vec S2 = s2-2.0*A2*u;
 
+  cube Bigrad(De*n,De*n,NparA);
+  vec detBgrad(NparA), Tgrad_A(NparA), Vgrad_A(NparA), Vgrad_s(De*n), Mgrad_A(NparA);
   size_t count = 0;
-  for (size_t i = 0; i < n+1; i++) {
-    for (size_t j = i+1; j < n+1; j++) {
-      for (size_t k = 0; k < De; k++) {
-        vArray                    = vArrayList.at(k);
-        Bigrad_A.slice(De*count+k)= -B*vArray[i][j]*(vArray[i][j]).t()*B;
-        detBgrad_A(De*count+k)    = detB * dot(vArray[i][j],B*vArray[i][j]);
-        Mgrad2_A(De*count+k)      = dot(v,Bigrad_A.slice(De*count+k)*v);
-        Tgrad2_A(De*count+k)      = trace(A1*Lambda*A2*Bigrad_A.slice(De*count+k)); // dB-1/da
-        Tgrad3_A(De*count+k)      = trace(A1*Lambda*vArray[i][j]*(vArray[i][j]).t()*B); // dA/da
-        Tgrad4_A(De*count+k)      = dot(-2.0*A1*Bigrad_A.slice(De*count+k)*v, Lambda*S2);
-        Tgrad5_A(De*count+k)      = dot(S1, Lambda * (-vArray[i][j]*(vArray[i][j]).t()*B*v -A2*Bigrad_A.slice(De*count+k)*v));
-      }
-      count++;
-    }
+  for (auto w : vList){
+    Bigrad.slice(count) = -B*w*w.t()*B;
+    detBgrad(count)     = detB*dot(w,B*w);
+    Mgrad_A(count)      = 0.25*overlap*dot(v,Bigrad.slice(count)*v);
+    Tgrad_A(count)      = 6.0/De*overlap*trace(A1*Lambda*(A2*Bigrad.slice(count)+w*w.t()*B))
+                        + overlap*dot(-2.0*A1*Bigrad.slice(count)*v, Lambda*S2)
+                        + overlap*dot(S1,Lambda*(-w*w.t()*B*v - A2*Bigrad.slice(count)*v));
+    count++;
   }
-  double T = 6.0/De*trace(A1*Lambda*A2*B) + dot(S1,Lambda*S2);
-  vec Mgrad_A = 0.25*Mgrad2_A*overlap -1.5/De/detB *overlap*detBgrad_A;
+  double T    = 6.0/De*trace(A1*Lambda*A2*B) + dot(S1,Lambda*S2);
+  Mgrad_A    += -1.5/De/detB *overlap*detBgrad;
+  Tgrad_A    += T*Mgrad_A;
   vec Mgrad_s = 0.5*B*v*overlap;
-  vec Tgrad_A = T*Mgrad_A + 6.0/De*(Tgrad2_A+Tgrad3_A)*overlap + (Tgrad4_A+Tgrad5_A)*overlap;
   vec Tgrad_s = T*Mgrad_s
-            + (Lambda*s1-2.0*Lambda*A1*u-B*A1*Lambda*s2-B*A2*Lambda*s1+2.0*B*A2*Lambda*A1*u+2.0*B*A1*Lambda*A2*u)*overlap;
+              + (Lambda*s1-2.0*Lambda*A1*u-B*A1*Lambda*s2-B*A2*Lambda*s1+2.0*B*A2*Lambda*A1*u+2.0*B*A1*Lambda*A2*u)*overlap;
 
-  vec Vgrad_A(De*n*(n+1)/2);
-  vec Vgrad_s(De*n);
-
-  T *= overlap;
-  double V = Vstrat.calculateExpectedPotential(A1, A2, s1, s2, B, detB, Vgrad_A, Vgrad_s, Bigrad_A, detBgrad_A);
+  T          *= overlap;
+  double V    = Vstrat.calculateExpectedPotential(A1, A2, s1, s2, B, detB, Vgrad_A, Vgrad_s, Bigrad, detBgrad);
 
   Hij         = T+V;
   Bij         = overlap;
