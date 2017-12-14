@@ -92,46 +92,44 @@ double SingleGaussPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2
 
 
 double SingleGaussPotential::calculateExpectedPotential_noShift(mat& A1, mat& A2, mat& Binv, double detB, vec& Vgrad, cube& Binvgrad, vec& detBgrad){
-  size_t count = 0;
   mat Bp(size(A1)), x(size(A1)), L(size(A1)), temp = eye<mat>(size(A1));
-  double detBp, Mp, ddetBpdx;
-  vec kappavec(interactions.size()), intergrad(interactions.size());
-  Vgrad = zeros<vec>(De*n*(n+1)/2);
-  size_t intcount = 0, paramcount = 0;
+  double detBp, Mp;
+  vec ddetBpdx(De*n*(n+1)/2), kappavec(interactions.size());
+  mat intergrad(De*n*(n+1)/2,interactions.size());
+  size_t intcount = 0, pcount = 0;
 
-  for (size_t iparam = 0; iparam < n+1; iparam++) {
-    for (size_t jparam = iparam+1; jparam < n+1; jparam++) {
-      for (size_t kparam = 0; kparam < De; kparam++) {
-        intcount      = 0;
-        vec** wArray  = vArrayList.at(kparam);
-        vec v         = wArray[iparam][jparam];
+  for (auto& inter : interactions){
+    Bp  = A1+A2+interactions.at(intcount);
+    L   = chol(Bp,"lower");
+    x   = solve(trimatl(L), temp,solve_opts::fast);
+    Bp  = solve(trimatu(L.t()),x,solve_opts::fast); // inplace inverse
 
-        for (size_t iint = 0; iint < n; iint++) {
-          for (size_t jint = iint+1; jint < n+1; jint++) {
-            Bp  = A1+A2+interactions.at(intcount);
-            L   = chol(Bp,"lower");
-            x   = solve(trimatl(L), temp,solve_opts::fast);
-            Bp  = solve(trimatu(L.t()),x,solve_opts::fast); // inplace inverse
+    detBp = 1;
+    for (size_t i = 0; i < L.n_rows; i++) {
+      detBp *= L(i,i);
+    }
+    detBp *= detBp;
 
-            detBp = 1;
-            for (size_t i = 0; i < L.n_rows; i++) {
-              detBp *= L(i,i);
-            }
-            detBp *= detBp;
+    Mp = pow(datum::pi,3.0*n/2.0)*pow(detBp,-3.0/De/2.0);
 
-            Mp            = pow(datum::pi,3.0*n/2.0)*pow(detBp,-3.0/De/2.0);
-            ddetBpdx      = detBp*dot(v,Bp*v);
-
-            kappavec(intcount)  = Mp;
-            intergrad(intcount) = -1.5/De/detBp * ddetBpdx*Mp;
-            intcount++;
-          }
+    pcount = 0;
+    for (size_t iparam = 0; iparam < n; iparam++) {
+      for (size_t jparam = iparam+1; jparam < n+1; jparam++) {
+        for (size_t kparam = 0; kparam < De; kparam++) {
+          vec** wArray      = vArrayList.at(kparam);
+          vec v             = wArray[iparam][jparam];
+          ddetBpdx(pcount)  = detBp*dot(v,Bp*v);
+          pcount++;
         }
-        Vgrad(paramcount) = dot(interStr,intergrad);
-        paramcount++;
       }
     }
+
+    kappavec(intcount)  = Mp;
+    intergrad.col(intcount) = -1.5/De/detBp * ddetBpdx*Mp;
+    intcount++;
   }
+
+  Vgrad = intergrad*interStr;
   return dot(interStr,kappavec);
 }
 
@@ -139,48 +137,47 @@ double SingleGaussPotential::calculateExpectedPotential(mat& A1, mat& A2, vec& s
                                                     mat& Binv, double detB, vec& Vgrad_A, vec& Vgrad_s,
                                                     cube& Binvgrad, vec& detBgrad)
 {
-  size_t count = 0;
   mat Bp(size(A1)), x(size(A1)), L(size(A1)), temp = eye<mat>(size(A1));
-  double detBp, Mp, ddetBpdx;
-  vec kappavec(interactions.size()), intergrad_A(interactions.size());
+  double detBp, Mp;
+  vec ddetBpdx(De*n*(n+1)/2), kappavec(interactions.size()), dMp(De*n*(n+1)/2);
+  mat intergrad(De*n*(n+1)/2,interactions.size());
   vec v = s1+s2;
-  Vgrad_A = zeros<vec>(De*n*(n+1)/2);
-  size_t intcount = 0, paramcount = 0;
+  Vgrad_s.zeros();
+  size_t intcount = 0, pcount = 0;
 
-  for (size_t iparam = 0; iparam < n+1; iparam++) {
-    for (size_t jparam = iparam+1; jparam < n+1; jparam++) {
-      for (size_t kparam = 0; kparam < De; kparam++) {
-        intcount      = 0;
-        vec** wArray  = vArrayList.at(kparam);
-        vec w         = wArray[iparam][jparam];
-        Vgrad_s = zeros<vec>(De*n);
+  for (auto& inter : interactions){
+    Bp  = A1+A2+inter;
+    L   = chol(Bp,"lower");
+    x   = solve(trimatl(L), temp,solve_opts::fast);
+    Bp  = solve(trimatu(L.t()),x,solve_opts::fast); // inplace inverse
 
-        for (size_t iint = 0; iint < n; iint++) {
-          for (size_t jint = iint+1; jint < n+1; jint++) {
-            Bp  = A1+A2+interactions.at(intcount);
-            L   = chol(Bp,"lower");
-            x   = solve(trimatl(L), temp,solve_opts::fast);
-            Bp  = solve(trimatu(L.t()),x,solve_opts::fast); // inplace inverse
+    detBp = 1;
+    for (size_t i = 0; i < L.n_rows; i++) {
+      detBp *= L(i,i);
+    }
+    detBp *= detBp;
 
-            detBp = 1;
-            for (size_t i = 0; i < L.n_rows; i++) {
-              detBp *= L(i,i);
-            }
-            detBp *= detBp;
+    Mp = pow(datum::pi,3.0*n/2.0)*pow(detBp,-3.0/De/2.0)*exp(0.25*dot(v,Bp*v));
 
-            Mp            = pow(datum::pi,3.0*n/2.0)*pow(detBp,-3.0/De/2.0)*exp(0.25*dot(v,Bp*v));
-            ddetBpdx      = detBp*dot(w,Bp*w);
-
-            kappavec(intcount)    = Mp;
-            intergrad_A(intcount) = (0.25*dot(v,Binvgrad.slice(paramcount)*v) -1.5/De/detBp * ddetBpdx)*Mp;
-            Vgrad_s              += interStr(intcount)*0.5*Bp*v*Mp;
-            intcount++;
-          }
+    pcount = 0;
+    for (size_t iparam = 0; iparam < n+1; iparam++) {
+      for (size_t jparam = iparam+1; jparam < n+1; jparam++) {
+        for (size_t kparam = 0; kparam < De; kparam++) {
+          vec** wArray      = vArrayList.at(kparam);
+          vec w             = wArray[iparam][jparam];
+          ddetBpdx(pcount)  = detBp*dot(w,Bp*w);
+          dMp(pcount)       = dot(v,Binvgrad.slice(pcount)*v);
+          pcount++;
         }
-        Vgrad_A(paramcount) = dot(interStr,intergrad_A);
-        paramcount++;
       }
     }
+
+    kappavec(intcount)      = Mp;
+    intergrad.col(intcount) = (0.25*dMp -1.5/De/detBp * ddetBpdx)*Mp;
+    Vgrad_s                += interStr(intcount)*0.5*Bp*v*Mp;
+    intcount++;
   }
+
+  Vgrad_A = intergrad*interStr;
   return dot(interStr,kappavec);
 }
