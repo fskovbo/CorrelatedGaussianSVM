@@ -45,6 +45,10 @@ public:
   vec sweepDeterministicCMAES(size_t state, size_t sweeps, size_t maxeval);
   vec sweepDeterministic_grad(size_t state, size_t sweeps);
   vec stochasticGradient(size_t state, size_t sweeps, size_t trials, vec Ameanval);
+  vec CMAES_Gradient(size_t state, size_t sweeps, size_t maxeval);
+  vec multistarting(size_t state, size_t sweeps, size_t trials);
+
+  double fullBasisSearch(size_t state);
 
   void printBasis();
   void printShift();

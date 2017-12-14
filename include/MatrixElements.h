@@ -12,7 +12,7 @@ using namespace std;
 class MatrixElements {
 private:
   size_t n, De;
-  mat lambda;
+  mat Lambda;
   PotentialStrategy& Vstrat;
   vector<vec**> vArrayList;
 

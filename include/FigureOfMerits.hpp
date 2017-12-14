@@ -29,6 +29,12 @@ typedef struct {
     MatrixElements& matElem;
 } my_function_data_shift;
 
+typedef struct {
+    size_t n, K, De, Npar, state;
+    vector<vec**>& vArrayList;
+    MatrixElements& matElem;
+} global_data;
+
 inline double myvfunc(const std::vector<double> &x, std::vector<double> &grad, void *data)
 {
   my_function_data *d = reinterpret_cast<my_function_data*>(data);
@@ -210,6 +216,58 @@ inline double myvfunc_grad(const std::vector<double> &x, std::vector<double> &gr
   }
 
   return E;
+}
+
+inline double globalvfunc(const std::vector<double> &x, std::vector<double> &grad, void *data)
+{
+  global_data *d = reinterpret_cast<global_data*>(data);
+  size_t n = d->n, K = d->K, De = d->De, Npar = d->Npar, state = d->state;
+  vector<vec**>& vArrayList = d->vArrayList;
+  MatrixElements& matElem = d->matElem;
+
+  double Hij, Bij;
+  mat Ai(De*n,De*n), Aj(De*n,De*n), H(K,K), B(K,K);
+  cube basis(De*n,De*n,K);
+  vec** vArray;
+
+  for (size_t l = 0; l < K; l++) {
+    Ai.zeros();
+    size_t count = 0;
+
+    for (size_t i = 0; i < n+1; i++) {
+      for (size_t j = i+1; j < n+1; j++) {
+        for (size_t k = 0; k < De; k++) {
+          vArray = vArrayList.at(k);
+          Ai += x[l*De*n*(n+1)/2 +De*count+k] * (vArray[i][j] * (vArray[i][j]).t());
+        }
+        count++;
+      }
+    }
+    basis.slice(l) = Ai;
+  }
+
+  for (size_t i = 0; i < K; i++) {
+    Ai = basis.slice(i);
+    for (size_t j = i; j < K; j++) {
+      Aj = basis.slice(j);
+      matElem.calculateH_noShift(Ai,Aj,Hij,Bij);
+      H(j,i) = Hij;
+      H(i,j) = Hij;
+      B(j,i) = Bij;
+      B(i,j) = Bij;
+    }
+  }
+
+
+  mat L(K,K);
+  bool status = chol(L,B,"lower");
+  if (status) {
+    vec eigs = eig_sym( L.i()*H*(L.t()).i() );
+    return eigs(state);
+  }
+  else{
+    return 9999*1e10;
+  }
 }
 
 #endif

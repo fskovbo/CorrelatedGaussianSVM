@@ -28,14 +28,16 @@ int main() {
   auto ansatz           = Variational(Test,elem);
 
   Trap.updateTrap(1e-2);
-  ansatz.initializeBasis(8);
+  ansatz.initializeBasis(12);
 
   vec aGuess            = {0.5*1e-2 , 2.5 , 2.5};
-  vec res1              = ansatz.sweepStochastic(0,5,1e2,aGuess);
+  vec res1              = ansatz.sweepStochastic(0,5,1e4,aGuess);
   // vec res2              = ansatz.sweepDeterministic_grad(0,5);
-  vec res2              = ansatz.stochasticGradient(1,5,1e1,aGuess);
-
-  cout << res2(res2.n_rows-1)-Trap.gsExpectedVal() << endl;
+  // vec res2              = ansatz.multistarting(1,5,15);
+  // double lastres        = ansatz.fullBasisSearch(1);
+  //
+  // cout << res2(res2.n_rows-1)-Trap.gsExpectedVal() << endl;
+  // cout << lastres-Trap.gsExpectedVal() << endl;
 
   clock_t end = clock();
   cout << "Runtime = " <<  double(end - begin) / CLOCKS_PER_SEC << endl;

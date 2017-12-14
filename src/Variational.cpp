@@ -548,6 +548,171 @@ vec Variational::stochasticGradient(size_t state, size_t sweeps, size_t trials, 
   return results;
 }
 
+vec Variational::CMAES_Gradient(size_t state, size_t sweeps, size_t maxeval){
+  size_t index, Npar = De*n*(n+1)/2;
+  vec results(sweeps), dummy;
+  vec** vArray;
+  std::vector<double> lb(Npar,1e-6);
+  nlopt::opt opt(nlopt::LD_MMA, Npar); //<--- sets optimization algorithm
+  opt.set_lower_bounds(lb);
+  opt.set_xtol_abs(1e-4); // tolerance on parametres
+  double Ebest;
+
+  function<double(vec&)> fitness = [&](vec& alpha){
+    double minf;
+    std::vector<double> beta(Npar);
+    for (size_t i = 0; i < Npar; i++) {
+      beta[i] = max(alpha(i),lb[i]);
+    }
+
+    my_function_data data = { index,n,K,De,De,state,dummy,vArrayList,H,B,basis,matElem };
+    opt.set_min_objective(myvfunc_grad, &data);
+
+    bool status = false;
+    size_t attempts = 0;
+    while (!status && attempts < 5) {
+      try{
+        nlopt::result optresult = opt.optimize(beta, minf);
+        status = true;
+      }
+      catch (const std::exception& e) {
+        attempts++;
+      }
+    }
+    cout << "Index: " << index << ", fval: " << minf << endl;
+    return minf;
+  };
+
+  for (size_t l = 0; l < sweeps; l++) {
+    for (index = 0; index < K; index++) {
+      auto xstart = basisCoefficients[index];
+      vec xs(xstart.size());
+      for (size_t i = 0; i < xstart.size(); i++) {
+        xs(i) = xstart[i];
+      }
+      CMAES::optimize(fitness, xs, 20, 5, 0.5, maxeval);
+
+      for (size_t i = 0; i < xstart.size(); i++) {
+        xstart[i] = max(xs(i),lb[i]);
+      }
+
+      basis.slice(index) = updateMatrices(xstart,index,false,dummy);
+      basisCoefficients[index] = xstart;
+    }
+    Ebest = eigenEnergy(state);
+    cout << "Energy after deterministic sweep " << l+1 << ": " << Ebest << "\n";
+    results(l) = Ebest;
+  }
+  return results;
+}
+
+vec Variational::multistarting(size_t state, size_t sweeps, size_t trials){
+  size_t Npar = De*n*(n+1)/2;
+  double minf, Ebest = eigenEnergy(state);
+  vec dummy = {0,1,2}, results(sweeps);
+  vec** vArray;
+  std::vector<double> lb(Npar,1e-6);
+  nlopt::opt opt(nlopt::LD_MMA, Npar); //<--- sets optimization algorithm
+  // nlopt::opt opt(nlopt::LN_SBPLX, Npar);
+  opt.set_lower_bounds(lb);
+  opt.set_xtol_abs(1e-6); // tolerance on parametres
+
+  vec Etrials(trials);
+  vector<vector<double> > xtrials(trials,vector<double>(Npar));
+
+  double tol = 17500 - 1;
+  double sigma = 0.5;
+
+  for (size_t l = 0; l < sweeps; l++) {
+    for (size_t index = 0; index < K; index++) {
+
+      mat trial = sigma*randn<mat>(Npar,trials);
+      trial.col(0).zeros();
+
+      for (size_t k = 0; k < trials; k++) {
+        auto xmean = basisCoefficients[index];
+        for (size_t i = 0; i < Npar; i++) {
+          xmean[i] += trial(i,k);
+          while (xmean[i] < lb[i]) {
+            xmean[i] -= 0.1*trial(i,k);
+          }
+        }
+        my_function_data data = { index,n,K,De,De,state,dummy,vArrayList,H,B,basis,matElem };
+        // opt.set_min_objective(myvfunc, &data);
+        opt.set_min_objective(myvfunc_grad, &data);
+
+        bool status = false;
+        size_t attempts = 0;
+        while (!status && attempts < 5) {
+          try{
+            nlopt::result optresult = opt.optimize(xmean, minf);
+            status = true;
+          }
+          catch (const std::exception& e) {
+            attempts++;
+          }
+        }
+        cout << "Sweep " << l+1 << ", fct " << index << ", trial " << k << " ---> " << minf << "\n";
+
+        Etrials(k) = minf;
+        xtrials[k] = xmean;
+      }
+
+      Etrials.elem( find(Etrials < tol) ).fill(1e10);
+
+      uvec sortindices = sort_index(Etrials);
+      if (Etrials(sortindices(0)) < Ebest) {
+        basis.slice(index) = updateMatrices(xtrials[sortindices(0)],index,false,dummy);
+        Ebest = Etrials(sortindices(0));
+        basisCoefficients[index] = xtrials[sortindices(0)];
+      }
+    }
+    cout << "Energy after multisampling sweep " << l+1 << ": " << Ebest << "\n";
+    results(l) = Ebest;
+  }
+  return results;
+}
+
+double Variational::fullBasisSearch(size_t state){
+  size_t Npar = K*De*n*(n+1)/2;
+  vec** vArray;
+
+  //
+  //  NLOpt setup
+  //
+  std::vector<double> lb(Npar,1e-6);
+  std::vector<double> xs;
+  nlopt::opt opt(nlopt::LN_NELDERMEAD, Npar);
+  opt.set_lower_bounds(lb);
+  opt.set_xtol_abs(1e-10); // tolerance on parametres
+  double minf;
+
+  for (size_t i = 0; i < K; i++) {
+    for (size_t j = 0; j < De*n*(n+1)/2; j++) {
+      xs.push_back(basisCoefficients[i][j]);
+    }
+  }
+
+
+  global_data data = { n,K,De,Npar,state,vArrayList,matElem };
+  opt.set_min_objective(globalvfunc, &data);
+  bool status = false;
+  size_t attempts = 0;
+  while (!status && attempts < 5) {
+    try{
+      nlopt::result optresult = opt.optimize(xs, minf);
+      status = true;
+    }
+    catch (const std::exception& e) {
+      cout << "Optimization failed at attempt " << attempts << endl;
+      attempts++;
+    }
+  }
+
+
+  return minf;
+}
+
 void Variational::printBasis(){
   cout << "Current basis:" << endl << basis << endl;
 }
