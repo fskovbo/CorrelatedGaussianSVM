@@ -1,6 +1,6 @@
 #include "SingleGaussPotential.h"
 
-SingleGaussPotential::SingleGaussPotential(System& sys, double baseStr, double interactionRange)
+SingleGaussPotential::SingleGaussPotential(System& sys, double interactionRange, double baseStr)
   : vArrayList(sys.vArrayList), n(sys.n), De(sys.De), lambdamat(sys.lambdamat), vList(sys.vList) {
   alpha = 1.0/pow(interactionRange,2);
   interStr = calculateIntStr(sys.masses,baseStr,interactionRange);

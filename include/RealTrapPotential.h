@@ -1,31 +1,26 @@
-#ifndef SINGLEGAUSSPOTENIAL_H
-#define SINGLEGAUSSPOTENIAL_H
+#ifndef REALTRAPPOTENIAL_H
+#define REALTRAPPOTENIAL_H
 
 #include <armadillo>
 #include <vector>
+#include <iostream>
 #include "PotentialStrategy.h"
-#include "Utils.h"
 #include "System.h"
 
 using namespace arma;
 using namespace std;
 
-class SingleGaussPotential : public PotentialStrategy{
+class RealTrapPotential : public PotentialStrategy{
 private:
-  vec interStr;
-  vector<vec**> vArrayList;
-  double alpha;
   size_t n, De;
-  mat lambdamat;
-
-  vector<mat> interactions;
-  vector<vec> vList;
-
-  vec calculateIntStr(vec& masses, double baseStr, double intRange);
-  void buildInteractions(mat& Ui);
+  mat OmegaXY, OmegaZ, lambdamat, XYmat, Zmat;
+  double trapLengthXY, trapLengthZ;
 
 public:
-  SingleGaussPotential(System& sys, double interactionRange = 1.0, double baseStr = -2.68400465);
+  RealTrapPotential(System& sys, double trapLengthXY);
+  RealTrapPotential(System& sys, double trapLengthXY, double trapLengthZ);
+  void updateTrap(double trapLengthZ);
+  double gsExpectedVal();
   virtual double calculateExpectedPotential(mat& A1, mat& A2, vec& s1, vec& s2, mat& Binv, double detB);
   virtual double calculateExpectedPotential_noShift(mat& A1, mat& A2, mat& Binv, double detB);
   virtual double calculateExpectedPotential_noShift(mat& A1, mat& A2, mat& Binv, double detB, vec& Vgrad, cube& Binvgrad, vec& detBgrad);

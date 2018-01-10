@@ -66,7 +66,7 @@ double TrapPotential::calculateExpectedPotential(mat& A1, mat& A2, vec& s1, vec&
   double overlap = pow(datum::pi,3.0*n/2.0)*pow(detB,-3.0/De/2.0)*exp(0.25*dot(v,Binv*v));
   double trapval = 1.5/De*trace(Omega*Binv) + dot(u,Omega*u);
 
-  vec Mgrad_A(size(Vgrad_A));  
+  vec Mgrad_A(size(Vgrad_A));
   size_t count = 0;
   Binvgrad.each_slice(
     [&](mat& X)

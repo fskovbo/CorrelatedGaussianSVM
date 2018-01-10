@@ -47,9 +47,15 @@ public:
   vec sweepDeterministic_grad(size_t state, size_t sweeps);
   vec stochasticGradient(size_t state, size_t sweeps, size_t trials, vec Ameanval);
   vec CMAES_Gradient(size_t state, size_t sweeps, size_t maxeval);
-  vec multistarting(size_t state, size_t sweeps, size_t trials);
+  vec multistarting(size_t state, size_t sweeps, size_t trials, double sigma = 1, double tol = -HUGE_VAL);
+  vec multistartingShift(size_t state, size_t sweeps, size_t trials, double sigma = 1, double tol = -HUGE_VAL);
 
-  double fullBasisSearch(size_t state);
+  vec fullBasisSearch(size_t state);
+  double fullBasisSearchShift(size_t state);
+  vec fullBasisSearch_grad(size_t state);
+
+  vec sweepDeterministicNEW(size_t state, size_t sweeps, vec shiftBounds, size_t Nunique = 3, vec uniquePar = {0,1,2});
+  vec test(size_t state, size_t sweeps);
 
   void printBasis();
   void printShift();
