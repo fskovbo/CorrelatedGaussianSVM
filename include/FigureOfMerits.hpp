@@ -550,18 +550,14 @@ inline double fitness(const std::vector<double> &x, std::vector<double> &grad, v
   vec scurrent(3*n), strial(3*n);
   size_t count = 0;
 
-  for (size_t i = 0; i < n+1; i++) {
-    for (size_t j = i+1; j < n+1; j++) {
-      for (size_t k = 0; k < De; k++) {
-        vec w = vList.at(De*count+k);
-        Atrial += x[Nunique*count+uniquePar(k)]*w*w.t();
-      }
-      count++;
-    }
+  size_t c1 = 0, c2 = 0;
+  for (vec& w : vList) {
+    Atrial += x[Nunique*c1+uniquePar(c2++)]*w*w.t();
+    if (c2 == De) { c2 = 0; c1 ++; }
   }
 
   for (size_t i = 0; i < 3*n; i++) {
-    strial(i) = x[i+count*Nunique];
+    strial(i) = x[i+Nunique*n*(n+1)/2];
   }
 
   for (size_t j = 0; j < K; j++) {
@@ -590,17 +586,13 @@ inline double fitness(const std::vector<double> &x, std::vector<double> &grad, v
     return eigs(state);
   }
   else{
-    cout << H << endl;
-    cout << B << endl;
-    cout << Atrial << endl;
-    cout << strial << endl;
-    cout << basis << endl;
     return 9999*1e10;
   }
 }
 
 typedef struct {
-    size_t index, n, K, De, state;
+    size_t index, n, K, De, state, Nunique;
+    vec& uniquePar;
     vector<vec>& vList;
     mat H, B;
     cube& basis;
@@ -610,7 +602,8 @@ typedef struct {
 inline double testfunc(const std::vector<double> &x, std::vector<double> &grad, void *data)
 {
   test_data *d = reinterpret_cast<test_data*>(data);
-  size_t index = d->index, n = d->n, K = d->K, De = d->De, state = d->state;
+  size_t index = d->index, n = d->n, K = d->K, De = d->De, state = d->state, Nunique = d->Nunique;
+  vec& uniquePar = d->uniquePar;
   vector<vec>& vList = d->vList;
   mat H = d->H, B = d->B;
   cube& basis = d->basis;
@@ -618,10 +611,11 @@ inline double testfunc(const std::vector<double> &x, std::vector<double> &grad, 
 
   double Hij, Bij;
   mat Acurrent(De*n,De*n), Atrial = zeros<mat>(De*n,De*n);
-  size_t count = 0;
 
+  size_t c1 = 0, c2 = 0;
   for (vec& w : vList) {
-    Atrial += x[count++]*w*w.t();
+    Atrial += x[Nunique*c1+uniquePar(c2++)]*w*w.t();
+    if (c2 == De) { c2 = 0; c1 ++; }
   }
 
   for (size_t j = 0; j < K; j++) {
