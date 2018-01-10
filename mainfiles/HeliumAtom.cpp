@@ -17,15 +17,15 @@ int main() {
   masses << 7296 << 1 << 1;
   charges << 2 << -1 << -1;
 
-  System He = System(masses,charges);
+  System He = System(masses,charges,1);
   CoulombPotential Vstrat(He,10,12);
   MatrixElements elem(He,Vstrat);
   Variational ansatz1 = Variational(He,elem);
 
   ansatz1.initializeBasis(20);
-  vec startingGuess = 2.5*ones<vec>(3);
-  vec res1 = ansatz1.sweepStochastic(5,1e2,startingGuess);
-  vec res2 = ansatz1.sweepDeterministic(5);
+  vec startingGuess = 1.5*ones<vec>(3);
+  vec res1 = ansatz1.sweepStochastic(0,5,1e2,startingGuess);
+  vec res2 = ansatz1.sweepDeterministic(0,5,{0,0,0},1,{0});
 
   cout << "Result after stochastic sweep:" << endl << res1 << endl;
   cout << "Result after deterministic sweep:" << endl << res2 << endl;

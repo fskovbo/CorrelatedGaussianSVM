@@ -3,7 +3,6 @@
 
 #include <armadillo>
 #include <functional>
-#include <gsl/gsl_multimin.h>
 
 using namespace arma;
 using namespace std;

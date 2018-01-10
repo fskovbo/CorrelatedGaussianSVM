@@ -15,32 +15,38 @@
 #include "CMAES.h"
 #include "Utils.h"
 
+#include "FigureOfMerits.hpp"
+
 using namespace arma;
 using namespace std;
 
 
 class Variational {
 private:
-  size_t K, n;
+  size_t K, n, De;
   mat H, B, shift;
   MatrixElements matElem;
   cube basis;
-  mat basisCoefficients;
+  vector< vector<double> > basisCoefficients;
   vector<vec**> vArrayList;
+  vector<vec> vList;
 
-  static double myvfunc(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
-  double groundStateEnergy();
-  mat generateRandomGaussian(vec& Ameanval, vec& coeffs);
+  double eigenEnergy(size_t state);
+  mat generateRandomGaussian(vec& Ameanval, vector<double>& coeffs);
+  mat updateMatrices(vector<double> x, size_t index, bool shifted, vec& snew);
 
 public:
   Variational(System& sys, MatrixElements& matElem);
 
   double initializeBasis(size_t basisSize);
-  vec sweepStochastic(size_t sweeps, size_t trials, vec& Ameanval);
-  vec sweepDeterministic(size_t sweeps);
+  vec sweepStochastic(size_t state, size_t sweeps, size_t trials, vec Ameanval);
+  vec sweepStochasticShift(size_t state, size_t sweeps, size_t trials, vec Ameanval, vec maxShift);
+  vec sweepDeterministicCMAES(size_t state, size_t sweeps, size_t maxeval);
+  vec sweepDeterministic_grad(size_t state, size_t sweeps);
 
-  vec sweepDeterministicCMAES(size_t sweeps, size_t maxeval);
-  double addBasisFunctionCMAES(mat A_guess, vec S_guess, size_t state, size_t maxeval);
+  vec fullBasisSearch(size_t state);
+
+  vec sweepDeterministic(size_t state, size_t sweeps, vec shiftBounds = {0,0,0}, size_t Nunique = 3, vec uniquePar = {0,1,2});
 
   void printBasis();
   void printShift();

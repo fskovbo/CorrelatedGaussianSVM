@@ -11,17 +11,22 @@ using namespace std;
 
 
 class System {
+private:
+  void setupCoordinates();
+  void setupCoordinates2();
+  void setupLambdaMatrix();
+  void setupvArray();
+  void setupvList();
 
 public:
-  size_t N, n;
+  size_t N, n, De;
   mat U, Ui, lambdamat;
   vec masses, charges;
   vector<vec**> vArrayList;
+  vector<vec> vList;
+  vector<mat> vprodList;
 
-  System(vec& masses, vec& charges);
-
-  void setupCoordinates();
-  void setupCoordinates2();
+  System(vec& masses, vec& charges, size_t De = 3);
 
 };
 
