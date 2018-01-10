@@ -23,8 +23,9 @@ using namespace std;
 
 class Variational {
 private:
-  size_t K, n, De;
+  size_t K, n, De, Nunique;
   mat H, B, shift;
+  vec uniquePar;
   MatrixElements matElem;
   cube basis;
   vector< vector<double> > basisCoefficients;
@@ -38,6 +39,7 @@ private:
 public:
   Variational(System& sys, MatrixElements& matElem);
 
+  void setUniqueCoordinates(size_t Nunique_, vec uniquePar_);
   double initializeBasis(size_t basisSize);
   vec sweepStochastic(size_t state, size_t sweeps, size_t trials, vec Ameanval);
   vec sweepStochasticShift(size_t state, size_t sweeps, size_t trials, vec Ameanval, vec maxShift);
@@ -46,7 +48,7 @@ public:
 
   vec fullBasisSearch(size_t state);
 
-  vec sweepDeterministic(size_t state, size_t sweeps, vec shiftBounds = {0,0,0}, size_t Nunique = 3, vec uniquePar = {0,1,2});
+  vec sweepDeterministic(size_t state, size_t sweeps, vec shiftBounds = {0,0,0});
 
   void printBasis();
   void printShift();

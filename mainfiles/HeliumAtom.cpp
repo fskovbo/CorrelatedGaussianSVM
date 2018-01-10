@@ -25,7 +25,7 @@ int main() {
   ansatz1.initializeBasis(20);
   vec startingGuess = 1.5*ones<vec>(3);
   vec res1 = ansatz1.sweepStochastic(0,5,1e2,startingGuess);
-  vec res2 = ansatz1.sweepDeterministic(0,5,{0,0,0},1,{0});
+  vec res2 = ansatz1.sweepDeterministic(0,5,{0,0,0});
 
   cout << "Result after stochastic sweep:" << endl << res1 << endl;
   cout << "Result after deterministic sweep:" << endl << res2 << endl;

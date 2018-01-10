@@ -3,6 +3,9 @@
 Variational::Variational(System& sys, MatrixElements& matElem)
 : n(sys.n), De(sys.De), matElem(matElem), vArrayList(sys.vArrayList), vList(sys.vList) {
   K = 0;
+
+  Nunique   = De;
+  uniquePar = linspace<vec>(0,De-1,De);
 }
 
 
@@ -16,6 +19,11 @@ double Variational::eigenEnergy(size_t state){
   else{
     return 9999*1e10;
   }
+}
+
+void Variational::setUniqueCoordinates(size_t Nunique_, vec uniquePar_){
+  Nunique   = Nunique_;
+  uniquePar = uniquePar_;
 }
 
 mat Variational::generateRandomGaussian(vec& Ameanval, vector<double>& coeffs){
@@ -421,7 +429,7 @@ vec Variational::fullBasisSearch(size_t state){
   return datavec;
 }
 
-vec Variational::sweepDeterministic(size_t state, size_t sweeps, vec shiftBounds, size_t Nunique, vec uniquePar){
+vec Variational::sweepDeterministic(size_t state, size_t sweeps, vec shiftBounds){
   size_t NparA = Nunique*n*(n+1)/2;
   size_t NparS = 3*n;
   size_t Npar  = NparA + NparS;
