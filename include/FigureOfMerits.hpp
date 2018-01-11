@@ -256,7 +256,7 @@ inline double globalvfunc(const std::vector<double> &x, std::vector<double> &gra
 }
 
 typedef struct {
-    size_t index, n, K, De, Nunique, state;
+    size_t index, n, K, De, Nunique, state, Nf;
     vec& uniquePar;
     vector<vec>& vList;
     mat H, B;
@@ -269,89 +269,21 @@ typedef struct {
 inline double fitness(const std::vector<double> &x, std::vector<double> &grad, void *data)
 {
   function_data *d = reinterpret_cast<function_data*>(data);
-  size_t index = d->index, n = d->n, K = d->K, De = d->De, Nunique = d->Nunique, state = d->state;
-  vec& uniquePar = d->uniquePar;
-  vector<vec>& vList = d->vList;
-  mat H = d->H, B = d->B;
-  cube& basis = d->basis;
-  mat& shift = d->shift;
-  MatrixElements& matElem = d->matElem;
-  bool shifted = d->shifted;
-
-  double Hij, Bij;
-  mat Acurrent(De*n,De*n), Atrial = zeros<mat>(De*n,De*n);
-  vec scurrent(3*n), strial(3*n);
-  size_t count = 0;
-
-  size_t c1 = 0, c2 = 0;
-  for (vec& w : vList) {
-    Atrial += x[Nunique*c1+uniquePar(c2++)]*w*w.t();
-    if (c2 == De) { c2 = 0; c1 ++; }
-  }
-
-  for (size_t i = 0; i < 3*n; i++) {
-    strial(i) = x[i+Nunique*n*(n+1)/2];
-  }
-
-  for (size_t j = 0; j < K; j++) {
-    if (j == index) {
-      if (shifted) { matElem.calculateH(Atrial,Atrial,strial,strial,Hij,Bij); }
-      else         { matElem.calculateH_noShift(Atrial,Atrial,Hij,Bij); }
-      H(index,index) = Hij;
-      B(index,index) = Bij;
-    } else {
-      Acurrent = basis.slice(j);
-      scurrent = shift.col(j);
-
-      if (shifted) { matElem.calculateH(Acurrent,Atrial,scurrent,strial,Hij,Bij); }
-      else         { matElem.calculateH_noShift(Acurrent,Atrial,Hij,Bij); }
-      H(j,index) = Hij;
-      H(index,j) = Hij;
-      B(j,index) = Bij;
-      B(index,j) = Bij;
-    }
-  }
-
-  mat L(K,K);
-  bool status = chol(L,B,"lower");
-  if (status) {
-    vec eigs = eig_sym( L.i()*H*(L.t()).i() );
-    return eigs(state);
-  }
-  else{
-    return 9999*1e10;
-  }
-}
-
-typedef struct {
-    size_t index, n, K, De, Nunique, state, Nf;
-    vec& uniquePar;
-    vector<vec>& vList;
-    mat H, B;
-    cube& basis;
-    mat& shift;
-    MatrixElements& matElem;
-    bool shifted;
-} function_data_test;
-
-inline double fitness_test(const std::vector<double> &x, std::vector<double> &grad, void *data)
-{
-  function_data_test *d = reinterpret_cast<function_data_test*>(data);
   size_t index = d->index, n = d->n, K = d->K, De = d->De, Nunique = d->Nunique, state = d->state, Nf = d->Nf;
-  vec& uniquePar = d->uniquePar;
-  vector<vec>& vList = d->vList;
-  mat H = d->H, B = d->B;
-  cube& basis = d->basis;
-  mat& shift = d->shift;
+  vec& uniquePar          = d->uniquePar;
+  vector<vec>& vList      = d->vList;
+  mat H                   = d->H, B = d->B;
+  cube& basis             = d->basis;
+  mat& shift              = d->shift;
   MatrixElements& matElem = d->matElem;
-  bool shifted = d->shifted;
+  bool shifted            = d->shifted;
 
   double Hij, Bij;
   mat Ai(De*n,De*n), Aj(De*n,De*n);
   vec si(3*n), sj(3*n);
   cube Atrials(De*n,De*n,Nf);
   mat strials(3*n,Nf);
-  size_t count = 0, Npar = Nunique*n*(n+1)/2 + 3*n;
+  size_t Npar = Nunique*n*(n+1)/2 + 3*n;
 
   for (size_t j = 0; j < Nf; j++) {
     mat Atrial = zeros<mat>(De*n,De*n);

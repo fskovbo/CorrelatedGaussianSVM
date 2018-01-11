@@ -36,9 +36,10 @@ int main() {
   Trap.updateTrap(trapdepth);
   ansatz.initializeBasis(8);
   ansatz.setUniqueCoordinates(2,{0,1,1});
+  ansatz.setUpdateNumber(2);
 
   vec warmstart         = ansatz.sweepStochastic(state,5,1e3,aGuess);
-  vec res               = ansatz.sweepDeterministic(state,5,2);
+  vec res               = ansatz.sweepDeterministic(state,5);
 
   std::cout << "Energy of state " << state << ": " << res(res.n_rows-1)-Trap.gsExpectedVal() << '\n';
 

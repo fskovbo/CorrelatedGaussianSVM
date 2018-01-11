@@ -26,6 +26,10 @@ void Variational::setUniqueCoordinates(size_t Nunique_, vec uniquePar_){
   uniquePar = uniquePar_;
 }
 
+void Variational::setUpdateNumber(size_t Nf_){
+  Nf = Nf_;
+}
+
 mat Variational::generateRandomGaussian(vec& Ameanval, vector<double>& coeffs){
   size_t count = 0;
   mat A = zeros<mat>(De*n,De*n);
@@ -439,80 +443,6 @@ vec Variational::sweepDeterministic(size_t state, size_t sweeps, vec shiftBounds
   //
   //  NLOpt setup
   //
-  std::vector<double> lb(Npar);
-  std::vector<double> ub(Npar);
-  std::vector<double> xs(Npar);
-  std::vector<double> Acoeff(De*n*(n+1)/2);
-  std::vector<double> fullcoeff(De*n*(n+1)/2 + NparS);
-
-  for (size_t i = 0; i < NparA; i++) {
-    lb[i] = 1e-6;
-    ub[i] = HUGE_VAL;
-  }
-  for (size_t i = 0; i < n; i++) {
-    for (size_t k = 0; k < 3; k++) {
-      lb[NparA + 3*i+k] = -shiftBounds(k);
-      ub[NparA + 3*i+k] = shiftBounds(k);
-    }
-  }
-  nlopt::opt opt(nlopt::LN_SBPLX, Npar);
-  opt.set_lower_bounds(lb);
-  opt.set_upper_bounds(ub);
-  opt.set_xtol_abs(1e-10); // tolerance on parametres
-  double minf;
-
-  for (size_t l = 0; l < sweeps; l++) {
-    for (size_t index = 0; index < K; index++) {
-
-      Acoeff = basisCoefficients[index];
-      for (size_t i = 0; i < n*(n+1)/2; i++) {
-        for (size_t k = 0; k < De; k++) {
-          xs[Nunique*i+uniquePar(k)] = Acoeff[De*i+k];
-        }
-      }
-      for (size_t i = 0; i < NparS; i++) {
-        xs[i+NparA] = shift(i,index);
-      }
-
-      function_data data = { index,n,K,De,Nunique,state,uniquePar,vList,H,B,basis,shift,matElem,shifted };
-      opt.set_min_objective(fitness, &data);
-
-      try{ nlopt::result optresult = opt.optimize(xs, minf); }
-      catch (const std::exception& e) { }
-
-      //
-      // add optimized basis function to basis
-      //
-      for (size_t i = 0; i < n*(n+1)/2; i++) {
-        for (size_t k = 0; k < De; k++) {
-          Acoeff[De*i+k]      = xs[Nunique*i+uniquePar(k)];
-          fullcoeff[De*i+k]   = xs[Nunique*i+uniquePar(k)];
-        }
-      }
-      for (size_t i = 0; i < NparS; i++) {
-        fullcoeff[De*n*(n+1)/2 + i] = xs[NparA + i];
-      }
-
-      basis.slice(index)        = updateMatrices(fullcoeff,index,shifted,snew);
-      basisCoefficients[index]  = Acoeff;
-      shift.col(index)          = snew;
-    }
-    cout << "Energy after deterministic sweep " << l+1 << ": " << minf << "\n";
-    results(l) = minf;
-  }
-  return results;
-}
-
-vec Variational::sweepDeterministic(size_t state, size_t sweeps, size_t Nf, vec shiftBounds){
-  size_t NparA = Nunique*n*(n+1)/2;
-  size_t NparS = 3*n;
-  size_t Npar  = NparA + NparS;
-  vec results(sweeps), snew;
-  bool shifted = !all(shiftBounds == 0);
-
-  //
-  //  NLOpt setup
-  //
   std::vector<double> lb(Nf*Npar);
   std::vector<double> ub(Nf*Npar);
   std::vector<double> xs(Nf*Npar);
@@ -553,8 +483,8 @@ vec Variational::sweepDeterministic(size_t state, size_t sweeps, size_t Nf, vec 
         }
       }
 
-      function_data_test data = { index,n,K,De,Nunique,state,Nf,uniquePar,vList,H,B,basis,shift,matElem,shifted };
-      opt.set_min_objective(fitness_test, &data);
+      function_data data = { index,n,K,De,Nunique,state,Nf,uniquePar,vList,H,B,basis,shift,matElem,shifted };
+      opt.set_min_objective(fitness, &data);
 
       try{ nlopt::result optresult = opt.optimize(xs, minf); }
       catch (const std::exception& e) { }
