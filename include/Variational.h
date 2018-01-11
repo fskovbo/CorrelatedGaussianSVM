@@ -49,6 +49,7 @@ public:
   vec fullBasisSearch(size_t state);
 
   vec sweepDeterministic(size_t state, size_t sweeps, vec shiftBounds = {0,0,0});
+  vec sweepDeterministic(size_t state, size_t sweeps, size_t Nf, vec shiftBounds = {0,0,0});
 
   void printBasis();
   void printShift();

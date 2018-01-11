@@ -503,6 +503,85 @@ vec Variational::sweepDeterministic(size_t state, size_t sweeps, vec shiftBounds
   return results;
 }
 
+vec Variational::sweepDeterministic(size_t state, size_t sweeps, size_t Nf, vec shiftBounds){
+  size_t NparA = Nunique*n*(n+1)/2;
+  size_t NparS = 3*n;
+  size_t Npar  = NparA + NparS;
+  vec results(sweeps), snew;
+  bool shifted = !all(shiftBounds == 0);
+
+  //
+  //  NLOpt setup
+  //
+  std::vector<double> lb(Nf*Npar);
+  std::vector<double> ub(Nf*Npar);
+  std::vector<double> xs(Nf*Npar);
+  std::vector<double> Acoeff(De*n*(n+1)/2);
+  std::vector<double> fullcoeff(De*n*(n+1)/2 + 3*n);
+
+  for (size_t j = 0; j < Nf; j++) {
+    for (size_t i = 0; i < NparA; i++) {
+      lb[Npar*j+i] = 1e-6;
+      ub[Npar*j+i] = HUGE_VAL;
+    }
+    for (size_t i = 0; i < n; i++) {
+      for (size_t k = 0; k < 3; k++) {
+        lb[Npar*j+NparA+3*i+k] = -shiftBounds(k);
+        ub[Npar*j+NparA+3*i+k] = shiftBounds(k);
+      }
+    }
+  }
+
+  nlopt::opt opt(nlopt::LN_SBPLX, Nf*Npar);
+  opt.set_lower_bounds(lb);
+  opt.set_upper_bounds(ub);
+  opt.set_xtol_abs(1e-10); // tolerance on parametres
+  double minf;
+
+  for (size_t l = 0; l < sweeps; l++) {
+    for (size_t index = 0; index < K; index+=Nf) {
+
+      for (size_t j = 0; j < Nf; j++) {
+        Acoeff = basisCoefficients[index+j];
+        for (size_t i = 0; i < n*(n+1)/2; i++) {
+          for (size_t k = 0; k < De; k++) {
+            xs[Npar*j+Nunique*i+uniquePar(k)] = Acoeff[De*i+k];
+          }
+        }
+        for (size_t i = 0; i < NparS; i++) {
+          xs[Npar*j+i+NparA] = shift(i,index+j);
+        }
+      }
+
+      function_data_test data = { index,n,K,De,Nunique,state,Nf,uniquePar,vList,H,B,basis,shift,matElem,shifted };
+      opt.set_min_objective(fitness_test, &data);
+
+      try{ nlopt::result optresult = opt.optimize(xs, minf); }
+      catch (const std::exception& e) { }
+      //
+      // add optimized basis function to basis
+      //
+      for (size_t j = 0; j < Nf; j++) {
+        for (size_t i = 0; i < n*(n+1)/2; i++) {
+          for (size_t k = 0; k < De; k++) {
+            Acoeff[De*i+k]      = xs[j*Npar+Nunique*i+uniquePar(k)];
+            fullcoeff[De*i+k]   = xs[j*Npar+Nunique*i+uniquePar(k)];
+          }
+        }
+        for (size_t i = 0; i < NparS; i++) {
+          fullcoeff[De*n*(n+1)/2 + i] = xs[j*Npar+NparA + i];
+        }
+
+        basis.slice(index+j)        = updateMatrices(fullcoeff,index+j,shifted,snew);
+        basisCoefficients[index+j]  = Acoeff;
+        shift.col(index+j)          = snew;
+      }
+    }
+    cout << "Energy after deterministic sweep " << l+1 << ": " << minf << "\n";
+    results(l) = minf;
+  }
+  return results;
+}
 
 void Variational::printBasis(){
   cout << "Current basis:" << endl << basis << endl;
