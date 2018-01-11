@@ -353,11 +353,6 @@ inline double fitness_test(const std::vector<double> &x, std::vector<double> &gr
   mat strials(3*n,Nf);
   size_t count = 0, Npar = Nunique*n*(n+1)/2 + 3*n;
 
-  // std::cout << "/* message */" << '\n';
-  // for (auto& lol : x){
-  //   std::cout << lol << '\n';
-  // }
-
   for (size_t j = 0; j < Nf; j++) {
     mat Atrial = zeros<mat>(De*n,De*n);
     vec strial = zeros<vec>(3*n);
