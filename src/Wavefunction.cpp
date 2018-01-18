@@ -1,12 +1,13 @@
 #include "Wavefunction.hpp"
 
-Wavefunction::Wavefunction(System& sys, cube& basis, mat& shift, vec& coeffs)
- : K(coeffs.n_rows), n(sys.n), De(sys.De), basis(basis), shift(shift), coeffs(coeffs), U(sys.U), Ui(sys.Ui) {
+Wavefunction::Wavefunction(System& sys, MatrixElements& matElem, cube& basis, mat& shift, vec& coeffs)
+ : K(coeffs.n_rows), n(sys.n), De(sys.De), basis(basis), shift(shift),
+   coeffs(coeffs), U(sys.U), Ui(sys.Ui), matElem(matElem) {
 
 }
 
-Wavefunction::Wavefunction(System& sys, std::string filename)
- : n(sys.n), De(sys.De), U(sys.U), Ui(sys.Ui) {
+Wavefunction::Wavefunction(System& sys, MatrixElements& matElem, std::string filename)
+ : n(sys.n), De(sys.De), U(sys.U), Ui(sys.Ui), matElem(matElem) {
 
  bool status;
  mat tmp;
@@ -27,11 +28,7 @@ Wavefunction::Wavefunction(System& sys, std::string filename)
  }
 }
 
-double Wavefunction::factorial(double x){
-  return std::tgamma(x+1);
-}
-
-void Wavefunction::calculateOverlap(mat& O, mat& A1, mat& A2, vec& s1, vec& s2, double c1, double c2, double& Oij, double& Bij){
+void Wavefunction::calculateR(mat& R, mat& A1, mat& A2, vec& s1, vec& s2, double& Rij, double& Bij){
   mat B     = A1 + A2;
 
   mat L     = chol(B,"lower");
@@ -49,41 +46,11 @@ void Wavefunction::calculateOverlap(mat& O, mat& A1, mat& A2, vec& s1, vec& s2, 
   vec u = 0.5*B*v;
 
   Bij   = (pow(datum::pi,3.0*n/2.0)*pow(detB,-3.0/De/2.0)) * exp(0.25*dot(v,B*v));
-  Oij   = Bij*(1.5/De*trace(O*B) + dot(u,O*u));
+  Rij   = Bij*(1.5/De*trace(R*B) + dot(u,R*u));
 }
 
-double Wavefunction::calculateExptValue(mat& O){
-  mat Om(K,K), B(K,K);
-  mat A1, A2;
-  vec s1, s2;
-  double c1, c2, Oij, Bij;
-
-  for (size_t i = 0; i < K; i++) {
-    A1 = basis.slice(i);
-    s1 = shift.col(i);
-    c1 = coeffs(i);
-
-    for (size_t j = i; j < K; j++) {
-      A2 = basis.slice(j);
-      s2 = shift.col(j);
-      c2 = coeffs(j);
-
-      calculateOverlap(O,A1,A2,s1,s2,c1,c2,Oij,Bij);
-      Om(i,j) = Oij;
-      Om(j,i) = Oij;
-      B(i,j)  = Bij;
-      B(j,i)  = Bij;
-    }
-  }
-  mat L(K,K);
-  bool status = chol(L,B,"lower");
-  if (status) {
-    vec eigs = eig_sym( L.i()*Om*(L.t()).i() );
-    return eigs(0);
-  }
-  else{
-    return 9999*1e10;
-  }
+double Wavefunction::factorial(double x){
+  return std::tgamma(x+1);
 }
 
 cube Wavefunction::buildPermutations(){
@@ -115,7 +82,7 @@ cube Wavefunction::buildPermutations(){
     size_t ie = De*(i+1)-1;
     size_t jb;
     if (i == n) { jb = 0; }
-    else       { jb = De*(i+1); }
+    else        { jb = De*(i+1); }
     size_t je = jb+De-1;
 
     tmp(span(ib,ie),span(jb,je)) = eye(De,De);
@@ -133,60 +100,79 @@ cube Wavefunction::buildPermutations(){
   return perm;
 }
 
-vec Wavefunction::RMSdistances(){
-  vec RMS(De*(n+1));
+void Wavefunction::Symmetrize(cube& symbasis, mat& symshift){
+  cube permutations = buildPermutations();
 
-  for (size_t i = 0; i < De*(n+1); i++) {
-    mat Uir = Ui( span(i,i),span(0,De*n-1) );
-    mat F   = Uir.t()*Uir;
-    RMS(i)  = calculateExptValue(F);
+  for (size_t i = 0; i < K; i++) {
+    mat A = basis.slice(i), As = zeros<mat>(De*n,De*n);
+    vec s = shift.col(i),   ss = zeros<vec>(3*n);
+
+    for (size_t k = 0; k < permutations.n_slices; k++) {
+      mat perm = permutations.slice(k);
+      As      += perm.t()*A*perm;
+      ss      += perm*s;
+    }
+
+    symbasis.slice(i) = As/permutations.n_slices;
+    symshift.col(i)   = ss/permutations.n_slices;
   }
-
-  return RMS;
 }
 
 double Wavefunction::Symmetrization(){
-  cube permutations = buildPermutations();
-  mat S             = zeros<mat>(K,K);
-  mat B(K,K);
+  cube symbasis(basis);
+  mat symshift(shift);
+  Symmetrize(symbasis,symshift);
+  mat Ai, Aj;
+  vec si, sj;
+  double Rij, Bij;
+  mat F = zeros<mat>(De*n,De*n);
+  mat S(K,K), B(K,K);
 
-  for (size_t k = 0; k < permutations.n_slices; k++) {
-    mat perm = permutations.slice(k);
-    mat Bp(K,K), I = eye(De*n,De*n);
-    mat A1, A2, A2p;
-    vec s1, s2, s2p;
-    double c1, c2, Oij, Bij;
+  for (size_t i = 0; i < K; i++) {
+    Ai = basis.slice(i);
+    si = shift.col(i);
+    for (size_t j = 0; j < K; j++) {
+      Aj = basis.slice(j);
+      sj = shift.col(j);
+      calculateR(F,Ai,Aj,si,sj,Rij,Bij);
+      B(i,j) = Bij;
+
+      Aj = symbasis.slice(j);
+      sj = symshift.col(j);
+      calculateR(F,Ai,Aj,si,sj,Rij,Bij);
+      S(i,j) = Bij;
+    }
+  }
+
+  return dot(coeffs,S*coeffs)/dot(coeffs,B*coeffs);
+}
+
+vec Wavefunction::RMSdistances(){
+  vec RMS(De*(n+1));
+  mat Ai, Aj;
+  vec si, sj;
+  double Rij, Bij;
+  mat R(K,K), B(K,K);
+
+  for (size_t k = 0; k < De*(n+1); k++) {
+    mat Uir = Ui( span(k,k),span(0,De*n-1) );
+    mat F   = Uir.t()*Uir;
 
     for (size_t i = 0; i < K; i++) {
-      A1 = basis.slice(i);
-      s1 = shift.col(i);
-      c1 = coeffs(i);
+      Ai = basis.slice(i);
+      si = shift.col(i);
+      for (size_t j = i; j < K; j++) {
+        Aj = basis.slice(j);
+        sj = shift.col(j);
 
-      for (size_t j = 0; j < K; j++) {
-        A2  = basis.slice(j);
-        A2p = perm.t()*A2*perm;
-        s2  = shift.col(j);
-        s2p = perm*s2;
-        c2  = coeffs(j);
-
-        calculateOverlap(I,A1,A2,s1,s2,c1,c2,Oij,Bij);
-        B(i,j)  = Bij;
-        B(j,i)  = Bij;
-        calculateOverlap(I,A1,A2p,s1,s2p,c1,c2,Oij,Bij);
-        Bp(i,j) = Bij;
-        Bp(j,i) = Bij;
+        calculateR(F,Ai,Aj,si,sj,Rij,Bij);
+        R(i,j) = Rij;
+        R(j,i) = Rij;
+        B(i,j) = Bij;
+        B(j,i) = Bij;
       }
     }
-    S += Bp;
+    RMS(k) = dot(coeffs,R*coeffs)/dot(coeffs,B*coeffs);
   }
-
-  mat L(K,K);
-  bool status = chol(L,B,"lower");
-  if (status) {
-    vec eigs = eig_sym( L.i()*S*(L.t()).i() );
-    return eigs(eigs.n_rows-1)/permutations.n_slices;
-  }
-  else{
-    return 9999*1e10;
-  }
+  return RMS;
 }

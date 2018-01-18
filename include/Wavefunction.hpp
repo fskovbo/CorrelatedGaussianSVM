@@ -3,6 +3,7 @@
 
 #include <armadillo>
 #include "System.h"
+#include "MatrixElements.h"
 #include <cmath>
 #include <string>
 
@@ -16,15 +17,16 @@ private:
   mat shift, U, Ui;
   cube basis;
   vec coeffs;
+  MatrixElements matElem;
 
   double factorial(double x);
-  double calculateExptValue(mat& O);
-  void calculateOverlap(mat& O, mat& A1, mat& A2, vec& s1, vec& s2, double c1, double c2, double& Oij, double& Bij);
   cube buildPermutations();
+  void Symmetrize(cube& symbasis, mat& symshift);
+  void calculateR(mat& R, mat& A1, mat& A2, vec& s1, vec& s2, double& Rij, double& Bij);
 
 public:
-  Wavefunction(System& sys, cube& basis, mat& shift, vec& coeffs);
-  Wavefunction(System& sys, std::string filename);
+  Wavefunction(System& sys, MatrixElements& matElem, cube& basis, mat& shift, vec& coeffs);
+  Wavefunction(System& sys, MatrixElements& matElem, std::string filename);
 
   vec RMSdistances();
   double Symmetrization();
