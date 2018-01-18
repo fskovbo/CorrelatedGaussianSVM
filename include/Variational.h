@@ -8,6 +8,8 @@
 #include <math.h>
 #include <time.h>
 #include <vector>
+#include <string>
+#include <fstream>
 #include "nlopt.hpp"
 
 #include "System.h"
@@ -39,6 +41,7 @@ private:
 public:
   Variational(System& sys, MatrixElements& matElem);
 
+  vec eigenSpectrum();
   void setUniqueCoordinates(size_t Nunique_, vec uniquePar_);
   void setUpdateNumber(size_t Nf_);
   double initializeBasis(size_t basisSize);
@@ -53,6 +56,11 @@ public:
 
   void printBasis();
   void printShift();
+  bool saveBasis(size_t state, std::string filename);
+  cube getBasis();
+  mat getShift();
+  void setBasis(cube basis_);
+  void setShift(mat shift_);
 };
 
 #endif

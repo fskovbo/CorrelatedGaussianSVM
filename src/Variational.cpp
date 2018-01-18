@@ -6,8 +6,20 @@ Variational::Variational(System& sys, MatrixElements& matElem)
 
   Nunique   = De;
   uniquePar = linspace<vec>(0,De-1,De);
+  Nf        = 1;
 }
 
+vec Variational::eigenSpectrum(){
+  mat L(K,K);
+  bool status = chol(L,B,"lower");
+  if (status) {
+    vec eigs = eig_sym( L.i()*H*(L.t()).i() );
+    return eigs;
+  }
+  else{
+    return zeros<vec>(K);
+  }
+}
 
 double Variational::eigenEnergy(size_t state){
   mat L(K,K);
@@ -519,4 +531,41 @@ void Variational::printBasis(){
 
 void Variational::printShift(){
   cout << "Current shift:" << endl << shift << endl;
+}
+
+bool Variational::saveBasis(size_t state, std::string filename){
+  mat L(K,K), eigvecs;
+  vec eigvals;
+  bool status = chol(L,B,"lower");
+  if (status) {
+    eig_sym( eigvals, eigvecs, L.i()*H*(L.t()).i() );
+  }
+  else { return status; }
+
+  std::string cn = filename + "_coeffs";
+  std::string bn = filename + "_basis";
+  std::string sn = filename + "_shift";
+
+  vec coeffs = eigvecs.col(state);
+  status     = coeffs.save(cn,raw_ascii);
+  status     = basis.save(bn,raw_ascii);
+  status     = shift.save(sn,raw_ascii);
+  return status;
+}
+
+cube Variational::getBasis(){
+  return basis;
+}
+
+mat Variational::getShift(){
+  return shift;
+}
+
+void Variational::setBasis(cube basis_){
+  basis = basis_;
+  K     = basis.n_slices;
+}
+
+void Variational::setShift(mat shift_){
+  shift = shift_;
 }
