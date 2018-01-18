@@ -569,3 +569,13 @@ void Variational::setBasis(cube basis_){
 void Variational::setShift(mat shift_){
   shift = shift_;
 }
+
+Wavefunction Variational::exportWavefunction(System& sys, size_t state){
+  mat L(K,K), eigvecs;
+  vec eigvals;
+  chol(L,B,"lower");
+  eig_sym( eigvals, eigvecs, L.i()*H*(L.t()).i() );
+  vec coeffs = eigvecs.col(state);
+
+  return Wavefunction(sys,basis,shift,coeffs);
+}

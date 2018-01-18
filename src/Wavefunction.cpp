@@ -9,18 +9,21 @@ Wavefunction::Wavefunction(System& sys, std::string filename)
  : n(sys.n), De(sys.De), U(sys.U), Ui(sys.Ui) {
 
  bool status;
+ mat tmp;
  std::string cn = filename + "_coeffs";
  std::string bn = filename + "_basis";
  std::string sn = filename + "_shift";
- status         = coeffs.save(cn,raw_ascii);
- status         = basis.save(bn,raw_ascii);
- status         = shift.save(sn,raw_ascii);
+ status         = coeffs.load(cn,raw_ascii);
+ K              = coeffs.n_rows;
+ basis          = zeros<cube>(De*n,De*n,K);
+ status         = tmp.load(bn,raw_ascii);
+ for (size_t i = 0; i < K; i++) {
+   basis.slice(i) = tmp(span(i*De*n,(i+1)*De*n-1),span(0,De*n-1));
+ }
+ status         = shift.load(sn,raw_ascii);
 
  if (!status) {
   std::cout << "Loading Error!" << '\n';
- }
- else{
-   K = coeffs.n_rows;
  }
 }
 
@@ -46,7 +49,7 @@ void Wavefunction::calculateOverlap(mat& O, mat& A1, mat& A2, vec& s1, vec& s2, 
   vec u = 0.5*B*v;
 
   Bij   = (pow(datum::pi,3.0*n/2.0)*pow(detB,-3.0/De/2.0)) * exp(0.25*dot(v,B*v));
-  Oij   = c1*c2*Bij*(1.5/De*trace(O*B) + dot(u,O*u));
+  Oij   = Bij*(1.5/De*trace(O*B) + dot(u,O*u));
 }
 
 double Wavefunction::calculateExptValue(mat& O){
@@ -108,18 +111,22 @@ cube Wavefunction::buildPermutations(){
 
   mat tmp = zeros<mat>(De*(n+1),De*(n+1));
   for (size_t i = 0; i < n+1; i++) {
-    size_t ib = De*i, ie = De*(i+1)-1, jb;
-    if (i = n) { jb = 0; }
+    size_t ib = De*i;
+    size_t ie = De*(i+1)-1;
+    size_t jb;
+    if (i == n) { jb = 0; }
     else       { jb = De*(i+1); }
     size_t je = jb+De-1;
 
     tmp(span(ib,ie),span(jb,je)) = eye(De,De);
   }
+
   for (size_t i = 0; i < n+1; i++) {
     mat temp = tmp;
     for (size_t j = 0; j < i; j++) {
       temp = temp*tmp;
     }
+
     temp                = U*temp*Ui;
     perm.slice(count++) = temp(span(0,De*n-1),span(0,De*n-1));
   }
@@ -177,7 +184,7 @@ double Wavefunction::Symmetrization(){
   bool status = chol(L,B,"lower");
   if (status) {
     vec eigs = eig_sym( L.i()*S*(L.t()).i() );
-    return eigs(0)/permutations.n_slices;
+    return eigs(eigs.n_rows-1)/permutations.n_slices;
   }
   else{
     return 9999*1e10;

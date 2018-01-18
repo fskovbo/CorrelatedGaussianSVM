@@ -16,6 +16,7 @@
 #include "MatrixElements.h"
 #include "CMAES.h"
 #include "Utils.h"
+#include "Wavefunction.hpp"
 
 #include "FigureOfMerits.hpp"
 
@@ -61,6 +62,7 @@ public:
   mat getShift();
   void setBasis(cube basis_);
   void setShift(mat shift_);
+  Wavefunction exportWavefunction(System& sys, size_t state);
 };
 
 #endif
