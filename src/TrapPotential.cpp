@@ -3,31 +3,23 @@
 TrapPotential::TrapPotential(System& sys)
   : n(sys.n), De(sys.De), lambdamat(sys.lambdamat) {
 
-  Xmat = zeros<mat>(De*n,De*n);
-  for (size_t i = 0; i < n; i++) {
-    Xmat(De*i,De*i) = 1;
-  }
 }
 
-TrapPotential::TrapPotential(System& sys, double trapLength)
+TrapPotential::TrapPotential(System& sys, vec trapLength)
   : n(sys.n), De(sys.De), lambdamat(sys.lambdamat) {
-
-  Xmat = zeros<mat>(De*n,De*n);
-  for (size_t i = 0; i < n; i++) {
-    Xmat(De*i,De*i) = 1;
-  }
 
   updateTrap(trapLength);
 }
 
-void TrapPotential::updateTrap(double trapLength){
-  trapLength_cur = trapLength;
-
-  Omega = lambdamat%Xmat * 0.5 * pow(trapLength,-4);
+void TrapPotential::updateTrap(vec trapLength){
+  mat trapmat = diagmat(repmat( pow(trapLength,-4) ,n,1));
+  Omega       = 0.5*lambdamat%trapmat;
+  gsEnergy    = 1.5*trace(lambdamat%diagmat(repmat( pow(trapLength,-2) ,n,1)))/De;
 }
 
 double TrapPotential::gsExpectedVal(){
-  return 1.5*trace(lambdamat)/De/De/trapLength_cur/trapLength_cur;
+  return gsEnergy;
+  // return 1.5*trace(lambdamat)/De/De/trapLength_cur/trapLength_cur;
 }
 
 double TrapPotential::calculateExpectedPotential(mat& A1, mat& A2, vec& s1, vec& s2, mat& Binv, double detB){

@@ -577,5 +577,5 @@ Wavefunction Variational::exportWavefunction(System& sys, size_t state){
   eig_sym( eigvals, eigvecs, L.i()*H*(L.t()).i() );
   vec coeffs = eigvecs.col(state);
 
-  return Wavefunction(sys,matElem,basis,shift,coeffs);
+  return Wavefunction(sys,basis,shift,coeffs);
 }

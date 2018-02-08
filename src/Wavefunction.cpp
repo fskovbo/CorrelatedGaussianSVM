@@ -1,13 +1,13 @@
 #include "Wavefunction.hpp"
 
-Wavefunction::Wavefunction(System& sys, MatrixElements& matElem, cube& basis, mat& shift, vec& coeffs)
+Wavefunction::Wavefunction(System& sys, cube& basis, mat& shift, vec& coeffs)
  : K(coeffs.n_rows), n(sys.n), De(sys.De), basis(basis), shift(shift),
-   coeffs(coeffs), U(sys.U), Ui(sys.Ui), matElem(matElem) {
+   coeffs(coeffs), U(sys.U), Ui(sys.Ui) {
 
 }
 
-Wavefunction::Wavefunction(System& sys, MatrixElements& matElem, std::string filename)
- : n(sys.n), De(sys.De), U(sys.U), Ui(sys.Ui), matElem(matElem) {
+Wavefunction::Wavefunction(System& sys, std::string filename)
+ : n(sys.n), De(sys.De), U(sys.U), Ui(sys.Ui) {
 
  bool status;
  mat tmp;

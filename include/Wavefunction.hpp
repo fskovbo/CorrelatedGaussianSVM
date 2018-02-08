@@ -17,7 +17,6 @@ private:
   mat shift, U, Ui;
   cube basis;
   vec coeffs;
-  MatrixElements matElem;
 
   double factorial(double x);
   cube buildPermutations();
@@ -25,8 +24,8 @@ private:
   void calculateR(mat& R, mat& A1, mat& A2, vec& s1, vec& s2, double& Rij, double& Bij);
 
 public:
-  Wavefunction(System& sys, MatrixElements& matElem, cube& basis, mat& shift, vec& coeffs);
-  Wavefunction(System& sys, MatrixElements& matElem, std::string filename);
+  Wavefunction(System& sys, cube& basis, mat& shift, vec& coeffs);
+  Wavefunction(System& sys, std::string filename);
 
   vec RMSdistances();
   double Symmetrization();

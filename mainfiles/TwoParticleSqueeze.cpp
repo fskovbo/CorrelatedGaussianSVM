@@ -34,7 +34,7 @@ int main() {
   mat data              = zeros<mat>(Nvals,2);
 
   for (size_t i = 0; i < Nvals; i++) {
-    Trap.updateTrap(bs(i));
+    Trap.updateTrap( { bs(i) , 1e10 , 1e10 } );
     ansatz.initializeBasis(4);
 
     vec res1      = ansatz.sweepStochastic(0,5,1e4,startGuess);

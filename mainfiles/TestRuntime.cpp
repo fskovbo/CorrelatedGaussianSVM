@@ -27,19 +27,19 @@ int main() {
   PotentialList Vstrat  = {&Gauss, &Trap};
   auto elem             = MatrixElements(Test,Vstrat);
   auto ansatz           = Variational(Test,elem);
-  double trapdepth      = 1e-2;
+  vec trapdepth         = {1e-2 , 1e2, 1e2};
 
-  size_t state          = 2;
-  vec aGuess            = {2*trapdepth , 2.5 , 2.5};
-  vec shiftBounds       = {1e-2 * trapdepth , 1e-2 , 1e-2};
+  size_t state          = 0;
+  vec aGuess            = {2*1e-2 , 2.5 , 2.5};
+  vec shiftBounds       = {1e-2 * 1e-2 , 1e-2 , 1e-2};
 
   Trap.updateTrap(trapdepth);
   ansatz.initializeBasis(8);
   // ansatz.setUniqueCoordinates(2,{0,1,1});
   ansatz.setUpdateNumber(2);
 
-  vec warmstart         = ansatz.sweepStochastic(state,10,1e4,aGuess);
-  vec res               = ansatz.sweepDeterministic(state,10,shiftBounds);
+  vec warmstart         = ansatz.sweepStochastic(state,5,1e3,aGuess);
+  vec res               = ansatz.sweepDeterministic(state,5);
 
   std::cout << "Energy of state " << state << ": " << res(res.n_rows-1)-Trap.gsExpectedVal() << '\n';
   std::cout << "Energy spectrum: \n" << ansatz.eigenSpectrum()-Trap.gsExpectedVal() << '\n';
