@@ -1,0 +1,65 @@
+\documentclass[a4paper,oneside,onecolumn,article,11pt]{memoir}
+\usepackage[english]{babel}		
+\usepackage[utf8x]{inputenc}	
+\usepackage{graphicx}
+\usepackage{physics}
+\usepackage{subcaption}
+\usepackage{epstopdf}		
+\usepackage{mathtools}
+\usepackage{dsfont}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage[draft]{fixme} 
+\usepackage{listings} 
+\lstset{language=matlab,breaklines=True}
+\usepackage{braket}
+\usepackage{wasysym}
+\usepackage[labelfont={small,bf},textfont={small,it},singlelinecheck=off]{caption}
+
+\captionsetup[subfigure]{labelfont=bf,textfont=normalfont,singlelinecheck=off,justification=raggedright}
+
+\usepackage{hyperref}% http://ctan.org/pkg/hyperref
+\hypersetup{%
+  colorlinks = true,
+  linkcolor  = black
+}
+
+\usepackage{wrapfig}
+
+%\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\e}{e}
+\DeclareMathOperator{\im}{i}
+
+%\usepackage{subcaption}
+%\captionnamefont{\small\sffamily}
+%\captiontitlefont{\small\sffamily}
+
+\usepackage{soul} 
+\sodef\an{}{0.2em}{.9em plus.6em}{1em plus.1em minus.1em}
+\newcommand\stext[1]{\an{\scshape#1}}
+
+\usepackage{microtype} 
+\usepackage{booktabs}
+
+\setlrmarginsandblock{2cm}{2cm}{*}
+
+\setulmarginsandblock{2cm}{2cm}{*}
+
+\checkandfixthelayout
+
+\pagestyle{simple}
+
+%\numberwithin{align}{chapter} %sets equation numbers <chapter>.<index>
+%\numberwithin{align}{section} %sets equation numbers <chapter>.<section>.<index>
+%\numberwithin{align}{subsection} %sets equation numbers <chapter>.<section>.<subsection>.<index>
+%\numberwithin{align}{subsubsection} %sets equation numbers <chapter>.<section>.<subsection>.<subsubsection>.<index>
+\newcommand{\nb}{\nonumber\\}
+\newcommand{\lspace}{\qquad \text{,} \qquad}
+\newcommand{\vect}[1]{\mathbf{#1}}
+
+\newtheorem{problem}{Problem}
+\newtheorem{theorem}{Theorem}
+\renewcommand\thesubfigure{\roman{subfigure}}
