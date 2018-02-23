@@ -1,0 +1,80 @@
+\chapter{Methods}
+
+\begin{equation}
+\hat{H} = \sum_{i = 1}^{N} \left( \frac{\hbar ^2}{2 m_i} \right) \frac{\partial ^2}{\partial \vec{r}_i} + \sum_{i = 1}^{N} V_i (\vec{r}_i) + \sum_{i < j}^{N} V_{ij} (\vec{r}_i - \vec{r}_j)
+\end{equation}
+
+
+
+\section{Correlated Gaussian Method}
+
+\begin{equation}
+ \braket{ \boldsymbol{r} | g }  \equiv  \exp \left( - \sum_{i,j = 1}^{3 \cdot N} A_{ij} r_i \cdot r_j + \sum_{i=1}^{3 \cdot N} s_i \cdot r_i \right)  =  e^{-\boldsymbol{r}^T A \boldsymbol{r} + \boldsymbol{s}^T \boldsymbol{r} }
+\end{equation}
+
+\begin{equation}
+	\ket{\psi} = \sum_{i = 1}^{K} c_i \ket{g_i}
+\end{equation}
+
+\begin{equation}
+	\hat{H} \ket{\psi} = \epsilon \ket{\psi}
+\end{equation}
+
+\begin{equation}
+	\hat{H} \sum_{i=1}^{K} c_{i} \ket{g_i} = \epsilon \sum_{i=1}^{K} c_{i} \ket{g_i} 
+\end{equation}
+
+\begin{equation}
+	\sum_{i=1}^{K} c_{i} \bra{g_j} \hat{H} \ket{g_i} = \epsilon \sum_{i=1}^{K} c_{i} \braket{g_j | g_i} 
+\end{equation}
+
+\begin{equation}
+	\mathcal{H}_{j,i} \equiv \bra{g_j} \hat{H} \ket{g_i} \quad , \quad \mathcal{B}_{j,i} \equiv \braket{g_j | g_i} 
+\end{equation}
+
+\begin{equation}
+	\mathcal{H} \boldsymbol{c} = \epsilon \mathcal{B} \boldsymbol{c} 
+\end{equation}
+
+\section{Jacobi Coordinates}
+
+\begin{equation}
+	\boldsymbol{x} = \mathcal{U} \boldsymbol{r} \quad , \quad \hat{\boldsymbol{\nabla}}_x = \mathcal{U} \hat{\boldsymbol{\nabla}}
+\end{equation}
+	
+\begin{equation}
+ \mathcal{U} \: = \: \begin{pmatrix}
+1 & -1 & 0 & \hdots & 0 \\
+\frac{m_1}{m_1 + m_2} & \frac{m_2}{m_1 + m_2} & -1 & \hdots & 0 \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+\frac{m_1}{m_1 + \ldots + m_N} & \frac{m_2}{m_1  + \ldots + m_N} & \hdots & \hdots & \frac{m_N}{m_1  + \ldots + m_N}
+\end{pmatrix} \; .
+\end{equation}
+
+\begin{equation}
+	\Psi \left( \vec{r}_1 , \vec{r}_2 , \ldots , \vec{r}_N \right) = \Phi \left( \vec{x}_1 , \vec{x}_2 , \ldots , \vec{x}_{N-1} \right) \phi( \vec{x}_N )
+\end{equation}
+
+\begin{equation}
+	\hat{T} = \hat{T}^{\mathrm{int}} + \hat{T}^{\mathrm{CM}} \quad , \quad \hat{V}_{\mathrm{HO}} = \hat{V}_{\mathrm{HO}}^{\mathrm{int}} + \hat{V}_{\mathrm{HO}}^{\mathrm{CM}} 
+\end{equation}
+
+\begin{equation}
+	\hat{H} = - \frac{\hbar^2}{2} \hat{\boldsymbol{\nabla}}_{x}^{T} \Lambda \hat{\boldsymbol{\nabla}}_x + \boldsymbol{x}^T \Omega \boldsymbol{x} + \sum_{i < j}^{N} V_{ij} + \hat{H}^{\mathrm{CM}} 
+\end{equation}
+
+\begin{equation}
+	\Lambda_{kj} = \sum_{i = 1}^{N} \frac{\mathcal{U}_{ki} \mathcal{U}_{ji}}{m_i}
+\end{equation}
+
+\begin{equation}
+	\Lambda_{kj} = \mu_{k}^{-1} \delta_{kj}
+\end{equation}
+
+\begin{equation}
+	\mu_k = \frac{m_{k+1} \left( \sum_{i= 1}^{k} m_{i} \right)}{\sum_{i= 1}^{k+1} m_{i}}
+\end{equation}
+
+\begin{equation}
+	\Omega_{kj} = \frac{\hbar^2 \Lambda_{kj} }{2 \;  b^4 }
+\end{equation}

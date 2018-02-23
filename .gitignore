@@ -10,3 +10,8 @@ CMakeLists.txt
 libSVMlib.a
 Makefile
 profiling
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc
+report/*.synctex.gz

@@ -12,46 +12,46 @@ int main() {
   vec charges           = {0 , 0 , 0};
   auto Sys              = System(masses,charges,3);
 
-  int state             = 1;
-  size_t Nvals          = 20;
-  std::vector<int> Ks   = {12,14,16,18,22,26};
-  vec bs                = logspace<vec>(-2.5,2.5,Nvals);
+  size_t Nvals          = 25;
+  std::vector<int> Ks   = {14,20,26,30};
+  std::vector<int> sts  = {0,1,2,3};
+  vec bsx               = logspace<vec>(-2.0,2.0,Nvals);
+  vec bsy               = logspace<vec>(-2.0,2.0,Nvals);
 
-  mat symmetries(Nvals,Ks.size());
-  cube RMSdist(3*masses.n_rows,Nvals,Ks.size());
-  mat energies(Nvals,Ks.size()+1);
-  energies.col(0) = bs;
-  size_t count = 0;
+  mat symmetries(2*Nvals,Ks.size());
 
-  for (int K : Ks){
-    std::string dirname = "K" + std::to_string(K) + "State" + std::to_string(state) + "/";
+  for (size_t j = 0; j < Ks.size(); j++) {
+    size_t count = 0;
+    auto Kstr = std::to_string(Ks.at(j));
+    std::string dirname = "K" + Kstr + "State" + std::to_string(sts.at(j)) + "Double/";
     mat temp(3*masses.n_rows,Nvals);
 
     for (size_t i = 0; i < Nvals; i++) {
-      double b              = bs(i);
-      std::string filename  = dirname + "ThreePartSqueezeK" + std::to_string(K) + "b" + std::to_string(b);
+      double b              = bsx(i);
+      std::string filename  = dirname + "ThreePartSqueezeK" + Kstr + "bx" + std::to_string(b);
       try {
-        auto psi              = Wavefunction(Sys,filename);
-        symmetries(i,count)   = psi.Symmetrization();
-        temp.col(i)           = psi.RMSdistances();
+        auto psi            = Wavefunction(Sys,filename);
+        symmetries(i,j)     = psi.Symmetrization();
       }
       catch (const std::exception& e) {
-        symmetries(i,count)   = 0;
-        temp.col(i).zeros();
+        symmetries(i,j)     = 0;
       }
     }
 
-    std::string filename = dirname + "ThreePartSqueezeK" + std::to_string(K);
-    mat etmp;
-    etmp.load(filename,raw_ascii);
-    energies.col(count+1)= etmp.col(1);
-    RMSdist.slice(count) = temp;
-    count++;
+    for (size_t i = 0; i < Nvals; i++) {
+      double b              = bsy(i);
+      std::string filename  = dirname + "ThreePartSqueezeK" + Kstr + "by" + std::to_string(b);
+      try {
+        auto psi              = Wavefunction(Sys,filename);
+        symmetries(i+Nvals,j) = psi.Symmetrization();
+      }
+      catch (const std::exception& e) {
+        symmetries(i+Nvals,j) = 0;
+      }
+    }
   }
 
   symmetries.save("Symmetries",raw_ascii);
-  RMSdist.save("RMSdist",raw_ascii);
-  energies.save("Energies",raw_ascii);
 
 
   return 0;
