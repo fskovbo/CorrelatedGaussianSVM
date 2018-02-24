@@ -1,0 +1,22 @@
+\chapter{Matrix Elements}
+
+\begin{equation}
+	\braket{ g' |  g} = \e ^{\frac{1}{4} \boldsymbol{v}^{\mathrm{T}} B^{-1} \boldsymbol{v}}  \frac{\pi ^{3 n /2}}{\sqrt{\mathrm{det}(B)}} \equiv M 
+\end{equation}
+
+$B = A + A'$
+$\boldsymbol{v} = \boldsymbol{s} + \boldsymbol{s}'$
+$\boldsymbol{u} \frac{1}{2} B^{-1} \boldsymbol{v}$
+
+\begin{equation}
+	\braket{ g' | \boldsymbol{x} | g} =  \frac{\partial}{\partial \boldsymbol{v}^{\mathrm{T}}}  M = \boldsymbol{u} M
+\end{equation}
+
+\begin{equation}
+	\braket{ g' | \boldsymbol{x}^{\mathrm{T}} F \boldsymbol{x} | g} = \left( \frac{\partial}{\partial \boldsymbol{v}} F \frac{\partial}{\partial \boldsymbol{v}^{\mathrm{T}}} \right) M = \left( \frac{1}{2} \mathrm{trace} \left( F B^{-1} \right) + \boldsymbol{u}^{\mathrm{T}} F \boldsymbol{u}  \right) M	
+\end{equation}
+
+
+\begin{equation}
+	\braket{ g' | - \hat{\boldsymbol{\nabla}}_{x}^{\mathrm{T}} \Lambda \hat{\boldsymbol{\nabla}}_x | g} = \left( 2 \mathrm{trace} \left( A' \Lambda A B^{-1} \right) + \left( \boldsymbol{s}' - 2 A' \boldsymbol{u} \right)^{\mathrm{T}} \Lambda \left( \boldsymbol{s} - 2 A \boldsymbol{u} \right) \right) M
+\end{equation}

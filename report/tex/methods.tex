@@ -1,40 +1,40 @@
 \chapter{Methods}
 
-\begin{equation}
-\hat{H} = \sum_{i = 1}^{N} \left( \frac{\hbar ^2}{2 m_i} \right) \frac{\partial ^2}{\partial \vec{r}_i} + \sum_{i = 1}^{N} V_i (\vec{r}_i) + \sum_{i < j}^{N} V_{ij} (\vec{r}_i - \vec{r}_j)
-\end{equation}
+The Correlated Gaussian Method is a variational method, which has been used to solve quantum-mechanical few-body problems in molecular, atomic and nuclear physics. The method has attained its popularity from the ease of calculating matrix elements in a Gaussian basis. Many matrix elements and their corresponding gradients are fully analytic, whereby numerical optimizations can be carried out with a high degree accuracy.
 
 
-
-\section{Correlated Gaussian Method}
-
-\begin{equation}
- \braket{ \boldsymbol{r} | g }  \equiv  \exp \left( - \sum_{i,j = 1}^{3 \cdot N} A_{ij} r_i \cdot r_j + \sum_{i=1}^{3 \cdot N} s_i \cdot r_i \right)  =  e^{-\boldsymbol{r}^T A \boldsymbol{r} + \boldsymbol{s}^T \boldsymbol{r} }
-\end{equation}
-
+\section{Fully Correlated Gaussian Method}
+The standard procedure when employing the correlated Gaussian method is utilizing "isotropic" Gaussians, which do not distinguish between directions for the individual particles. This approach is very efficient, as only few optimization parameters are needed. The lack of explicit directional bias is compensated by shifting the positions of the Gaussians, thus enabling accurate approximations of most wavefunctions. However, this approach is not feasible in squeezing problems, since the size of the Gaussians is limited by the width of any confining potential. As the potential is squeezed tightly in one direction, the number of isotropic Gaussians needed to cover the entire wavefunction will increase exponentially.
+Hence, an alternative method is presented here, where fully correlated Gaussians are employed, which do distinguish directions at the cost of additional variational parameters. 
+For a system of $N$ particles with coordinates $\boldsymbol{r} = (\vec{r}_1 , \vec{r}_2 , \ldots , \vec{r}_N)^{\mathrm{T}} = (r_1 , r_2 , \ldots , r_{3 N})^{\mathrm{T}}$, the fully correlated Gaussians have the form
+\begin{align}
+ \braket{ \boldsymbol{r} | g }  &\equiv  \exp \left( - \sum_{i < j = 1}^{3 \cdot N} a_{ij} (r_i - r_j)^2 + \sum_{i=1}^{3 \cdot N} s_i \cdot r_i \right)  \nonumber \\
+  &=   \exp \left( - \sum_{i < j = 1}^{3 \cdot N} a_{ij} \boldsymbol{r}^{\mathrm{T}} w_{ij} w_{ij}^{\mathrm{T}} \boldsymbol{r} + \sum_{i=1}^{3 \cdot N} s_i \cdot r_i \right) \nonumber \\
+ &=  e^{-\boldsymbol{r}^{\mathrm{T}} A \boldsymbol{r} + \boldsymbol{s}^{\mathrm{T}} \boldsymbol{r} } \; ,
+\end{align}
+where $\boldsymbol{s}$ is a column of variational shifts, $A$ is a positive-definite matrix containing the variational parameters $a_{ij} > 0$, and $w_{ij}$ is a size $3 N$ column vector of zeros with the exception of elements $i$ and $j$ being 1 and -1 respectively. 
+This particular form is chosen ensure the positive-definiteness of $A$, as the matrix is constructed as a sum of positive-definite rank-1 matrices $a_{ij}  w_{ij} w_{ij}^{\mathrm{T}}$. 
+The trial wavefunction of the few-body wavefunction, $\ket{\psi}$, is written as a linear combination of $K$ Gaussians
 \begin{equation}
 	\ket{\psi} = \sum_{i = 1}^{K} c_i \ket{g_i}
 \end{equation}
-
+Inserting this expression into the Schr\oe dinger equation
 \begin{equation}
-	\hat{H} \ket{\psi} = \epsilon \ket{\psi}
+	\hat{H} \sum_{i=1}^{K} c_{i} \ket{g_i} = E \sum_{i=1}^{K} c_{i} \ket{g_i} 
 \end{equation}
-
+and multiplying from the left with $\bra{g_j}$ yields
 \begin{equation}
-	\hat{H} \sum_{i=1}^{K} c_{i} \ket{g_i} = \epsilon \sum_{i=1}^{K} c_{i} \ket{g_i} 
+	\sum_{i=1}^{K} c_{i} \bra{g_j} \hat{H} \ket{g_i} = E \sum_{i=1}^{K} c_{i} \braket{g_j | g_i} \; .
 \end{equation}
-
+This expression can be formulated as a generalized eigenvalue problem
 \begin{equation}
-	\sum_{i=1}^{K} c_{i} \bra{g_j} \hat{H} \ket{g_i} = \epsilon \sum_{i=1}^{K} c_{i} \braket{g_j | g_i} 
+	\mathcal{H} \boldsymbol{c} = E \mathcal{B} \boldsymbol{c} \; ,
+	\label{eq:genEigenProb}
 \end{equation}
+where $\boldsymbol{c}$ is the column of linear parameters, $c_i$, while $\mathcal{H}_{j,i} \equiv \bra{g_j} \hat{H} \ket{g_i}$ and $\mathcal{B}_{j,i} \equiv \braket{g_j | g_i}$. A downside of utilizing a basis of Gaussians is the non-orthogonality of the functions resulting in a non-identity overlap-matrix, $\mathcal{B}$. The generalized eigenvalue problem can be turned into a regular eigenvalue problem through a Cholesky decomposition, and the symmetry of the matrices $\mathcal{H}$ and $\mathcal{B}$ can be exploited for obtaining solutions faster. 
+While the linear parameters, $c_i$, together with the energy spectrum are found by solving eq. \eqref{eq:genEigenProb}, the non-linear parameters, $a_{ij}$ and $s_i$, are found using the Nelder-Mead optimization algorithm. 
 
-\begin{equation}
-	\mathcal{H}_{j,i} \equiv \bra{g_j} \hat{H} \ket{g_i} \quad , \quad \mathcal{B}_{j,i} \equiv \braket{g_j | g_i} 
-\end{equation}
 
-\begin{equation}
-	\mathcal{H} \boldsymbol{c} = \epsilon \mathcal{B} \boldsymbol{c} 
-\end{equation}
 
 \section{Jacobi Coordinates}
 
@@ -52,6 +52,10 @@
 \end{equation}
 
 \begin{equation}
+	 v_{i j} = \left( \mathcal{U}^{-1} \right) ^{\mathcal{T}} w_{i j} 
+\end{equation}
+
+\begin{equation}
 	\Psi \left( \vec{r}_1 , \vec{r}_2 , \ldots , \vec{r}_N \right) = \Phi \left( \vec{x}_1 , \vec{x}_2 , \ldots , \vec{x}_{N-1} \right) \phi( \vec{x}_N )
 \end{equation}
 
@@ -60,7 +64,7 @@
 \end{equation}
 
 \begin{equation}
-	\hat{H} = - \frac{\hbar^2}{2} \hat{\boldsymbol{\nabla}}_{x}^{T} \Lambda \hat{\boldsymbol{\nabla}}_x + \boldsymbol{x}^T \Omega \boldsymbol{x} + \sum_{i < j}^{N} V_{ij} + \hat{H}^{\mathrm{CM}} 
+	\hat{H} = - \frac{\hbar^2}{2} \hat{\boldsymbol{\nabla}}_{x}^{\mathrm{T}} \Lambda \hat{\boldsymbol{\nabla}}_x + \boldsymbol{x}^{\mathrm{T}} \Omega \boldsymbol{x} + \sum_{i < j}^{N} V_{ij} + \hat{H}^{\mathrm{CM}} 
 \end{equation}
 
 \begin{equation}
@@ -77,4 +81,11 @@
 
 \begin{equation}
 	\Omega_{kj} = \frac{\hbar^2 \Lambda_{kj} }{2 \;  b^4 }
+\end{equation}
+
+
+
+
+\begin{equation}
+\hat{H} = \sum_{i = 1}^{N} \left( \frac{\hbar ^2}{2 m_i} \right) \frac{\partial ^2}{\partial \vec{r}_i} + \sum_{i = 1}^{N} V_i (\vec{r}_i) + \sum_{i < j}^{N} V_{ij} (\vec{r}_i - \vec{r}_j) 
 \end{equation}
