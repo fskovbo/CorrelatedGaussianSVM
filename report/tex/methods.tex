@@ -35,13 +35,14 @@ where $\boldsymbol{c}$ is the column of linear parameters, $c_i$, while $\mathca
 While the linear parameters, $c_i$, together with the energy spectrum are found by solving eq. \eqref{eq:genEigenProb}, the non-linear parameters, $a_{ij}$ and $s_i$, are found using the Nelder-Mead optimization algorithm. 
 
 
-
 \section{Jacobi Coordinates}
-
+It is convenient to use a set a Jacobi coordinates, $\boldsymbol{x} = (\vec{x}_1 , \ldots, \vec{x}_{N-1})^{\mathrm{T}}$, rather than relative distance vectors, $(\vec{r}_i - \vec{r}_j)$ \cite{Varga1995}. The Jacobi coordinates separates then center-of-mass coordinates from the rest, which enables a description of the internal dynamics of the systems. Furthermore, disregarding the center-of-mass coordinates reduces the amount of parameters needed.
+Consider the transformation of the coordinate vector, $\boldsymbol{r}$, and its corresponding gradient operator 
 \begin{equation}
-	\boldsymbol{x} = \mathcal{U} \boldsymbol{r} \quad , \quad \hat{\boldsymbol{\nabla}}_x = \mathcal{U} \hat{\boldsymbol{\nabla}}
+	\boldsymbol{x} = \mathcal{U} \boldsymbol{r} \quad , \quad \hat{\boldsymbol{\nabla}}_x = \mathcal{U} \hat{\boldsymbol{\nabla}} \; ,
 \end{equation}
-	
+where $\mathcal{U}$ is the transformation matrix and $\hat{\boldsymbol{\nabla}} = \left( \hat{\nabla}_1 , \ldots , \hat{\nabla}_N \right)^{\mathrm{T}}$. 	
+In order to produce Jacobian coordinates, a possible form of the transformation matrix is \cite{Mitroy2013}
 \begin{equation}
  \mathcal{U} \: = \: \begin{pmatrix}
 1 & -1 & 0 & \hdots & 0 \\
@@ -49,43 +50,30 @@ While the linear parameters, $c_i$, together with the energy spectrum are found 
 \vdots & \vdots & \vdots & \ddots & \vdots \\
 \frac{m_1}{m_1 + \ldots + m_N} & \frac{m_2}{m_1  + \ldots + m_N} & \hdots & \hdots & \frac{m_N}{m_1  + \ldots + m_N}
 \end{pmatrix} \; .
+	\label{eq:JacobiTransMatrix}
 \end{equation}
-
+Although this transformation matrix is not unitary, its inverse can be written explicitly \cite{Suzuki1998}.
+In general, in the presence of external fields it is not always possible to separate out the contributions from the center-of-mass. However, it is possible to divide the harmonic oscillator operator into an internal (int) and a center-of-mass (CM) part
 \begin{equation}
-	 v_{i j} = \left( \mathcal{U}^{-1} \right) ^{\mathcal{T}} w_{i j} 
+	\hat{T} = \hat{T}^{\mathrm{int}} + \hat{T}^{\mathrm{CM}} \quad , \quad \hat{V}_{\mathrm{HO}} = \hat{V}_{\mathrm{HO}}^{\mathrm{int}} + \hat{V}_{\mathrm{HO}}^{\mathrm{CM}} \; .
 \end{equation}
-
+Thus, the total wavefunction of the system can be factorized as  
 \begin{equation}
-	\Psi \left( \vec{r}_1 , \vec{r}_2 , \ldots , \vec{r}_N \right) = \Phi \left( \vec{x}_1 , \vec{x}_2 , \ldots , \vec{x}_{N-1} \right) \phi( \vec{x}_N )
+	\Psi \left( \vec{r}_1 , \vec{r}_2 , \ldots , \vec{r}_N \right) = \Phi \left( \vec{x}_1 , \vec{x}_2 , \ldots , \vec{x}_{N-1} \right) \phi( \vec{x}_N ) \; ,
 \end{equation}
-
+where the wavefunction dependent on the center-of-mass coordinate, $\vec{x}_N$, can be completely neglected.
+Therefore, considering only harmonic confining potentials as external fields, the few-body Hamiltonian considered in Jacobi coordinates reads 
 \begin{equation}
-	\hat{T} = \hat{T}^{\mathrm{int}} + \hat{T}^{\mathrm{CM}} \quad , \quad \hat{V}_{\mathrm{HO}} = \hat{V}_{\mathrm{HO}}^{\mathrm{int}} + \hat{V}_{\mathrm{HO}}^{\mathrm{CM}} 
+	\hat{H} = - \frac{\hbar^2}{2} \hat{\boldsymbol{\nabla}}_{x}^{\mathrm{T}} \Lambda \hat{\boldsymbol{\nabla}}_x + \boldsymbol{x}^{\mathrm{T}} \Omega \boldsymbol{x} + \sum_{i < j}^{N} V_{ij}(\boldsymbol{x}) + \hat{H}^{\mathrm{CM}} \; ,
 \end{equation}
-
+where $V_{ij}(\boldsymbol{x})$ is an arbitrary two-body potential. The matrix $\Lambda$ has elements of the form
 \begin{equation}
-	\hat{H} = - \frac{\hbar^2}{2} \hat{\boldsymbol{\nabla}}_{x}^{\mathrm{T}} \Lambda \hat{\boldsymbol{\nabla}}_x + \boldsymbol{x}^{\mathrm{T}} \Omega \boldsymbol{x} + \sum_{i < j}^{N} V_{ij} + \hat{H}^{\mathrm{CM}} 
+	\Lambda_{kj} = \sum_{i = 1}^{N} \frac{\mathcal{U}_{ki} \mathcal{U}_{ji}}{m_i} \; ,
+	\label{eq:LambdaElements}
 \end{equation}
-
+which can be derived from the separation of the kinetic operator. The elements \eqref{eq:LambdaElements} are general, however, in the scenario of the transformation matrix being that of eq. \eqref{eq:JacobiTransMatrix}, the elements reduce to $\Lambda_{kj} = \mu_{k}^{-1} \delta_{kj}$, where $\mu_k = \frac{m_{k+1} \left( \sum_{i= 1}^{k} m_{i} \right)}{\sum_{i= 1}^{k+1} m_{i}}$ is the $k$'th reduced mass.
+Following this, the elements of the harmonic oscillator matrix $\Omega$ can be written as
 \begin{equation}
-	\Lambda_{kj} = \sum_{i = 1}^{N} \frac{\mathcal{U}_{ki} \mathcal{U}_{ji}}{m_i}
+	\Omega_{kj} = \frac{\hbar^2 \Lambda_{kj} }{2 \;  a_{\mathrm{HO}}^4 } \; ,
 \end{equation}
-
-\begin{equation}
-	\Lambda_{kj} = \mu_{k}^{-1} \delta_{kj}
-\end{equation}
-
-\begin{equation}
-	\mu_k = \frac{m_{k+1} \left( \sum_{i= 1}^{k} m_{i} \right)}{\sum_{i= 1}^{k+1} m_{i}}
-\end{equation}
-
-\begin{equation}
-	\Omega_{kj} = \frac{\hbar^2 \Lambda_{kj} }{2 \;  b^4 }
-\end{equation}
-
-
-
-
-\begin{equation}
-\hat{H} = \sum_{i = 1}^{N} \left( \frac{\hbar ^2}{2 m_i} \right) \frac{\partial ^2}{\partial \vec{r}_i} + \sum_{i = 1}^{N} V_i (\vec{r}_i) + \sum_{i < j}^{N} V_{ij} (\vec{r}_i - \vec{r}_j) 
-\end{equation}
+where $a_{\mathrm{HO}}$ is the oscillator length.
