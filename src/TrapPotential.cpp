@@ -13,7 +13,8 @@ TrapPotential::TrapPotential(System& sys, vec trapLength)
 
 void TrapPotential::updateTrap(vec trapLength){
   mat trapmat = diagmat(repmat( pow(trapLength,-4) ,n,1));
-  Omega       = 0.5*lambdamat%trapmat;
+  Omega       = zeros(lambdamat);
+  Omega       = 0.5*pow(lambdamat,-1)%trapmat;
   gsEnergy    = 1.5*trace(lambdamat%diagmat(repmat( pow(trapLength,-2) ,n,1)))/De;
 }
 
