@@ -17,11 +17,11 @@ int main() {
   clock_t begin = clock();
   arma_rng::set_seed_random();
 
-  vec masses            = {10 , 10 , 1};
+  vec masses            = {133.0/6.0 , 133.0/6.0 , 1};
   vec charges           = {0 , 0 , 0};
   auto TwoPart          = System(masses,charges,3);
 
-  auto Gauss            = SingleGaussPotential(TwoPart);
+  auto Gauss            = SingleGaussPotential(TwoPart,-2.7);
   auto Trap             = TrapPotential(TwoPart);
   PotentialList Vstrat  = {&Trap, &Gauss};
 
@@ -29,12 +29,12 @@ int main() {
   auto ansatz           = Variational(TwoPart,elem);
   ansatz.setUpdateNumber(2);
 
-  size_t state          = 3;
-  size_t Nvals          = 25;
+  size_t state          = 0;
+  size_t Nvals          = 30;
   size_t Ntries         = 3;
-  size_t K              = 30;
-  vec bsx               = logspace<vec>(-2.0,2.0,Nvals);
-  vec bsy               = logspace<vec>(-2.0,2.0,Nvals);
+  size_t K              = 16;
+  vec bsx               = logspace<vec>(-2.0,3.0,Nvals);
+  vec bsy               = logspace<vec>(-2.0,3.0,Nvals);
 
 
   mat datax(Nvals,2);
@@ -45,8 +45,9 @@ int main() {
   // ansatz.setUniqueCoordinates(2,{0,1,1});
   ansatz.setUniqueCoordinates(3,{0,1,2});
   for (size_t i = 0; i < Nvals; i++) {
-    Trap.updateTrap( { bsx(i) , bsy(Nvals-1) , 1e2 } );
+    Trap.updateTrap( { bsx(i) , 1e6 , 1e6 } );
     vec aGuess      = {2.0*bsx(i) , 5 , 5};
+    // vec shiftBounds = {1e-2 * bsx(i) , 1e-2 , 1e-2};
     double Ebest    = 1e10;
     cube BestBasis;
     mat BestShift;
@@ -78,7 +79,7 @@ int main() {
       ansatz.setBasis(BestBasis);
       ansatz.setShift(BestShift);
       bool hassaved = ansatz.saveBasis(state,ntmp);
-      std::cout << "Save Status: " << hassaved << '\n';
+      std::cout << "State saved with energy " << Ebest << '\n';
     }
     catch (const std::exception& e) {
       std::cout << "Error encountered while saving basis!" << '\n';
@@ -87,8 +88,9 @@ int main() {
 
   ansatz.setUniqueCoordinates(3,{0,1,2});
   for (size_t i = 0; i < Nvals; i++) {
-    Trap.updateTrap( { bsx(0) , bsy(i) , 1e2 } );
+    Trap.updateTrap( { bsx(0) , bsy(i) , 1e6 } );
     vec aGuess      = {2.0*bsx(0) , 2.0*bsy(i) , 5};
+    // vec shiftBounds = {1e-2 * bsx(0) , 1e-2 * bsy(i) , 1e-2};
     double Ebest    = 1e10;
     cube BestBasis;
     mat BestShift;

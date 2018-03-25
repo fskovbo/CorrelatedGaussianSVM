@@ -18,6 +18,12 @@ vec SingleGaussPotential::calculateIntStr(vec& masses, double baseStr, double in
       count++;
     }
   }
+
+  //
+  //  SPECIAL CASE!
+  //
+  interStr(0) = 0;
+
   return interStr;
 }
 
