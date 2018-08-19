@@ -22,7 +22,7 @@ vec SingleGaussPotential::calculateIntStr(vec& masses, double baseStr, double in
   //
   //  SPECIAL CASE!
   //
-  interStr(0) = 0;
+  //interStr(0) = 0;
 
   return interStr;
 }

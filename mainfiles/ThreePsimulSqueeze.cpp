@@ -17,11 +17,11 @@ int main() {
   clock_t begin = clock();
   arma_rng::set_seed_random();
 
-  vec masses            = {133.0/6.0 , 133.0/6.0 , 1};
+  vec masses            = {2.12, 1 , 1};
   vec charges           = {0 , 0 , 0};
   auto TwoPart          = System(masses,charges,3);
 
-  auto Gauss            = SingleGaussPotential(TwoPart,-2.7);
+  auto Gauss            = SingleGaussPotential(TwoPart);
   auto Trap             = TrapPotential(TwoPart);
   PotentialList Vstrat  = {&Trap, &Gauss};
 
@@ -29,10 +29,10 @@ int main() {
   auto ansatz           = Variational(TwoPart,elem);
   ansatz.setUpdateNumber(2);
 
-  size_t state          = 0;
+  size_t state          = 1;
   size_t Nvals          = 30;
   size_t Ntries         = 3;
-  size_t K              = 16;
+  size_t K              = 20;
   vec bsxy              = logspace<vec>(-2.0,3.0,Nvals);
 
   mat data(Nvals,2);
